@@ -55,12 +55,12 @@ public class VerificationAgencyServiceImpl implements VerificationAgencyService 
 		theverificationAgency.setInsertime(new Date());
 		theverificationAgency.setCreator_id("Arush");
 		
-		if (theverificationAgency.getRequestref() != null) {
-				
-		theverificationAgency.getRequestref().get(0).setCreator_id("arush123");
-		theverificationAgency.getRequestref().get(0).setInsert_time(new Date());
-		
-		}
+//		if (theverificationAgency.getRequestref() != null) {
+//				
+//		theverificationAgency.getRequestref().get(0).setCreator_id("arush123");
+//		theverificationAgency.getRequestref().get(0).setInsert_time(new Date());
+//		
+//		}
 		verificationAgencyRepository.save(theverificationAgency);
 			
 	}

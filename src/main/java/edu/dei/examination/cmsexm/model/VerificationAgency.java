@@ -57,13 +57,13 @@ public class VerificationAgency {
 	private String creator_id;
 	private String modifier_id;
 	
-	///  one to many  relation with RequesterReferences 
-	@OneToMany(fetch=FetchType.LAZY,
-			   mappedBy="requester",
-			   cascade= {CascadeType.PERSIST, CascadeType.MERGE,
-						 CascadeType.DETACH, CascadeType.REFRESH})
-	@JsonManagedReference
-	private List<VerificationAgencyReferences> requestref; 
+//	///  one to many  relation with RequesterReferences 
+//	@OneToMany(fetch=FetchType.LAZY,
+//			   mappedBy="requester",
+//			   cascade= {CascadeType.PERSIST, CascadeType.MERGE,
+//						 CascadeType.DETACH, CascadeType.REFRESH})
+//	@JsonManagedReference
+//	private List<VerificationAgencyReferences> requestref; 
 	
 	public VerificationAgency() {
 	
@@ -173,16 +173,16 @@ public class VerificationAgency {
 	
 
 		   	
-	public List<VerificationAgencyReferences> getRequestref() {
-		return requestref;
-	}
-
-
-
-
-	public void setRequestref(List<VerificationAgencyReferences> requestref) {
-		this.requestref = requestref;
-	}
+//	public List<VerificationAgencyReferences> getRequestref() {
+//		return requestref;
+//	}
+//
+//
+//
+//
+//	public void setRequestref(List<VerificationAgencyReferences> requestref) {
+//		this.requestref = requestref;
+//	}
 
 
 	public boolean isAuthentic() {
@@ -225,17 +225,17 @@ public class VerificationAgency {
 
 
 
-	public void add (VerificationAgencyReferences tempref) {
-		
-		if (requestref ==null) {
-			requestref = new ArrayList<VerificationAgencyReferences>();
-		}
-		
-		requestref.add(tempref);
-		
-		tempref.setRequester(this);
-		
-	}
+//	public void add (VerificationAgencyReferences tempref) {
+//		
+//		if (requestref ==null) {
+//			requestref = new ArrayList<VerificationAgencyReferences>();
+//		}
+//		
+//		requestref.add(tempref);
+//		
+//		tempref.setRequester(this);
+//		
+//	}
 	
 //		public void add(RequesterReferences tempref) {
 //			
