@@ -31,7 +31,7 @@ public class VerificationAgencyController {
 	}
 	
 	
-	@GetMapping("/verificationagency")
+	@GetMapping("/test/verificationagency")
 	public List<VerificationAgency> findAll() {
 		return verificationAgencyService.findAll();
 		
