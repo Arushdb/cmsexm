@@ -1,6 +1,7 @@
 package edu.dei.examination.cmsexm.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +21,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.filter.CorsFilter;
 
 import edu.dei.examination.cmsexm.security.jwt.AuthEntryPointJwt;
 import edu.dei.examination.cmsexm.security.jwt.AuthTokenFilter;
@@ -64,10 +66,32 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				
 	}
 	
+	@Bean
+	public CorsFilter corsFilter() {
+		
+		CorsConfiguration corsConfiguration = new CorsConfiguration();
+		corsConfiguration.setAllowCredentials(true);
+		corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+		
+		corsConfiguration.setAllowedHeaders(Arrays.asList("Origin","Access-Control-Allow-Origin","Content-Type",
+				"Accept","Authorization","Origin","Accept","X-Requested-With"));
+		
+		corsConfiguration.setExposedHeaders(Arrays.asList("Origin","Content-Type","Accept",
+				"Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
+		
+		corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		
+		org.springframework.web.cors.UrlBasedCorsConfigurationSource thesource = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+				thesource.registerCorsConfiguration("/**", corsConfiguration);
+		//theurlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+		return new CorsFilter(thesource);
+	}
+	
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable()
+		//http.cors().and()
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests()

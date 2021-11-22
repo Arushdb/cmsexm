@@ -2,6 +2,8 @@ package edu.dei.examination.cmsexm.payload.response;
 
 import java.util.List;
 
+import org.json.JSONArray;
+
 public class JwtResponse {
 	
 	private String token;
@@ -9,6 +11,7 @@ public class JwtResponse {
 	private Long id;
 	private String username;
 	
+	private String menuary ;
 	private List<String> roles;
 
 	public JwtResponse(String accessToken, Long id, String username,  List<String> roles) {
@@ -18,6 +21,21 @@ public class JwtResponse {
 	
 		this.roles = roles;
 	}
+
+	
+	
+	
+	public JwtResponse(String token, Long id, String username, String menuary, List<String> roles) {
+	
+		this.token = token;
+		this.id = id;
+		this.username = username;
+		this.menuary = menuary;
+		this.roles = roles;
+	}
+
+
+
 
 	public String getAccessToken() {
 		return token;
@@ -55,6 +73,14 @@ public class JwtResponse {
 
 	public List<String> getRoles() {
 		return roles;
+	}
+
+	public String getMenuary() {
+		return menuary;
+	}
+
+	public void setMenuary(String menuary) {
+		this.menuary = menuary;
 	}
 
 }
