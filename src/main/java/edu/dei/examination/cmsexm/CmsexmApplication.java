@@ -17,20 +17,20 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-//public class CmsexmApplication extends SpringBootServletInitializer{
+public class CmsexmApplication extends SpringBootServletInitializer{
 
-	public class CmsexmApplication {
+	//public class CmsexmApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CmsexmApplication.class, args);
 	}
 
-//	@Override
-//	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-//		// TODO Auto-generated method stub
-//		
-//		return builder.sources(CmsexmApplication.class);
-//	
-//	}
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+		// TODO Auto-generated method stub
+		
+		return builder.sources(CmsexmApplication.class);
+	
+	}
 	
 	
 	
