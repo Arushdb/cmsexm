@@ -14,5 +14,7 @@ public interface VerificationAgencyService {
 	public void save(VerificationAgency theverificationAgency);
 	
 	public void deleteById(int theId);
+	
+	public List<VerificationAgency> findByAuthentic(Boolean a);
 
 }

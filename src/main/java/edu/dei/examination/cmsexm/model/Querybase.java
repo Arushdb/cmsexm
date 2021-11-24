@@ -28,7 +28,14 @@ query="SELECT  parent "
 		" AND node.id in (select menu_id FROM Role_Menu  WHERE role_id = :role_id )"+
 	    " AND parent.id = :MenuId "+
 		" ORDER BY node.lft"
-	)}
+	),
+@NamedQuery (name="getdefaultrole",
+query =" select u from UserRoles u where user_id=:userid and default_role=:defaultrole"
+)
+
+
+
+}
 
 		)
 public class Querybase {

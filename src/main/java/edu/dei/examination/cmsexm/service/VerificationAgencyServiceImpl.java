@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ import edu.dei.examination.cmsexm.repository.VerificationAgencyRepository;
 public class VerificationAgencyServiceImpl implements VerificationAgencyService {
 	
 	private VerificationAgencyRepository verificationAgencyRepository;
+	
+	
 	
 	@Autowired
 	public VerificationAgencyServiceImpl(VerificationAgencyRepository verificationAgencyRepository) {
@@ -69,6 +73,12 @@ public class VerificationAgencyServiceImpl implements VerificationAgencyService 
 	public void deleteById(int theId) {
 		verificationAgencyRepository.deleteById(theId);
 		
+	}
+
+	@Override
+	public List<VerificationAgency> findByAuthentic(Boolean a) {
+		// TODO Auto-generated method stub
+		return verificationAgencyRepository.findByAuthentic(a);
 	}
 
 	

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.dei.examination.cmsexm.model.Login;
+import edu.dei.examination.cmsexm.model.UserRoles;
 import edu.dei.examination.cmsexm.payload.request.LoginRequest;
 import edu.dei.examination.cmsexm.payload.response.JwtResponse;
 import edu.dei.examination.cmsexm.repository.RoleRepository;
@@ -73,10 +74,16 @@ public class AuthController {
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 		
-		Login login = new Login(); 
+		Login login = new Login();
 		
-		JSONArray menuary =userDetailsServiceImpl.getNewMenu(login);
-	
+		
+		
+		List<UserRoles> dftroles  =userDetailsServiceImpl.getdefaultrole(userDetails.getId());
+		
+		int id =dftroles.get(0).getUserrolePK().getUser_id();
+		JSONArray menuary =userDetailsServiceImpl.getNewMenu(id);
+		
+		
 
 		return ResponseEntity.ok(new JwtResponse(jwt, 
 												 userDetails.getId(), 

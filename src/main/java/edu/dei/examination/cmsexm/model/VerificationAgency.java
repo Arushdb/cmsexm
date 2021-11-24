@@ -41,7 +41,7 @@ public class VerificationAgency {
 	private String email;
 	private String website;
 	
-	@Column(columnDefinition = "TINYINT")
+	@Column(columnDefinition = "TINYINT" ,name = "authentic")
 	
 	private boolean authentic=false;
 	

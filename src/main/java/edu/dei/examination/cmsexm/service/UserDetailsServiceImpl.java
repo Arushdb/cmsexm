@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import edu.dei.examination.cmsexm.model.Login;
 import edu.dei.examination.cmsexm.model.Menu;
 import edu.dei.examination.cmsexm.model.User;
+import edu.dei.examination.cmsexm.model.UserRoles;
 import edu.dei.examination.cmsexm.repository.UserRepository;
 
 
@@ -43,25 +44,31 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	}
 
 
+public List<UserRoles> getdefaultrole(Long id){
+ List<UserRoles> roleList =(List<UserRoles>)em.createNamedQuery("getdefaultrole",UserRoles.class )
+			.setParameter("userid",id)
+			.setParameter("defaultrole", true)
+			
+			.getResultList();
+ 
+ return roleList;
+}
 	
 	
-	
-	
-	public JSONArray getNewMenu(Login login){
+public  JSONArray getNewMenu(int role_id){
 		
 		//List<Login> ParentList=getSqlMapClientTemplate().queryForList("login.getParentMenuItems",login);
 
 		
-		int role_id = 1;
+	  Login login = new Login();
 		List<Menu> ParentList =(List<Menu>)em.createNamedQuery("getParentMenuItems",Menu.class )
 		.setParameter("role_id", role_id)
 		.getResultList();
+		
 						
 		JSONArray mainary = new JSONArray();
 		JSONArray zerolvlchildren = new JSONArray();
-		
-		
-		
+			
 		JSONObject zerolvlparent = new JSONObject();
 		
 		

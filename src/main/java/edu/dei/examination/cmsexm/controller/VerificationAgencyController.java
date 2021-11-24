@@ -31,7 +31,7 @@ public class VerificationAgencyController {
 	}
 	
 	
-	@GetMapping("/test/verificationagency")
+	@GetMapping("/verificationagency")
 	public List<VerificationAgency> findAll() {
 		return verificationAgencyService.findAll();
 		
@@ -117,5 +117,11 @@ public class VerificationAgencyController {
 //		return theVerificationAgency;
 //	}
 	
+	
+	@GetMapping("/authenticverificationagency/{status}")
+	public List<VerificationAgency> findByAuthentic(@PathVariable Boolean status) {
+		return verificationAgencyService.findByAuthentic(status);
+		
+	} 
 
 }
