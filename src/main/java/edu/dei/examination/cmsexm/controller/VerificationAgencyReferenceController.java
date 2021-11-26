@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import edu.dei.examination.cmsexm.model.VerificationAgencyReferences;
 import edu.dei.examination.cmsexm.service.VerificationAgencyReferencesService;
@@ -101,5 +102,16 @@ public class VerificationAgencyReferenceController {
 		return "Deleted Enrolment Id - " + enrolmentId;
 	}
 
+	@GetMapping("/agencyreference/{agencyId}")
+	public List<VerificationAgencyReferences>  agencyreferences(@PathVariable int agencyId) {
+		return referenceService.findByAgencyid(agencyId);
+		
+	}
+
+	@GetMapping("/agencyreferencebyprocessstatus")
+	public List<VerificationAgencyReferences>  agencyprocessreferenceso(@RequestParam int agencyId,@RequestParam String status  ) {
+		return referenceService.findByProcessstatus(agencyId,status);
+		
+	}
 
 }

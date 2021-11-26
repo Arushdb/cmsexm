@@ -21,5 +21,8 @@ public interface VerificationAgencyReferencesService {
 
 
 	public void deletenEnrolmentno(int theId );
+	
+	public List <VerificationAgencyReferences>findByAgencyid(int id);
+	public List <VerificationAgencyReferences>findByProcessstatus(int agencyid,String sts);
 
 }

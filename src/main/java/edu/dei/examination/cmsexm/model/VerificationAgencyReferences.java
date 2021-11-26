@@ -35,8 +35,8 @@ public class VerificationAgencyReferences {
 	@Column(name="id")
 	private int id;
 	
-	//@Column(insertable = false,updatable = false)
-	private int agency_id;
+	@Column(name="agency_id")
+	private int agencyid;
 	
 	
 	private String  contact_number;
@@ -51,7 +51,8 @@ public class VerificationAgencyReferences {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date  reqrcvdate;
 	
-	private String  process_status;
+	@Column(name="process_status")
+	private String  processstatus;
 	private String  remarks;
 	
 	@Column(name="generated_date" ,columnDefinition = "DATETIME")
@@ -105,17 +106,17 @@ public class VerificationAgencyReferences {
 	
 	
 
-	public VerificationAgencyReferences(int agency_id, String contact_number, String email, String reference_no,
-			String request_mode, Date reqrcvdate, String process_status, String remarks, Date gen_date,
+	public VerificationAgencyReferences(int agencyid, String contact_number, String email, String reference_no,
+			String request_mode, Date reqrcvdate, String processstatus, String remarks, Date gen_date,
 			Date insert_time, Date modification_time, String creator_id, String modifier_id) {
 		super();
-		this.agency_id = agency_id;
+		this.agencyid = agencyid;
 		this.contact_number = contact_number;
 		this.email = email;
 		this.reference_no = reference_no;
 		this.request_mode = request_mode;
 		this.reqrcvdate = reqrcvdate;
-		this.process_status = process_status;
+		this.processstatus = processstatus;
 		this.remarks = remarks;
 		this.gen_date = gen_date;
 		this.insert_time = insert_time;
@@ -173,12 +174,12 @@ public class VerificationAgencyReferences {
 		this.reqrcvdate = reqrcvdate;
 	}
 
-	public String getProcess_status() {
-		return process_status;
+	public String getProcessstatus() {
+		return processstatus;
 	}
 
-	public void setProcess_status(String process_status) {
-		this.process_status = process_status;
+	public void setProcessstatus(String process_status) {
+		this.processstatus = process_status;
 	}
 
 	public Date getGen_date() {
@@ -249,16 +250,12 @@ public class VerificationAgencyReferences {
 
 
 
-	public int getAgency_id() {
-		return agency_id;
+	public int getAgencyid() {
+		return agencyid;
 	}
 
-
-
-
-
-	public void setAgency_id(int agency_id) {
-		this.agency_id = agency_id;
+	public void setAgencyid(int agencyid) {
+		this.agencyid = agencyid;
 	}
 
 

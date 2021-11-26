@@ -119,6 +119,20 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 		enrolmentrepository.deleteById(theId);
 		
 	}
+
+
+	@Override
+	public List<VerificationAgencyReferences> findByAgencyid(int id) {
+		// TODO Auto-generated method stub
+		return referencesRepository.findByAgencyid(id);
+	}
+
+
+	@Override
+	public List<VerificationAgencyReferences> findByProcessstatus(int agencyid,String sts) {
+		// TODO Auto-generated method stub
+		return referencesRepository.findByAgencyidAndProcessstatus(agencyid, sts);
+	}
 	
 	
 	
