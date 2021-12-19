@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity()
 @Table(name = "ver_references")
 
+
+
 public class VerificationAgencyReferences {
 	
 		
@@ -237,18 +239,13 @@ public class VerificationAgencyReferences {
 	
 	
 
-	
-//	public List<Ver_enrolmentno> getEnrolmentno() {
-//		return enrolmentno;
-//	}
-//
-//	public void setEnrolmentno(List<Ver_enrolmentno> enrolmentno) {
-//		this.enrolmentno = enrolmentno;
-//	}
+	public List<VerificationEnrolmentno> getEnrolmentno() {
+		return enrolmentno;
+	}
 
-
-
-
+	public void setEnrolmentno(List<VerificationEnrolmentno> enrolmentno) {
+		this.enrolmentno = enrolmentno;
+	}
 
 	public int getAgencyid() {
 		return agencyid;

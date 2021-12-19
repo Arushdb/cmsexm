@@ -59,7 +59,7 @@ public class VerificationAgencyReferenceController {
 		
 		// also just in case they pass an id in JSON ... set id to 0
 		// this is to force a save of new item ... instead of update
-		
+		if(thereferences.getId()>0) 
 		thereferences.setId(0);
 							
 		referenceService.save(thereferences);
@@ -109,9 +109,14 @@ public class VerificationAgencyReferenceController {
 	}
 
 	@GetMapping("/agencyreferencebyprocessstatus")
-	public List<VerificationAgencyReferences>  agencyprocessreferenceso(@RequestParam int agencyId,@RequestParam String status  ) {
-		return referenceService.findByProcessstatus(agencyId,status);
+	public List<VerificationAgencyReferences>  agencyprocessreferenceso(@RequestParam int agencyid,@RequestParam String processstatus  ) {
+		return referenceService.findByProcessstatus(agencyid,processstatus);
 		
+	}
+	
+	@GetMapping("/agencyreferencepdf/{refId}")
+	public String  genratepdf(@PathVariable int refId  ) {
+		return referenceService.generateVerificationReport(refId);		
 	}
 
 }

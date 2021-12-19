@@ -24,5 +24,13 @@ public interface VerificationAgencyReferencesService {
 	
 	public List <VerificationAgencyReferences>findByAgencyid(int id);
 	public List <VerificationAgencyReferences>findByProcessstatus(int agencyid,String sts);
-
+	
+	public String generateVerificationReport(int refid);
+	
+	
+	
+	//public String generateVerificationReport(int refId);
+	
+	
+    
 }

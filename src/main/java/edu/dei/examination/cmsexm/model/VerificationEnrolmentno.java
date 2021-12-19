@@ -13,10 +13,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "ver_enrolmentno", uniqueConstraints = @UniqueConstraint(columnNames = "enrolmentno"))
@@ -33,6 +35,10 @@ public class VerificationEnrolmentno {
 	@JoinColumn(name = "reference_id")
 	@JsonBackReference
 	private VerificationAgencyReferences myreference;
+	
+	
+	
+
 
 //	@ManyToMany(fetch=FetchType.LAZY,
 //			cascade= {CascadeType.PERSIST, CascadeType.MERGE,
@@ -81,5 +87,7 @@ public class VerificationEnrolmentno {
 	public String toString() {
 		return "Ver_enrolmentno [id=" + id + ", myreference=" + myreference + "]";
 	}
+
+	
 
 }
