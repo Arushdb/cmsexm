@@ -176,8 +176,8 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 		
 		String sep = System.getProperty("file.separator");
 		
-		//String directory1 = context.getRealPath("/")+"REPORTS" ;
-		String directory=context.getContextPath()+"/"+"REPORTS";
+		String directory = context.getRealPath("/")+"REPORTS" ;
+		//String directory=context.getContextPath()+"/"+"REPORTS";
 	
 		File file = new File(directory);
 		file.mkdirs();	
@@ -204,12 +204,7 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 			footer.setBorder(Rectangle.NO_BORDER);
 			document.setFooter(footer);
 			
-			
-					
-            			
-			
-	    	 
-	    	
+		    	
 	    	
 	    	HeaderFooter header = new HeaderFooter(new Phrase(Chunk.NEWLINE), false);
 	    	
