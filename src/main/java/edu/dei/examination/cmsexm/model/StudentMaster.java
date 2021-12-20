@@ -7,7 +7,7 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "student_master",schema ="cms_live_local" ,catalog ="cms_live_local" )
+@Table(name = "student_master",schema ="cms_live" ,catalog ="cms_live" )
 
 
 public class StudentMaster {

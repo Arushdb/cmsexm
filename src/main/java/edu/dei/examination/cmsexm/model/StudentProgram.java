@@ -13,7 +13,7 @@ import javax.persistence.SecondaryTables;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "student_program",schema ="cms_live_local" ,catalog ="cms_live_local" )
+@Table(name = "student_program",schema ="cms_live" ,catalog ="cms_live" )
 
 @IdClass(StudentProgramPK.class)
 public class StudentProgram {

@@ -78,11 +78,11 @@ query =
 @NamedNativeQuery(name="getstudentdetail1",query =
 "                 select sp.enrollment_number,sp.roll_number,sp.cgpa, "+
 "                 pm.program_name,stt.component_description,sp.passed_from_session ,sm.student_first_name " +
-"					from cms_live_local.student_program as  sp " + 
-"                 join cms_live_local.student_master as sm on sp.enrollment_number=sm.enrollment_number " + 
-"                 join cms_live_local.program_master pm on pm.program_id = sp.program_id " + 
+"					from cms_live.student_program as  sp " + 
+"                 join cms_live.student_master as sm on sp.enrollment_number=sm.enrollment_number " + 
+"                 join cms_live.program_master pm on pm.program_id = sp.program_id " + 
 
-"                 join cms_live_local.system_table_two  as stt on stt.component_code=sp.division " + 
+"                 join cms_live.system_table_two  as stt on stt.component_code=sp.division " + 
 "                 where sp.enrollment_number= :enrolmentno and sp.program_status = 'PAS' " + 
 "                 and stt.group_code= 'DVSCOD'",resultSetMapping = "StudentVerificationmap2")
 
