@@ -2,6 +2,7 @@ package edu.dei.examination.cmsexm.service;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -184,11 +185,11 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 		
 		Document document = new Document(PageSize.A4);
 	
-		
+		String filepath=directory + sep +refid+ ".pdf";
 		
 		
 		try {
-			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(directory + sep +refid+ ".pdf"));
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filepath));
 
 			Custompageevent event = new Custompageevent();
 			writer.setPageEvent(event);
@@ -359,15 +360,17 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		} catch (DocumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
 		
 		//PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(directory + sep + input.getRequestNo()+ ".pdf"));
 		
 		
-		return null;
+		return filepath;
 	}
 	protected class Custompageevent extends PdfPageEventHelper {
 		
@@ -398,63 +401,11 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 				 }	
 		}
 		
-//		@Override
-//		public void onEndPage(PdfWriter writer, Document document) {
-//			try{
-//				document.add(new Phrase("\n\n\n"));
-//				
-//				String filename = "/images/deiLogoHeader.png";
-//				//File file = new File(getClass().getResource(filename).getFile());
-//				
-//				Image headerimg = Image.getInstance(java.awt.Toolkit.getDefaultToolkit().createImage(getClass().getResource(filename)),null);
-//				
-//				headerimg.setAlignment(Element.ALIGN_MIDDLE);
-//				headerimg.setAbsolutePosition(0, 750);
-//				headerimg.scalePercent(25f, 16f);
-//				
-//					    	
-//		    	writer.getDirectContent().addImage(headerimg);
-//		    	
-//		    	
-//		    	
-//		    	
-//				}
-//				catch(Exception x) {
-//				      x.printStackTrace();
-//				      System.out.println("error in start page " + x.getMessage());
-//				 }
-//		}
-//		
-		//public void onStartPage(PdfWriter writer, Document document) {
-//			try{
-//			document.add(new Phrase("\n\n\n"));
-//			
-//			String filename = "/images/deiLogoHeader.png";
-//			//File file = new File(getClass().getResource(filename).getFile());
-//			
-//			Image headerimg = Image.getInstance(java.awt.Toolkit.getDefaultToolkit().createImage(getClass().getResource(filename)),null);
-//			
-//			headerimg.setAlignment(Element.ALIGN_MIDDLE);
-//			headerimg.setAbsolutePosition(0, 750);
-//			headerimg.scalePercent(25f, 16f);
-//			
-//				    	
-//	    	writer.getDirectContent().addImage(headerimg);
-//	    	
-////	    	document.add(Chunk.NEWLINE);
-////	    	Paragraph paragraph= new Paragraph(new Phrase("C O N F I D E N T I A L"));
-////	    	paragraph.setAlignment(1);
-//	    	
-//	    	//document.add(paragraph);
-//			}
-//			catch(Exception x) {
-//			      x.printStackTrace();
-//			      System.out.println("error in start page " + x.getMessage());
-//			 }
-	    //}
+
 		} 
 
 
+	
 	
 	
 	
