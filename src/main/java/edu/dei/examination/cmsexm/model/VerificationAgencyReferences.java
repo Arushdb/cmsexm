@@ -51,7 +51,7 @@ public class VerificationAgencyReferences {
 	
 	@Column(name="request_received_date" ,columnDefinition = "DATETIME")
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date  reqrcvdate;
+	private Date  request_received_date;
 	
 	@Column(name="process_status")
 	private String  processstatus;
@@ -59,7 +59,7 @@ public class VerificationAgencyReferences {
 	
 	@Column(name="generated_date" ,columnDefinition = "DATETIME")
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date  gen_date;
+	private Date  generated_date;
 	
 	
 	@Column(name="insert_time" ,nullable = false, updatable = false ,columnDefinition = "DATETIME")
@@ -108,24 +108,28 @@ public class VerificationAgencyReferences {
 	
 	
 
+	
+
 	public VerificationAgencyReferences(int agencyid, String contact_number, String email, String reference_no,
-			String request_mode, Date reqrcvdate, String processstatus, String remarks, Date gen_date,
-			Date insert_time, Date modification_time, String creator_id, String modifier_id) {
-		super();
-		this.agencyid = agencyid;
-		this.contact_number = contact_number;
-		this.email = email;
-		this.reference_no = reference_no;
-		this.request_mode = request_mode;
-		this.reqrcvdate = reqrcvdate;
-		this.processstatus = processstatus;
-		this.remarks = remarks;
-		this.gen_date = gen_date;
-		this.insert_time = insert_time;
-		this.modification_time = modification_time;
-		this.creator_id = creator_id;
-		this.modifier_id = modifier_id;
-	}
+		String request_mode, Date request_received_date, String processstatus, String remarks, Date generated_date,
+		Date insert_time, Date modification_time, String creator_id, String modifier_id,
+		List<VerificationEnrolmentno> enrolmentno) {
+	
+	this.agencyid = agencyid;
+	this.contact_number = contact_number;
+	this.email = email;
+	this.reference_no = reference_no;
+	this.request_mode = request_mode;
+	this.request_received_date = request_received_date;
+	this.processstatus = processstatus;
+	this.remarks = remarks;
+	this.generated_date = generated_date;
+	this.insert_time = insert_time;
+	this.modification_time = modification_time;
+	this.creator_id = creator_id;
+	this.modifier_id = modifier_id;
+	this.enrolmentno = enrolmentno;
+}
 
 	public int getId() {
 		return id;
@@ -168,28 +172,32 @@ public class VerificationAgencyReferences {
 		this.request_mode = request_mode;
 	}
 
-	public Date getReqrcvdate() {
-		return reqrcvdate;
+	
+
+	public Date getRequest_received_date() {
+		return request_received_date;
 	}
 
-	public void setReqrcvdate(Date reqrcvdate) {
-		this.reqrcvdate = reqrcvdate;
+	public void setRequest_received_date(Date request_received_date) {
+		this.request_received_date = request_received_date;
 	}
+
+
 
 	public String getProcessstatus() {
 		return processstatus;
 	}
 
-	public void setProcessstatus(String process_status) {
-		this.processstatus = process_status;
+	public void setProcessstatus(String processstatus) {
+		this.processstatus = processstatus;
 	}
 
-	public Date getGen_date() {
-		return gen_date;
+	public Date getGenerated_date() {
+		return generated_date;
 	}
 
-	public void setGen_date(Date gen_date) {
-		this.gen_date = gen_date;
+	public void setGenerated_date(Date generated_date) {
+		this.generated_date = generated_date;
 	}
 
 	public Date getInsert_time() {
