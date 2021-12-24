@@ -114,6 +114,10 @@ public class VerificationAgencyReferenceController {
 		return referenceService.findByProcessstatus(agencyid, processstatus);
 
 	}
+	
+	
+	
+	
 
 	@GetMapping("/getpdf/{refId}")
 	public ResponseEntity<byte[]> getpdf(@PathVariable int refId) {
@@ -139,5 +143,32 @@ public class VerificationAgencyReferenceController {
 		}
 
 	}
+
+	@GetMapping("/getdoc/{refId}")
+	public ResponseEntity<byte[]> getdoc(@PathVariable int refId) {
+
+		String path1 = referenceService.generateVerificationReportinword(refId);
+		Path path = Paths.get(path1);
+		byte[] contents;
+		try {
+			contents = Files.readAllBytes(path);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+			String filename = "output.doc";
+			headers.setContentDispositionFormData(filename, filename);
+			headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+			ResponseEntity<byte[]> response = new ResponseEntity<>(contents, headers, HttpStatus.OK);
+			return response;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+
 
 }

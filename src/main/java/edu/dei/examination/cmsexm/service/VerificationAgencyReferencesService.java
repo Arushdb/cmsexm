@@ -27,6 +27,9 @@ public interface VerificationAgencyReferencesService {
 	
 	public String generateVerificationReport(int refid);
 	
+	public String generateVerificationReportinword(int refid);
+	
+	
 	
 	
 	//public String generateVerificationReport(int refId);
