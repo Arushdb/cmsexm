@@ -383,7 +383,7 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 
 			RtfWriter2 writer = RtfWriter2.getInstance(document, new FileOutputStream(filepath));
 
-			String filename = "/images/0137.jpeg";
+			String filename = "/images/deiLogoHeader.png";
 			// File file = new File(getClass().getResource(filename).getFile());
 
 			Image headerimg = Image.getInstance(
