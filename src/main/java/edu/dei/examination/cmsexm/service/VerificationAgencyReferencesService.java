@@ -20,7 +20,7 @@ public interface VerificationAgencyReferencesService {
 
 
 
-	public void deletenEnrolmentno(int theId );
+	//public void deletenEnrolmentno(int theId );
 	
 	public List <VerificationAgencyReferences>findByAgencyid(int id);
 	public List <VerificationAgencyReferences>findByProcessstatus(int agencyid,String sts);
@@ -28,6 +28,8 @@ public interface VerificationAgencyReferencesService {
 	public String generateVerificationReport(int refid);
 	
 	public String generateVerificationReportinword(int refid);
+
+	public void deletenRollno(int rollId);
 	
 	
 	

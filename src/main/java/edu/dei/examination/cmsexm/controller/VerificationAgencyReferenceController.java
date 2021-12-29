@@ -96,11 +96,18 @@ public class VerificationAgencyReferenceController {
 		return "Deleted Verification Agency id - " + referenceId;
 	}
 
-	@DeleteMapping("/enrolment/{enrolmentId}")
-	public String deleteEnrolmentno(@PathVariable int enrolmentId) {
-		referenceService.deletenEnrolmentno(enrolmentId);
-		return "Deleted Enrolment Id - " + enrolmentId;
+//	@DeleteMapping("/enrolment/{enrolmentId}")
+//	public String deleteEnrolmentno(@PathVariable int enrolmentId) {
+//		referenceService.deletenEnrolmentno(enrolmentId);
+//		return "Deleted Enrolment Id - " + enrolmentId;
+//	}
+//	
+	@DeleteMapping("/rollno/{id}")
+	public String deleteRollno(@PathVariable int id) {
+		referenceService.deletenRollno(id);
+		return "Deleted Roll No Id - " + id;
 	}
+
 
 	@GetMapping("/agencyreference/{agencyId}")
 	public List<VerificationAgencyReferences> agencyreferences(@PathVariable int agencyId) {

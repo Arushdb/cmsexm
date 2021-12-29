@@ -56,35 +56,41 @@ query =
 "                 join SystemTableTwo  as stt on stt.component_code=sp.division " + 
 "                 where sp.enrollment_number= :enrolmentno and sp.program_status = 'PAS' " + 
 "                 and stt.group_code= 'DVSCOD' "
-),
-
-@NamedQuery (name="getStudentDetail",
-query =
-"          select new  edu.dei.examination.cmsexm.domain.Verification(sp.enrollment_number,sp.roll_number,sp.cgpa,sp.passed_from_session,"+
- "  sm.student_first_name,stt.component_description,pm.program_name) "+
-
-"    from StudentProgram as  sp " + 
-"                 join StudentMaster as sm on sp.enrollment_number=sm.enrollment_number " + 
-"                 join ProgramMaster pm on pm.program_id = sp.program_id " + 
-
-"                 join SystemTableTwo  as stt on stt.component_code=sp.division " + 
-"                 where sp.enrollment_number= :enrolmentno and sp.program_status = 'PAS' " + 
-"                 and stt.group_code= 'DVSCOD' "
-),
-}
 )
+
+})
+
+//@NamedQuery (name="getStudentDetail",
+//query =
+//"          select new  edu.dei.examination.cmsexm.domain.Verification(sp.enrollment_number,sp.roll_number,sp.cgpa,sp.passed_from_session,"+
+// "  sm.student_first_name,stt.component_description,pm.program_name) "+
+//
+//"    from StudentProgram as  sp " + 
+//"                 join StudentMaster as sm on sp.enrollment_number=sm.enrollment_number " + 
+//"                 join ProgramMaster pm on pm.program_id = sp.program_id " + 
+//
+//"                 join SystemTableTwo  as stt on stt.component_code=sp.division " + 
+//"                 where sp.enrollment_number= :enrolmentno and sp.program_status = 'PAS' " + 
+//"                 and stt.group_code= 'DVSCOD' "
+//),
+//}
+//)
 
 
 @NamedNativeQuery(name="getstudentdetail1",query =
 "                 select sp.enrollment_number,sp.roll_number,sp.cgpa, "+
-"                 pm.program_name,stt.component_description,sp.passed_from_session ,sm.student_first_name " +
+"                 pm.program_name,stt.component_description as division,sp.passed_from_session ,sm.student_first_name " +
+ ",stt1.component_description as branch,stt2.component_description as speclization" +
 "					from cms_live.student_program as  sp " + 
 "                 join cms_live.student_master as sm on sp.enrollment_number=sm.enrollment_number " + 
 "                 join cms_live.program_master pm on pm.program_id = sp.program_id " + 
 
-"                 join cms_live.system_table_two  as stt on stt.component_code=sp.division " + 
-"                 where sp.enrollment_number= :enrolmentno and sp.program_status = 'PAS' " + 
-"                 and stt.group_code= 'DVSCOD'",resultSetMapping = "StudentVerificationmap2")
+"                  join cms_live.system_table_two  as stt on stt.component_code=sp.division " + 
+"                  join cms_live.system_table_two  as stt1 on stt1.component_code=sp.branch_id " + 
+"                  join cms_live.system_table_two  as stt2 on stt2.component_code=sp.specialization_id " + 
+"                 where sp.roll_number= :rollno and sp.program_status = 'PAS' " + 
+"                 and stt.group_code= 'DVSCOD'  and stt1.group_code='BRNCOD' and stt2.group_code ='SPCLCD'       ",
+                  resultSetMapping = "StudentVerificationmap2")
 
 
 
@@ -99,7 +105,8 @@ query =
 	    @ConstructorResult(targetClass = Verification.class, 
 	    columns = {@ColumnResult(name="enrollment_number"), @ColumnResult(name="roll_number"),
 	    		@ColumnResult(name="cgpa"), @ColumnResult(name="passed_from_session"),
-	    		@ColumnResult(name="student_first_name"), @ColumnResult(name="component_description"),
+	    		@ColumnResult(name="student_first_name"), @ColumnResult(name="division"),
+	    		@ColumnResult(name="branch"), @ColumnResult(name="speclization"),
 	    		@ColumnResult(name="program_name")
 	    	    
 	    })

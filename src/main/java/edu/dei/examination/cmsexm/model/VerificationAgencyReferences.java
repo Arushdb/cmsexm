@@ -98,23 +98,28 @@ public class VerificationAgencyReferences {
 //			)
 	
 	
+//	@OneToMany(fetch=FetchType.LAZY,
+//			   mappedBy="myreference",
+//			   cascade= {CascadeType.PERSIST, CascadeType.MERGE,
+//						 CascadeType.DETACH, CascadeType.REFRESH})
+//	@JsonManagedReference
+//	private List<VerificationEnrolmentno>   enrolmentno;
+	
 	@OneToMany(fetch=FetchType.LAZY,
-			   mappedBy="myreference",
+			   mappedBy="rollnoreference",
 			   cascade= {CascadeType.PERSIST, CascadeType.MERGE,
 						 CascadeType.DETACH, CascadeType.REFRESH})
 	@JsonManagedReference
-	private List<VerificationEnrolmentno>   enrolmentno;
+	private List<VerificationRollno>   rollno;
 	
-	
-	
+		
 
-	
 
 	public VerificationAgencyReferences(int agencyid, String contact_number, String email, String reference_no,
 		String request_mode, Date request_received_date, String processstatus, String remarks, Date generated_date,
 		Date insert_time, Date modification_time, String creator_id, String modifier_id,
-		List<VerificationEnrolmentno> enrolmentno) {
-	
+		List<VerificationRollno> rollno) {
+
 	this.agencyid = agencyid;
 	this.contact_number = contact_number;
 	this.email = email;
@@ -128,7 +133,7 @@ public class VerificationAgencyReferences {
 	this.modification_time = modification_time;
 	this.creator_id = creator_id;
 	this.modifier_id = modifier_id;
-	this.enrolmentno = enrolmentno;
+	this.rollno = rollno;
 }
 
 	public int getId() {
@@ -247,13 +252,6 @@ public class VerificationAgencyReferences {
 	
 	
 
-	public List<VerificationEnrolmentno> getEnrolmentno() {
-		return enrolmentno;
-	}
-
-	public void setEnrolmentno(List<VerificationEnrolmentno> enrolmentno) {
-		this.enrolmentno = enrolmentno;
-	}
 
 	public int getAgencyid() {
 		return agencyid;
@@ -262,6 +260,16 @@ public class VerificationAgencyReferences {
 	public void setAgencyid(int agencyid) {
 		this.agencyid = agencyid;
 	}
+
+	public List<VerificationRollno> getRollno() {
+		return rollno;
+	}
+
+	public void setRollno(List<VerificationRollno> rollno) {
+		this.rollno = rollno;
+	}
+
+	
 
 
 	}

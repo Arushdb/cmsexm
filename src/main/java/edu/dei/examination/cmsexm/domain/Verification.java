@@ -20,7 +20,11 @@ public class Verification {
 	private String student_first_name;
 	
 
-	private String component_description;
+	private String division;
+	
+	private String branch;
+	
+	private String speclization;
 
 	
 	private String program_name ;
@@ -59,13 +63,7 @@ public class Verification {
 	}
 
 
-	public String getComponent_description() {
-		return component_description;
-	}
-
-	public void setComponent_description(String component_description) {
-		this.component_description = component_description;
-	}
+	
 
 	
 
@@ -85,22 +83,53 @@ public class Verification {
 	public void setPassed_from_session(Date passed_from_session) {
 		this.passed_from_session = passed_from_session;
 	}
+	
+	
+	
+	
+	public String getDivision() {
+		return division;
+	}
+
+	public void setDivision(String division) {
+		this.division = division;
+	}
+
+	public String getBranch() {
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+
+	public String getSpeclization() {
+		return speclization;
+	}
+
+	public void setSpeclization(String speclization) {
+		this.speclization = speclization;
+	}
+
 	public Verification() {
 		
 	}
 
 	public Verification(String enrollment_number, String roll_number, BigDecimal cgpa, Date passed_from_session,
-			String student_first_name, String component_description, String program_name) {
+			String student_first_name, String division, String branch, String speclization, String program_name) {
 		
 		this.enrollment_number = enrollment_number;
 		this.roll_number = roll_number;
 		this.cgpa = cgpa;
 		this.passed_from_session = passed_from_session;
 		this.student_first_name = student_first_name;
-		this.component_description = component_description;
+		this.division = division;
+		this.branch = branch;
+		this.speclization = speclization;
 		this.program_name = program_name;
 	}
 
+	
 	
 
 	
