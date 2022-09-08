@@ -167,7 +167,10 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 		List<VerificationRollno> rollnos = reflist.getRollno();
 
 		// Get Student detail
-
+        String email = reflist.getEmail();
+        if(email.equalsIgnoreCase("")) {
+        	email ="Not Available";
+        }
 		VerificationAgency veragency = verificationAgencyRepository.getById(reflist.getAgencyid());
 
 		String sep = System.getProperty("file.separator");
@@ -215,17 +218,20 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 			// Paragraph paragraph= new Paragraph(new Phrase("C O N F I D E N T I A L"));
 			// paragraph.setAlignment(1);
 			Paragraph agency = new Paragraph(
-					"Request No:" + refid + "                                                               "
+					"Request No:" + refid +"                                                               "                                                              
 							+ "                                      " + dateFormat.format(new Date()) + "\nTo:\n The "
 							+ veragency.getName() + "\n" + veragency.getAddress() + "\n" + veragency.getCity() + "\n"
-							+ veragency.getState());
+							+ veragency.getState()
+							+ "\n Email:"+ email);
 
 			Paragraph subject = new Paragraph("Subject: Verification of Result(s) / Degree(s).");
 
 			Paragraph salute = new Paragraph("Dear Sir/Madam:" + "\n"
 					+ "With reference to the above, the verified result of the concerned student(s) is"
 					+ " being sent to you with following details:");
-
+			
+			Paragraph certification = new Paragraph("This is to cerify further that the above figures have been taken from the records "
+					+ "of this institute .");
 			Phrase dashline = new Phrase("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 					+ " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
 
@@ -335,6 +341,7 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 			}
 
 			document.add(studentdetail);
+			document.add(certification);
 			// document.add(footer);
 			document.close();
 //			
@@ -364,6 +371,10 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 		List<VerificationRollno> rollnos = reflist.getRollno();
 
 		// Get Student detail
+		  String email = reflist.getEmail();
+	        if(email.equalsIgnoreCase("")) {
+	        	email ="Not Available";
+	        }
 
 		VerificationAgency veragency = verificationAgencyRepository.getById(reflist.getAgencyid());
 
@@ -427,10 +438,11 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 
 			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
 			Paragraph agency = new Paragraph(
-					"Request No:" + refid + "                                                               "
+					"Request No:" + refid + "                            "
 							+ "                                      " + dateFormat.format(new Date()) + "\nTo:\n The "
 							+ veragency.getName() + "\n" + veragency.getAddress() + "\n" + veragency.getCity() + "\n"
-							+ veragency.getState());
+							+ veragency.getState()
+							+ "\n Email:"+ email);
 
 			Paragraph subject = new Paragraph("Subject: Verification of Result(s) / Degree(s).");
 
@@ -440,6 +452,9 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 
 			Phrase dashline = new Phrase("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 					+ " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+			
+			Paragraph certification = new Paragraph("This is to cerify further that the above figures have been taken from the records "
+					+ "of this institute .");
 
 			float[] columnWidths = { 1, 3, 2, 3, 2, 2, 2 };
 
@@ -600,6 +615,7 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 			}
 
 			document.add(studentdetail);
+			document.add(certification);
 
 			document.close();
 //			
