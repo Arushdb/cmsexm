@@ -80,8 +80,10 @@ public class AuthController {
 		
 		List<UserRoles> dftroles  =userDetailsServiceImpl.getdefaultrole(userDetails.getId());
 		
-		int id =dftroles.get(0).getUserrolePK().getUser_id();
-		JSONArray menuary =userDetailsServiceImpl.getNewMenu(id);
+		//int id =dftroles.get(0).getUserrolePK().getUser_id();
+		int roleid = dftroles.get(0).getUserrolePK().getRole_id();
+		
+		JSONArray menuary =userDetailsServiceImpl.getNewMenu(roleid);
 		
 		
 
