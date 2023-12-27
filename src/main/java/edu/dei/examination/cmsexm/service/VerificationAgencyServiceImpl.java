@@ -27,9 +27,18 @@ public class VerificationAgencyServiceImpl implements VerificationAgencyService 
 
 	@Override
 	public List<VerificationAgency> findAll() {
+	List<VerificationAgency> list=	verificationAgencyRepository.findAllByOrderByInsertimeDesc();
 		// TODO Auto-generated method stub
-		return verificationAgencyRepository.findAll();
+		return verificationAgencyRepository.findAllByOrderByInsertimeDesc();
 	}
+	
+	
+	@Override
+	public List<VerificationAgency> getActiveAgency() {
+		// TODO Auto-generated method stub
+		return verificationAgencyRepository.findByDeletedOrderByInsertimeDesc(false);
+	}
+	
 
 	@Override
 	public VerificationAgency findById(int theId) {

@@ -17,4 +17,6 @@ public interface VerificationAgencyService {
 	
 	public List<VerificationAgency> findByAuthentic(Boolean a);
 
+	List<VerificationAgency> getActiveAgency();
+
 }

@@ -10,4 +10,12 @@ public interface VerificationAgencyRepository extends JpaRepository<Verification
 
 	 	
 	 List<VerificationAgency> findByAuthentic(Boolean a);
+	 
+	 List<VerificationAgency> findByDeletedOrderByInsertimeDesc(Boolean a);
+	 
+	 List<VerificationAgency> findAllByOrderByInsertimeDesc();
+	 
+	
+	 
+	 
 }

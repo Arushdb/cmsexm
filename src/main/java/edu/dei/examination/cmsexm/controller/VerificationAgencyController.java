@@ -36,7 +36,17 @@ public class VerificationAgencyController {
 	
 	@GetMapping("/verificationagency")
 	public List<VerificationAgency> findAll() {
+		
+	
 		return verificationAgencyService.findAll();
+		
+	}
+	
+	@GetMapping("/activeagency")
+	public List<VerificationAgency> getActiveAgency() {
+		List<VerificationAgency> list1 ;
+		
+		return verificationAgencyService.getActiveAgency();
 		
 	}
 	
@@ -82,6 +92,16 @@ public class VerificationAgencyController {
 	@PutMapping("/verificationagency")
 	public VerificationAgency updateVerificationAgency(@RequestBody VerificationAgency theVerificationAgency) {
 		
+		
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		UserDetailsImpl userdetail =(UserDetailsImpl)auth.getPrincipal();
+		
+				
+		theVerificationAgency.setModifier_id(userdetail.getUsername());
+		theVerificationAgency.setModificationtime(new Date());
+		
+		
 		verificationAgencyService.save(theVerificationAgency);
 		
 		return theVerificationAgency;
@@ -89,8 +109,8 @@ public class VerificationAgencyController {
 	
 	
 	
-	@DeleteMapping("/verificationagency/{verificationagencyId}")
-	public String deleteVerificationAgency(@PathVariable int verificationagencyId) {
+	@PutMapping("/deleteAgency/{verificationagencyId}")
+	public VerificationAgency deleteVerificationAgency(@PathVariable int verificationagencyId) {
 		
 		VerificationAgency tempVerificationAgency = verificationAgencyService.findById(verificationagencyId);
 		
@@ -99,10 +119,13 @@ public class VerificationAgencyController {
 		if (tempVerificationAgency == null) {
 			throw new RuntimeException("Verification Agency id not found - " + verificationagencyId);
 		}
+		// soft delete verification Agency on 23-12-2023
+		tempVerificationAgency.setDeleted(true);
+		verificationAgencyService.save(tempVerificationAgency);
 		
-		verificationAgencyService.deleteById(verificationagencyId);
-		
-		return "Deleted Verification Agency id - " + verificationagencyId;
+		//verificationAgencyService.deleteById(verificationagencyId);
+		return tempVerificationAgency;
+		//return "Deleted Verification Agency id - " + verificationagencyId;
 	}
 	
 	

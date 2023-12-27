@@ -27,6 +27,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +81,7 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 //	private EntityManager entityManager;
 
 	@Autowired
+	@Qualifier("examEntityManagerFactory")
 	EntityManager em;
 
 	@Autowired
@@ -451,9 +453,9 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 					+ " being sent to you with following details:");
 
 			Phrase dashline = new Phrase("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-					+ " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+					+ " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
 			
-			Paragraph certification = new Paragraph("This is to cerify further that the above figures have been taken from the records "
+			Paragraph certification = new Paragraph("This is to certify further that the above figures have been taken from the records "
 					+ "of this institute .");
 
 			float[] columnWidths = { 1, 3, 2, 3, 2, 2, 2 };
@@ -615,6 +617,7 @@ public class VerificationAgencyReferencesServiceImpl implements VerificationAgen
 			}
 
 			document.add(studentdetail);
+			document.add(dashline);
 			document.add(certification);
 
 			document.close();
