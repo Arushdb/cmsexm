@@ -19,8 +19,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,9 @@ public class DgMainServiceImpl implements DgMainService {
 		List <Dgmain> pcklist = getDgpcklist("N");
 		DgExtract ex = new DgExtract();
 		List<DgExtract> exlist=null;
+		Date rundate =new Date();
+		
+		String rundt = new SimpleDateFormat("yyyy-MM-dd").format(rundate);
 		List<Map<String, Object>> studentstaticdata  = new ArrayList<>();
 		List<Map<String, Object>> subjectdata  = new ArrayList<>();
 		List<Map<String, Object>> maxsubject  = new ArrayList<>();
@@ -95,22 +100,32 @@ public class DgMainServiceImpl implements DgMainService {
 			
 			String pck = pckobj.getProgramCourseKey();
 			String date = pckobj.getSemesterStartDate().toString();
-			 File file = new File("C:\\Arush\\"+pck+"_"+date+".csv");
+			
+			
+			 
 			 // create FileWriter object with file as parameter 
 		        FileWriter outputfile;
+		        String course_name="";
+		        String session="";
+		        String sem="";
 				try {
-					outputfile = new FileWriter(file);
-					CSVWriter writer = new CSVWriter(outputfile);
-				    
+					studentstaticdata = theDgExtractRepository.getstudentlist
+							(pckobj.getProgramCourseKey(),pckobj.getSemesterStartDate());
+					course_name =(String) studentstaticdata.get(0).get("course_name");
+					session =(String) studentstaticdata.get(0).get("SESSION");
+					sem =(String) studentstaticdata.get(0).get("SEM");
+					
 					maxsubject=theDgExtractRepository.getmaxsubject(pck, pckobj.getSemesterStartDate());
 					
 					totsubc=(String)maxsubject.get(0).get("totsub");
 					totsub = Integer.parseInt(totsubc);
 		        // create CSVWriter object filewriter object as parameter 
-		         
+					File file = new File("C:\\Arush\\"+session+"_"+course_name+"_"+sem+"_"+"Rundate_"+rundt+".csv");
+					outputfile = new FileWriter(file);
+					CSVWriter writer = new CSVWriter(outputfile);
+     
 			writecsvheader(writer,format,totsub);
-			studentstaticdata = theDgExtractRepository.getstudentlist
-					(pckobj.getProgramCourseKey(),pckobj.getSemesterStartDate());
+			
 			
 			for(Map<String, Object> student:studentstaticdata) {
 				
@@ -121,7 +136,7 @@ public class DgMainServiceImpl implements DgMainService {
 				totcreditpoint=theDgExtractRepository.gettotcreditpoint(rollno,pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
 				
 				
-				writecsv(student,format,writer,subjectdata,totcreditpoint);
+				writecsv(student,format,writer,subjectdata,totcreditpoint,totsub);
 				//System.out.println(student.get(format.get(0).getField()));
 			}
 			
@@ -168,13 +183,12 @@ public class DgMainServiceImpl implements DgMainService {
 		header[12]="SUB*_CREDIT_POINTS";
 		header[13]="SUB*_REMARKS";
 		header[14]="SUB*_CREDIT_ELIGIBILITY";
-		
-		
-		
+			
 		
           		
 		String keyfield;
 		String[]  arr= new String[format.size()+totsub*15-1];
+		int n=-1;
 		System.out.println("Array length="+arr.length);
 		Iterator <DgFormat> fmt = format.iterator();
 		for (int i =0;i<format.size();i++) {
@@ -185,8 +199,9 @@ public class DgMainServiceImpl implements DgMainService {
 					   
 			          convertheader(tempheader, header, j);
 			          for (int m=0;m<tempheader.length;m++) {
-			        	  arr[i]=tempheader[m];
-			        	  i++;
+			        	  n++;
+			        	  arr[n]=tempheader[m];
+			        	  
 			          }
 			          
 				   
@@ -197,7 +212,8 @@ public class DgMainServiceImpl implements DgMainService {
 				
 				
 			}else {
-				arr[i]=keyfield;	
+				n++;
+				arr[n]=keyfield;	
 			}
 			
 		}
@@ -213,12 +229,14 @@ public class DgMainServiceImpl implements DgMainService {
 	}
 	
 
-	private void writecsv(Map<String, Object> student,List <DgFormat> format,CSVWriter writer,List<Map<String, Object>> subjects,Map<String, Object> creditpoint) {
+	private void writecsv(Map<String, Object> student,List <DgFormat> format,CSVWriter writer,List<Map<String, Object>> subjects,Map<String, Object> creditpoint,int totsub) {
 		String keyfield;
-		String[]  arr= new String[format.size()+(subjects.size()*15)];
+		String[]  arr= new String[format.size()+(totsub*15)];
 		//String[]  arr= new String[300];
 		Iterator <DgFormat> fmt = format.iterator();
-		
+		int subcount = totsub-subjects.size();
+		subcount= subcount*15;
+		int n=-1;
         		
 		for (int i =0;i<format.size();i++) {
 			
@@ -228,30 +246,30 @@ public class DgMainServiceImpl implements DgMainService {
 			if (keyfield.equalsIgnoreCase("subject")) {
 				
 				for(Map<String, Object> stdsubjects:subjects) {
-				
-					arr[i]=(String)stdsubjects.get("course_name");
-					i++;
-				arr[i]=(String)stdsubjects.get("course_code");
+				    n++;
+					arr[n]=(String)stdsubjects.get("course_name");
+					n++;
+				arr[n]=(String)stdsubjects.get("course_code");
 							
 				for(int j=0;j<8;j++) {
-					i++;
-					arr[i]="";
+					n++;
+					arr[n]="";
 					
 				}
 								
-				i++;
-				arr[i]=(String)stdsubjects.get("gradepoint");
-				i++;
-				arr[i]=(String)stdsubjects.get("credits");
-				i++;
-				arr[i]=(String)stdsubjects.get("creditpoint");
+				n++;
+				arr[n]=(String)stdsubjects.get("gradepoint");
+				n++;
+				arr[n]=(String)stdsubjects.get("credits");
+				n++;
+				arr[n]=(String)stdsubjects.get("creditpoint");
 				
 				for(int j=0;j<2;j++) {
-					i++;
-					arr[i]="";
+					n++;
+					arr[n]="";
 					
 				}
-				i++;
+				//i++;
 				
 				}
 				continue;
@@ -259,14 +277,24 @@ public class DgMainServiceImpl implements DgMainService {
 		       System.out.println("Keyfield:"+keyfield);
 		       System.out.println("Value:"+student.get(keyfield));
 		       if (keyfield.equalsIgnoreCase("TOT_CREDIT_POINTS")) {
-		    	                 
-		    	   arr[i]=(String)creditpoint.get("TOT_CREDIT_POINTS");
+		    	   n++;              
+		    	   arr[n]=(String)creditpoint.get("TOT_CREDIT_POINTS");
 		    	   
 		       }else if(keyfield.equalsIgnoreCase("TOT_CREDIT")){
-		    	   arr[i]=(String)creditpoint.get("TOT_CREDIT");
+		    	   n++;
+		    	   arr[n]=(String)creditpoint.get("TOT_CREDIT");
 		    	   
 		       }else {
-		    	   arr[i]=(String)student.get(keyfield);
+		    	   if(keyfield.equalsIgnoreCase("AADHAAR_NAME")){
+		    		   for(int q=0;q < subcount;q++) {
+			    		   n++;
+							arr[n]="";
+			    	   }   
+		    	   }
+		    	   
+		    	   
+		    	   n++;
+		    	   arr[n]=(String)student.get(keyfield);
 		       }
 				
 				System.out.println(student.get(keyfield));
