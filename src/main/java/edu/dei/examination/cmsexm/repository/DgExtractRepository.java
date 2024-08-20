@@ -1,10 +1,12 @@
 package edu.dei.examination.cmsexm.repository;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import edu.dei.examination.cmsexm.model.DgExtract;
@@ -60,7 +62,7 @@ public interface DgExtractRepository extends JpaRepository<DgExtract, Integer> {
 	
 	@Query(name = "getsubjects" ,nativeQuery = true,value =
 	
-	" select srsh.roll_number,cmps.course_name,sc.course_code,cast(sms.final_grade_point as char(6) ) as gradepoint ,cast(cmps.credits as char(2)) as credits ,cast(sms.final_grade_point*cmps.credits as char(7) )as creditpoint from "
+	" select srsh.roll_number,cmps.course_name,sc.course_code,cast(sms.final_grade_point as char(6) ) as gradepoint ,cast(cmps.credits as char(7)) as credits ,cast(sms.final_grade_point*cmps.credits as char(7) )as creditpoint from "
    +" cms_live.student_registration_semester_header as srsh  "
 	+" join cms_live.student_course as sc on sc.roll_number = srsh.roll_number and sc.entity_id = srsh.entity_id and sc.program_course_key = srsh.program_course_key "
 	+" and sc.semester_start_date = srsh.session_start_date and sc.semester_end_date = srsh.session_end_date and sc.student_status = 'PAS' "
@@ -97,6 +99,13 @@ public interface DgExtractRepository extends JpaRepository<DgExtract, Integer> {
 	+" group by  srsh.roll_number ")
 	
 	Map<String, Object> gettotcreditpoint(String rollno,String pck ,Date ssd);
+	
+	@Query(name = "updatestatus" ,nativeQuery = true,value =
+	" update  dg_controller set  status = 'C' , run_date =?1 "
+	+" where program_course_key=?2 " 
+	+" and semester_start_date=?3 ") 
+	@Modifying
+	int updatestatus(Date rundate,String pck ,Date ssd);
 	
 	
 }

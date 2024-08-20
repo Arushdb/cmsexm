@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -81,12 +82,13 @@ public class DgMainServiceImpl implements DgMainService {
 		Date rundate =new Date();
 		
 		String rundt = new SimpleDateFormat("yyyy-MM-dd").format(rundate);
+		//List<HashMap<String, String>> studentstaticdata  = new ArrayList<HashMap<String, String>>();
+		
 		List<Map<String, Object>> studentstaticdata  = new ArrayList<>();
 		List<Map<String, Object>> subjectdata  = new ArrayList<>();
 		List<Map<String, Object>> maxsubject  = new ArrayList<>();
 		Map<String, Object> totcreditpoint  = null;
-		
-		List<Map<String, Object>> dgformat =theDgExtractRepository.getdgformat();
+				List<Map<String, Object>> dgformat =theDgExtractRepository.getdgformat();
 		Gson gson1 = new Gson();
 		JsonElement jsonElement1 = gson1.toJsonTree(dgformat);
 		Type collectionType1 = new TypeToken<List<DgFormat>>(){}.getType();
@@ -95,6 +97,14 @@ public class DgMainServiceImpl implements DgMainService {
 		
 		int totsub =0;
 		String totsubc ;
+		String currentUsersHomeDir = System.getProperty("user.home");
+		String dglocker = currentUsersHomeDir + File.separator + "dglocker";
+		
+		//File file = new File("C:\\Arush\\"+session+"_"+course_name+"_"+roman+"_"+"Rundate_"+rundt+".csv");
+		File theDir = new File(dglocker);
+		if (!theDir.exists()){
+		    theDir.mkdirs();
+		}
 		
 		for (Dgmain pckobj:pcklist) {
 			
@@ -108,19 +118,23 @@ public class DgMainServiceImpl implements DgMainService {
 		        String course_name="";
 		        String session="";
 		        String sem="";
+		        String roman="";
 				try {
 					studentstaticdata = theDgExtractRepository.getstudentlist
 							(pckobj.getProgramCourseKey(),pckobj.getSemesterStartDate());
 					course_name =(String) studentstaticdata.get(0).get("course_name");
 					session =(String) studentstaticdata.get(0).get("SESSION");
 					sem =(String) studentstaticdata.get(0).get("SEM");
+					roman=getroman(sem);
 					
 					maxsubject=theDgExtractRepository.getmaxsubject(pck, pckobj.getSemesterStartDate());
 					
 					totsubc=(String)maxsubject.get(0).get("totsub");
 					totsub = Integer.parseInt(totsubc);
 		        // create CSVWriter object filewriter object as parameter 
-					File file = new File("C:\\Arush\\"+session+"_"+course_name+"_"+sem+"_"+"Rundate_"+rundt+".csv");
+					
+					File file = new File(dglocker+File.separator+session+"_"+course_name+"_"+roman+"_"+"Rundate_"+rundt+".csv");
+					
 					outputfile = new FileWriter(file);
 					CSVWriter writer = new CSVWriter(outputfile);
      
@@ -136,11 +150,11 @@ public class DgMainServiceImpl implements DgMainService {
 				totcreditpoint=theDgExtractRepository.gettotcreditpoint(rollno,pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
 				
 				
-				writecsv(student,format,writer,subjectdata,totcreditpoint,totsub);
+				writecsv(student,format,writer,subjectdata,totcreditpoint,totsub,roman);
 				//System.out.println(student.get(format.get(0).getField()));
 			}
 			
-
+			theDgExtractRepository.updatestatus(rundate, pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
 			writer.close();
 		}
 
@@ -165,6 +179,25 @@ public class DgMainServiceImpl implements DgMainService {
 		
 	}
 	
+	private String getroman(String sem) {
+	// TODO Auto-generated method stub
+		
+		String romstr="";
+		String[] sm= {"SM1","SM2","SM3","SM4","SM5","SM6","SM7"
+				,"SM8","SM9","SM10","SM11","SM12","SM13","SM14","SM15","SM16"};
+		
+		String[] rom= {"I","II","III","IV","V","VI","VII"
+				,"VIII","IX","X","XI","XII","XIII","XIV","XV","XVI"};
+              for(int i=0;i<sm.length;i++) {
+            	  if(sem.equalsIgnoreCase(sm[i])) {
+            		  romstr=rom[i];
+            		  break;
+            	  }
+              }
+		
+		return romstr;
+}
+
 	private void writecsvheader(CSVWriter writer,List <DgFormat> format, int totsub){
 		String[] tempheader = new String[15];
 		String[] header = new String[15];
@@ -229,7 +262,8 @@ public class DgMainServiceImpl implements DgMainService {
 	}
 	
 
-	private void writecsv(Map<String, Object> student,List <DgFormat> format,CSVWriter writer,List<Map<String, Object>> subjects,Map<String, Object> creditpoint,int totsub) {
+	private void writecsv(Map<String, Object> student,List <DgFormat> format,
+			CSVWriter writer,List<Map<String, Object>> subjects,Map<String, Object> creditpoint,int totsub,String roman) {
 		String keyfield;
 		String[]  arr= new String[format.size()+(totsub*15)];
 		//String[]  arr= new String[300];
@@ -242,6 +276,11 @@ public class DgMainServiceImpl implements DgMainService {
 			
 			keyfield= fmt.next().getField();
 			
+			if (keyfield.equalsIgnoreCase("SEM")) {
+				n++;
+				arr[n]=roman;
+				continue ;
+			}
 		
 			if (keyfield.equalsIgnoreCase("subject")) {
 				
