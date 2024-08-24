@@ -124,6 +124,9 @@ public class DgMainServiceImpl implements DgMainService {
 				try {
 					studentstaticdata = theDgExtractRepository.getstudentlist
 							(pckobj.getProgramCourseKey(),pckobj.getSemesterStartDate());
+					if(!(studentstaticdata.size()>0)) {
+						continue;
+					}
 					course_name =(String) studentstaticdata.get(0).get("course_name");
 					file_course_name =course_name;
 					file_course_name=file_course_name.replaceAll(" ", "_");
