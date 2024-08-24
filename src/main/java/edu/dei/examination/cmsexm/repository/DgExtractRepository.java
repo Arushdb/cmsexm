@@ -91,7 +91,7 @@ public interface DgExtractRepository extends JpaRepository<DgExtract, Integer> {
 	+ " from cms_live.student_course where program_course_key=?1 "
 	+ " and semester_start_date=?2 "
 	+ " group by roll_number "
-	+ " order by totsub desc limit 1 ")
+	+ " order by cast(totsub as SIGNED)  desc limit 1 ")
 	List<Map<String, Object>> getmaxsubject(String pck ,Date ssd);
 	
 	@Query(name = "gettotcreditpoint" ,nativeQuery = true,value =
