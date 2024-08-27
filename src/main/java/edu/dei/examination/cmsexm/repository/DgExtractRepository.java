@@ -23,7 +23,7 @@ public interface DgExtractRepository extends JpaRepository<DgExtract, Integer> {
 	
 	@Query(name = "getstudentlist" ,nativeQuery = true,value =
 	    " select  'DAYALBAGH EDUCATIONAL INSTITUTE' as org_name ,'' as org_name_l , s.academic_course_id, "
-		+	"  s.course_name ,'' as course_name_l,concat(if(s.branch='NONE','',s.branch), "
+		+	"  s.course_name ,s.branch ,s.specialization,  '' as course_name_l,concat(if(s.branch='NONE','',s.branch), "
 		+	" if(s.specialization not in ('NONE'),concat(' with Specialization in ', "
 		+	" if(s.specialization='NONE','',s.specialization)),'')) as stream,'' as stream_l, cast(s.passedSession as char(4)) as session, "
 		+	" s.enrollment_number as regn_no, s.roll_number as rroll, "

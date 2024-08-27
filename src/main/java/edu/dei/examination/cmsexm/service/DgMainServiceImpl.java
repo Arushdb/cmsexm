@@ -117,6 +117,8 @@ public class DgMainServiceImpl implements DgMainService {
 		        FileWriter outputfile;
 		        String course_name="";
 		        String file_course_name="";
+		        String branch="";
+		        String spec="";
 
 		        String session="";
 		        String sem="";
@@ -134,6 +136,8 @@ public class DgMainServiceImpl implements DgMainService {
 					session =(String) studentstaticdata.get(0).get("SESSION");
 					sem =(String) studentstaticdata.get(0).get("SEM");
 					roman=getroman(sem);
+					branch= (String) studentstaticdata.get(0).get("branch");
+					spec= (String) studentstaticdata.get(0).get("specialization");
 					
 					maxsubject=theDgExtractRepository.getmaxsubject(pck, pckobj.getSemesterStartDate());
 					
@@ -141,7 +145,7 @@ public class DgMainServiceImpl implements DgMainService {
 					totsub = Integer.parseInt(totsubc);
 		        // create CSVWriter object filewriter object as parameter 
 					
-					File file = new File(dglocker+File.separator+session+"_"+file_course_name+"_"+roman+"_"+"Rundate_"+rundt+".csv");
+					File file = new File(dglocker+File.separator+session+"_"+file_course_name+"_"+branch+"_"+spec+"_"+roman+"_"+"Run_"+rundt+".csv");
 					
 					outputfile = new FileWriter(file);
 					CSVWriter writer = new CSVWriter(outputfile);
