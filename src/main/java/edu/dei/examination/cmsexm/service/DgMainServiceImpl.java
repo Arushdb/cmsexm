@@ -70,7 +70,7 @@ public class DgMainServiceImpl implements DgMainService {
 	
 	@Transactional()
 	@Scheduled(fixedRateString = "${run-frquency.minutes}", timeUnit = TimeUnit.MINUTES)
-	public void dgmain() {
+	public void dgmain() throws IOException {
 		
 		
 		// Read Dg controller for  unprocessed data
@@ -80,6 +80,7 @@ public class DgMainServiceImpl implements DgMainService {
 		DgExtract ex = new DgExtract();
 		List<DgExtract> exlist=null;
 		Date rundate =new Date();
+		String[] log = new String[1];
 		
 		String rundt = new SimpleDateFormat("yyyy-MM-dd").format(rundate);
 		//List<HashMap<String, String>> studentstaticdata  = new ArrayList<HashMap<String, String>>();
@@ -105,6 +106,13 @@ public class DgMainServiceImpl implements DgMainService {
 		if (!theDir.exists()){
 		    theDir.mkdirs();
 		}
+		  FileWriter logfile;
+		
+		  File myfile = new File(dglocker+File.separator+"log"+"_"+"Run_"+rundt+".csv");
+		  
+			logfile = new FileWriter(myfile);
+		
+		   CSVWriter logwriter = new CSVWriter(logfile);
 		
 		for (Dgmain pckobj:pcklist) {
 			
@@ -115,6 +123,7 @@ public class DgMainServiceImpl implements DgMainService {
 			 
 			 // create FileWriter object with file as parameter 
 		        FileWriter outputfile;
+		      
 		        String course_name="";
 		        String file_course_name="";
 		        String branch="";
@@ -145,9 +154,10 @@ public class DgMainServiceImpl implements DgMainService {
 					totsub = Integer.parseInt(totsubc);
 		        // create CSVWriter object filewriter object as parameter 
 					
-					File file = new File(dglocker+File.separator+session+"_"+file_course_name+"_"+branch+"_"+spec+"_"+roman+"_"+"Run_"+rundt+".csv");
+					File file = new File(dglocker+File.separator+session+"_"+pckobj.getProgramCourseKey()+"_"+file_course_name+"_"+branch+"_"+spec+"_"+roman+"_"+"Run_"+rundt+".csv");
 					
 					outputfile = new FileWriter(file);
+					
 					CSVWriter writer = new CSVWriter(outputfile);
      
 			writecsvheader(writer,format,totsub);
@@ -165,7 +175,8 @@ public class DgMainServiceImpl implements DgMainService {
 				writecsv(student,format,writer,subjectdata,totcreditpoint,totsub,roman);
 				//System.out.println(student.get(format.get(0).getField()));
 			}
-			
+			log[0]=pckobj.getProgramCourseKey()+"_"+pckobj.getSemesterStartDate()+"_"+pckobj.getSemesterEndDate();
+			logwriter.writeNext(log);
 			theDgExtractRepository.updatestatus(rundate, pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
 			writer.close();
 		}
@@ -173,9 +184,13 @@ public class DgMainServiceImpl implements DgMainService {
 		 catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log[0]=e.getMessage();
+			logwriter.writeNext(log);
 		}
 			
 		}
+		
+		logwriter.close();
 		
 		
 		
