@@ -45,6 +45,10 @@ public class VerificationAgency {
 	
 	private boolean authentic=false;
 	
+	@Column(columnDefinition = "TINYINT" ,name = "deleted")
+	
+	private boolean deleted=false;
+	
 	private String referenceno;
 		
 	@Column(name="insert_time" ,columnDefinition = "DATETIME")
@@ -210,6 +214,16 @@ public class VerificationAgency {
 	}
 	public void setReferenceno(String referenceno) {
 		this.referenceno = referenceno;
+	}
+
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 
