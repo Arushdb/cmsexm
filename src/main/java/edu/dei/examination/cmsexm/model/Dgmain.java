@@ -60,6 +60,7 @@ import java.util.Date;
 
 	  
 	    @Temporal(TemporalType.TIMESTAMP)
+	    @Column(name = "insert_time")
 	    private Date insertTime;
 
 	   
