@@ -44,8 +44,8 @@ import org.springframework.stereotype.Service;
 
 public class DgMainServiceImpl implements DgMainService {
 	
-	@Autowired
-	EntityManager em;
+	//@Autowired
+	//EntityManager em;
 	
 	@Autowired
 	private DgMainRepository  theDgMainRepository  ;
