@@ -152,9 +152,22 @@ public class DgMainServiceImpl implements DgMainService {
 					
 					totsubc=(String)maxsubject.get(0).get("totsub");
 					totsub = Integer.parseInt(totsubc);
+
+
+					 // Create directory based on the session by pragya
+					 File sessionDir = new File(dglocker + File.separator + session);
+					 if (!sessionDir.exists()) {
+						 sessionDir.mkdirs();
+					 }
+	 
+					 // Create CSV file path by pragya
+					 File file = new File(sessionDir + File.separator + session + "_" +
+							 pckobj.getProgramCourseKey() + "_" + file_course_name + "_" + branch + "_" +
+							 spec + "_" + roman + "_" + "Run_" + rundt + ".csv");
+
 		        // create CSVWriter object filewriter object as parameter 
 					
-					File file = new File(dglocker+File.separator+session+"_"+pckobj.getProgramCourseKey()+"_"+file_course_name+"_"+branch+"_"+spec+"_"+roman+"_"+"Run_"+rundt+".csv");
+				//	File file = new File(dglocker+File.separator+session+"_"+pckobj.getProgramCourseKey()+"_"+file_course_name+"_"+branch+"_"+spec+"_"+roman+"_"+"Run_"+rundt+".csv");
 					
 					outputfile = new FileWriter(file);
 					
