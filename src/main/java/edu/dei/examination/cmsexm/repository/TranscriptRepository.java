@@ -45,12 +45,8 @@ public class TranscriptRepository {
             "JOIN cms_live.student_program sp ON sp.roll_number = srsh.roll_number " +
             "AND sp.program_id = pch.program_id " +
                        
-<<<<<<< Updated upstream
-            "WHERE srsh.roll_number = ? AND sp.program_status = 'PAS' group by sc.semester_start_date,sc.course_code";
-=======
             "WHERE srsh.roll_number = ? AND sp.program_status = 'PAS' AND srsh.status = 'PAS' " +
             "group by sc.semester_start_date,sc.course_code order by sc.semester_start_date,sc.course_code";
->>>>>>> Stashed changes
 
     // Method to get Transcript data based on Roll Number
     public List<TranscriptData> getTranscriptData(String roll_number) {

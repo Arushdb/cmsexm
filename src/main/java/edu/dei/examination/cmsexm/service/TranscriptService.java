@@ -19,15 +19,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
-<<<<<<< Updated upstream
-=======
 
 
 
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
->>>>>>> Stashed changes
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -51,45 +48,23 @@ public class TranscriptService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-<<<<<<< Updated upstream
-=======
     
  // Handle image inside the service
     private final String HEADER_IMAGE_PATH = "/images/deiLogoHeader.png";
     private final String WATERMARK_IMAGE_PATH = "/images/DEI-WATERMARK.jpg";
->>>>>>> Stashed changes
 
     // Define a logger for the class
     private static final Logger logger = LoggerFactory.getLogger(TranscriptService.class);
 
-<<<<<<< Updated upstream
-    public void generateTranscriptPdf(Transcript transcript, OutputStream outputStream, String imagePath)  {
-        Document document = new Document(PageSize.A4, 36, 36, 72, 40);
-        try {
-            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
-            writer.setPageEvent(new HeaderFooterPageEvent(imagePath));
-=======
     public void generateTranscriptPdf(Transcript transcript, OutputStream outputStream) {
         Document document = new Document(PageSize.A4, 30, 36, 72, 80);
         try {
             PdfWriter writer = PdfWriter.getInstance(document, outputStream);
             writer.setPageEvent(new HeaderFooterPageEvent(HEADER_IMAGE_PATH));
->>>>>>> Stashed changes
          // 1. Create a PdfWriter instance
        //     PdfWriter writer1 = PdfWriter.getInstance(document, new FileOutputStream("document_with_page_numbers.pdf"));
             
             // 2. Add event for page number
-<<<<<<< Updated upstream
-            writer.setPageEvent(new PageNumberEvent());
-            document.open();
-            
-            
-            
-        
-
-            // Add spacing after opening the document
-         //   document.add(new Paragraph("\n\n\n\n\n"));
-=======
           //  writer.setPageEvent(new PageNumberEvent());
             
          // Pass the roll_number to the PageNumberEvent class
@@ -101,7 +76,6 @@ public class TranscriptService {
          // Add watermark image
        //     addWatermark(writer);
             
->>>>>>> Stashed changes
 
             // Title Table
             PdfPTable titleTable = new PdfPTable(1);
@@ -112,19 +86,6 @@ public class TranscriptService {
             titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             titleCell.setBorder(Rectangle.NO_BORDER);
             titleTable.addCell(titleCell);
-<<<<<<< Updated upstream
-
-            // Date Table
-            PdfPTable dateTable = new PdfPTable(1);
-          //  dateTable.setWidthPercentage(100);
-
-            String currentDate = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
-            PdfPCell dateCell = new PdfPCell(new Phrase("Dated: " + currentDate, FontFactory.getFont(FontFactory.HELVETICA, 10)));
-            dateCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            dateCell.setBorder(Rectangle.NO_BORDER);
-            dateTable.addCell(dateCell);
-
-=======
             
          // Generate the serial number
             String serialNumber = generateSerialNumber(transcript.getRoll_number());
@@ -146,7 +107,6 @@ public class TranscriptService {
             dateTable.addCell(dateCell);
             
         
->>>>>>> Stashed changes
             // Nest the date table inside the title table
             PdfPCell nestedTableCell = new PdfPCell(dateTable);
             nestedTableCell.setBorder(Rectangle.NO_BORDER);
@@ -154,7 +114,7 @@ public class TranscriptService {
 
             // Add the title table to the document
             document.add(titleTable);
-            document.add(new Paragraph("\n"));
+           // document.add(new Paragraph("\n"));
 
             // Add transcript details
             addTranscriptTable(document, transcript);
@@ -165,11 +125,8 @@ public class TranscriptService {
             Paragraph desc1 = new Paragraph("The Institute follows a credits system and evaluation by letter grading on an 11-point scale. The Letter Grades, corresponding Grade Point Values, and their achievement level are given below:\n\n",
                     FontFactory.getFont(FontFactory.HELVETICA, 10));
             document.add(desc1);
-<<<<<<< Updated upstream
-=======
             
          
->>>>>>> Stashed changes
 
             // Add the Grade and Achievement Table
             addGradeTable(document);
@@ -198,32 +155,19 @@ public class TranscriptService {
             desc2.add(new Chunk(" course and Gi", font));       
             desc2.add(new Chunk(" is the grade point scored by the student in the i", font));
             desc2.add(superscriptTh);
-<<<<<<< Updated upstream
-            desc2.add(new Chunk(" course)\n                                           CGPA = ", font));
-            desc2.add(summationSymbol);
-=======
-            desc2.add(new Chunk(" course)\n On the other hand,CGPA is also calculated in the same manner considering the overall performance of students in terms of all the courses undergone by a student across all the semesters of an academic programme, i.e.,\n                                                     CGPA = ", font));
+            desc2.add(new Chunk(" course)\n On the other hand,CGPA is also calculated in the same manner considering the overall performance of students in terms of all the courses undergone by a student across all the semesters of an academic programme, i.e.,\n                                                      CGPA = ", font));
             desc2.add(summationSymbol); 
->>>>>>> Stashed changes
             desc2.add(new Chunk("(Ci x Si)/", font));
             desc2.add(summationSymbol);
             desc2.add(new Chunk("Ci\n(where Si", font));
             desc2.add(new Chunk(" is the SGPA of the i", font));
             desc2.add(superscriptTh);
             desc2.add(new Chunk(" Semester/Module and Ci", font));
-<<<<<<< Updated upstream
-            desc2.add(new Chunk(" is the total number of credits earned by the student)\n", font));
-            desc2.add(new Chunk("Numerically, all GPA computations are expressed up to three decimal places. This ensures:\n", font));
-            desc2.add(new Chunk("Greater precision in assigning credit to studentâ€™s academic achievements\n", font));
-            desc2.add(new Chunk("Greater precision in discerning differences in achievements\n", font));
-            desc2.add(new Chunk("More precision in conversions from one format to another\n\n", font));
-=======
             desc2.add(new Chunk(" is the total number of credits earned by the student in that Semester as the case may be)\n", font));
             desc2.add(new Chunk("Numerically, all GPA computations are expressed up to three decimal places. This ensures:\n", font));
-            desc2.add(new Chunk("              Greater precision in assigning credit to student's academic achievements,\n", font));
-          desc2.add(new Chunk("                Greater precision in discerning differences in achievements,and\n", font));
+            desc2.add(new Chunk("               Greater precision in assigning credit to student's academic achievements,\n", font));
+            desc2.add(new Chunk("               Greater precision in discerning differences in achievements,and\n", font));
             desc2.add(new Chunk("               More precision in conversions from one format to another.\n", font));
->>>>>>> Stashed changes
             desc2.add(new Chunk("Award of Divisions: The minimum CGPA for different divisions is given in the following table.", font));
 
             // Add the paragraph to the document
@@ -235,22 +179,14 @@ public class TranscriptService {
 
             // Add the Division Table
             addDivisionTable(document);
-<<<<<<< Updated upstream
-            document.add(new Paragraph("\n"));
-=======
-          //  document.add(new Paragraph("\n"));
->>>>>>> Stashed changes
+          // document.add(new Paragraph("\n"));
 
             // CGPA description
             Paragraph desc3 = new Paragraph("Multiplication of CGPA by 10 yields the equivalent percentage marks obtained by a student.\n\n",
                     FontFactory.getFont(FontFactory.HELVETICA, 10));
             document.add(desc3);
             
-<<<<<<< Updated upstream
-            document.newPage();
-=======
           //  document.newPage();
->>>>>>> Stashed changes
 
             // Details of SGPA and CGPA
           //  document.add(new Paragraph("\n"));
@@ -258,11 +194,7 @@ public class TranscriptService {
                     FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10));
             document.add(desc4);
 
-<<<<<<< Updated upstream
-            // Add transcript table
-=======
            
->>>>>>> Stashed changes
             // Add transcript table
             PdfPTable firstTable = createTranscriptHeaderTable(); // Only create the header once
             document.add(firstTable);
@@ -301,15 +233,6 @@ public class TranscriptService {
             document.add(paragraph);
             document.add(new Paragraph("\n\n\n"));
          //   document.add(new Paragraph("Date:                                                                                                                                                                                                                                                                 Assistant Registrar (Exam.)\n                                                              For Registrar\n"));
-<<<<<<< Updated upstream
-            Paragraph DateTitle = new Paragraph("Date:", FontFactory.getFont(FontFactory.HELVETICA, 12));
-            DateTitle.setAlignment(Paragraph.ALIGN_LEFT);
-            document.add(DateTitle);
-            
-            Paragraph ARTitle = new Paragraph("Assistant Registrar (Exam.)", FontFactory.getFont(FontFactory.HELVETICA, 12));
-            ARTitle.setAlignment(Paragraph.ALIGN_RIGHT);
-            document.add(ARTitle);
-=======
           //  Paragraph DateTitle = new Paragraph("Date:", FontFactory.getFont(FontFactory.HELVETICA, 12));
          //   DateTitle.setAlignment(Paragraph.ALIGN_LEFT);
          //   document.add(DateTitle);
@@ -342,7 +265,6 @@ public class TranscriptService {
             document.add(table);
             
         //   addQRCode(writer, transcript.getRoll_number());
->>>>>>> Stashed changes
             
            
             // Close the document
@@ -416,15 +338,9 @@ public class TranscriptService {
         String[][] gradeData = {
                 {"A", "10", "Outstanding"}, {"D", "4", "Below Average"},
                 {"A-", "9", "Excellent"}, {"D-", "3", "Just Pass"},
-<<<<<<< Updated upstream
-                {"B", "8", "Very Good"}, {"E", "2", "Unsatisfactory"},
-                {"B-", "7", "Good"}, {"E-", "1", "Poor"},
-                {"C", "6", "Above Average"}, {"F", "0", "Very Poor"},
-=======
                 {"B", "8", "Very Good"}, {"E", "2", "Extension Grade"},
                 {"B-", "7", "Good"}, {"E-", "1", "Extension Grade"},
                 {"C", "6", "Above Average"}, {"F", "0", "Fail"},
->>>>>>> Stashed changes
                 {"C-", "5", "Average"}, {"", "", ""}
         };
 
@@ -451,21 +367,6 @@ public class TranscriptService {
 
     private void addTranscriptTable(Document document, Transcript transcript) throws DocumentException {
         // Create a table with 2 columns (Label, Value)
-<<<<<<< Updated upstream
-        PdfPTable table = new PdfPTable(4);
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{10,30,10,10}); // Set column widths
-
-        // Add student details
-        addTableRow(table, "Name", transcript.getStudent_first_name());
-        addTableRow(table, "Roll Number", transcript.getRoll_number());
-        addTableRow(table, "Name of the Course", transcript.getProgram_name());
-        addTableRow(table, "Enrollment No.", transcript.getEnrollment_number());
-        addTableRow(table, "Duration of the Course", transcript.getDuration());
-        addTableRow(table, "Medium of Instruction", transcript.getMedium());
-        addTableRow(table, "Date of Birth", transcript.getDate_of_birth());
-        addTableRow(table, "C.G.P.A.", transcript.getCgpa());
-=======
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(80);
         
@@ -482,30 +383,17 @@ public class TranscriptService {
         addTableRow(table, "MEDIUM OF INSTRUCTION:", transcript.getMedium());
        // addTableRow(table, "Date of Birth", transcript.getDate_of_birth());
         addTableRow(table, "C.G.P.A.:", transcript.getCgpa());
->>>>>>> Stashed changes
 
         // Add the table to the document
         document.add(table);
     }
 
-<<<<<<< Updated upstream
-    private void addTableRow(PdfPTable table, String label, String value) {
-    	
-    	Font labelFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLACK);  // Font for the label
-=======
     private void addTableRow(PdfPTable table, String label, String value) { 
         Font labelFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLACK);  // Font for the label
->>>>>>> Stashed changes
         Font valueFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);       // Font for the value
 
         PdfPCell labelCell = new PdfPCell(new Phrase(label, labelFont));
         PdfPCell valueCell = new PdfPCell(new Phrase(value, valueFont));
-<<<<<<< Updated upstream
-        table.addCell(labelCell);
-        table.addCell(valueCell);
-      //  table.addCell(new PdfPCell(new Phrase(label)));
-      //  table.addCell(new PdfPCell(new Phrase(value)));
-=======
 
         // Set borders to no border
         labelCell.setBorder(Rectangle.NO_BORDER);
@@ -513,14 +401,13 @@ public class TranscriptService {
         
         table.addCell(labelCell);
         table.addCell(valueCell);
->>>>>>> Stashed changes
     }
 
 
     private void addDivisionTable(Document document) throws DocumentException {
         PdfPTable table = new PdfPTable(2);
         table.setWidths(new float[]{3, 1});
-        table.setWidthPercentage(46);
+        table.setWidthPercentage(40);
         
         // Define font for table content
         Font font = FontFactory.getFont(FontFactory.HELVETICA, 10);
@@ -617,11 +504,7 @@ public class TranscriptService {
                 String sgpa = row.getSgpa(); 
 
                 // Add the summary row after all subject rows
-<<<<<<< Updated upstream
-                PdfPCell summaryCell = new PdfPCell(new Phrase("S.G.P.A./M.G.P.A.: " + sgpa, boldFont)); // Update with SGPA
-=======
                 PdfPCell summaryCell = new PdfPCell(new Phrase("S.G.P.A.: " + sgpa, boldFont)); // Update with SGPA
->>>>>>> Stashed changes
                 summaryCell.setColspan(3); // Span across subject code, grade point, and credits
                 summaryCell.setHorizontalAlignment(Element.ALIGN_RIGHT); // Align text to the right
                 table.addCell(summaryCell); // This will occupy the space of the last 3 columns
@@ -672,14 +555,11 @@ public class TranscriptService {
         return count;
     }
 
-<<<<<<< Updated upstream
-=======
     
   
 
 
     
->>>>>>> Stashed changes
             
             
             
@@ -692,11 +572,8 @@ public class TranscriptService {
         cell.setPadding(5);
         return cell;
     }
-<<<<<<< Updated upstream
-=======
     
   
->>>>>>> Stashed changes
 
     
     
@@ -716,30 +593,18 @@ public class TranscriptService {
             try {
                 image = Image.getInstance(this.getClass().getResource(imagePath));
                 image.setAlignment(Element.ALIGN_RIGHT);
-<<<<<<< Updated upstream
-                image.setAbsolutePosition(30, 700); // Adjust the position as needed
-=======
                 image.setAbsolutePosition(25, 700); // Adjust the position as needed
->>>>>>> Stashed changes
                 image.scalePercent(22f, 22f);
                 writer.getDirectContent().addImage(image, true);
                 
                 // Add vertical space dynamically after the image (estimated space based on image size)
                 float imageHeight = image.getScaledHeight(); // Get the scaled height of the image
                 float imageBottom = 700 - imageHeight; // Calculate the bottom Y position of the image
-<<<<<<< Updated upstream
-                float spaceBelowImage = imageBottom - 50; // Leave an additional margin (50) below the image
-
-                // Ensure that content starts below the image by adding a placeholder paragraph or adjusting document Y position
-                if (spaceBelowImage > 0) {
-                    document.add(new Paragraph("\n\n\n\n\n")); // Add new lines or padding to push content
-=======
                 float spaceBelowImage = imageBottom - 30; // Leave an additional margin (50) below the image
 
                 // Ensure that content starts below the image by adding a placeholder paragraph or adjusting document Y position
                 if (spaceBelowImage > 0) {
                     document.add(new Paragraph("\n\n\n\n")); // Add new lines or padding to push content
->>>>>>> Stashed changes
                 }
             } catch (IOException | DocumentException e) {
                 e.printStackTrace();
@@ -751,8 +616,6 @@ public class TranscriptService {
        
     }
     
-<<<<<<< Updated upstream
-=======
     public String generateSerialNumber(String rollNumber) {
         // Query to check if the serial number already exists for the student
         String queryCheck = "SELECT transcript_number FROM cms_live.student_program WHERE roll_number = ? group by roll_number";
@@ -781,9 +644,31 @@ public class TranscriptService {
             return formattedSerialNumber;
         }
     }
+    
+  //  public boolean validateRollNumberAndStatus(String rollNumber) {
+     //   String sql = "SELECT COUNT(*) FROM cms_live.student_program WHERE roll_number = ? AND program_status = 'PAS'";
+     //   Integer count = jdbcTemplate.queryForObject(sql, new Object[]{rollNumber}, Integer.class);
+      //  return count != null && count > 0;
+  //  }
+    
+    
+    // Method to check if the roll number exists in the database
+    public boolean rollNumberExists(String rollNumber) {
+        // Query to check if roll number exists
+        String query = "SELECT COUNT(*) FROM cms_live.student_program WHERE roll_number = ?  ORDER BY program_completion_date DESC LIMIT 1";
+        Integer count = jdbcTemplate.queryForObject(query, new Object[]{rollNumber}, Integer.class);
+        return count != null && count > 0;
+    }
+
+    // Method to check if the student with given roll number has passed the program
+    public boolean isStudentPassed(String rollNumber) {
+        // Query to check if student has passed the program
+        String query = "SELECT program_status FROM cms_live.student_program WHERE roll_number = ? ORDER BY program_completion_date DESC LIMIT 1";
+        String status = jdbcTemplate.queryForObject(query, new Object[]{rollNumber}, String.class);
+        return "PAS".equals(status); // Assuming 'PAS' represents passed students
+    }
 
     
->>>>>>> Stashed changes
 
     
 
@@ -795,38 +680,6 @@ public class TranscriptService {
 
     
  
-<<<<<<< Updated upstream
-     // Fetch Transcript data using a MySQL query
-        public Transcript getTranscriptByRollNumber(String roll_number) {
-            String sql ="SELECT substring(sp.registered_from_session,1,4) FromDate,substring(sp.passed_to_session,1,4) ToDate,'4' as duration,'ENGLISH' as medium, srsh.roll_number,sm.student_first_name,pm.program_name,sp.enrollment_number,sm.date_of_birth,sp.cgpa"
-            		+ " FROM cms_live.student_registration_semester_header srsh JOIN  cms_live.program_course_header pch ON"
-            		+ " srsh.program_course_key = pch.program_course_key JOIN cms_live.student_program sp ON "
-            		+ " srsh.roll_number = sp.roll_number AND pch.program_id = sp.program_id AND srsh.entity_id = sp.entity_id  "
-            		+ " AND pch.specialization_id = sp.specialization_id AND pch.branch_id =sp.branch_id"
-            		+ " JOIN cms_live.program_master pm ON pm.program_id = sp.program_id"
-            		+ " JOIN cms_live.student_master sm ON sm.enrollment_number = sp.enrollment_number "
-            		+ " WHERE sp.program_status = 'PAS'  AND srsh.roll_number = ? limit 1";
-
-            // Using JdbcTemplate to query for a single result
-            return jdbcTemplate.queryForObject(sql, new Object[]{roll_number}, new RowMapper<Transcript>() {
-                @Override
-                public Transcript mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    Transcript transcript = new Transcript();
-                    transcript.setRoll_number(rs.getString("roll_number"));
-                    transcript.setStudent_first_name(rs.getString("student_first_name"));
-                    transcript.setProgram_name(rs.getString("program_name"));
-                    transcript.setEnrollment_number(rs.getString("enrollment_number"));
-                    transcript.setDuration(rs.getString("duration"));
-                    transcript.setMedium(rs.getString("medium"));
-                    transcript.setDate_of_birth(rs.getString("date_of_birth"));
-                    transcript.setCgpa(rs.getString("cgpa"));
-                    transcript.setFromDate(rs.getString("FromDate"));
-                    transcript.setToDate(rs.getString("ToDate"));
-                    return transcript;
-                }
-            });
-            
-=======
     public Transcript getTranscriptByRollNumber(String roll_number) {
         String sql = "SELECT t1.FromDate, t1.ToDate, t2.duration, t2.medium, t2.roll_number, t2.student_first_name, t2.program_name, t2.enrollment_number, t2.date_of_birth, t2.cgpa " +
                      "FROM ( " +
@@ -842,7 +695,7 @@ public class TranscriptService {
                      "    WHERE sp.program_status IN ('PAS', 'SWT') AND srsh.roll_number = ? " +
                      ") AS t1 " +
                      "JOIN ( " +
-                     "    SELECT '4' AS duration, 'ENGLISH' AS medium, srsh.roll_number, sm.student_first_name, pm.program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
+                     "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, sm.student_first_name, pm.program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
                      "    FROM cms_live.student_registration_semester_header srsh " +
                      "    JOIN cms_live.program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                      "    JOIN cms_live.student_program sp ON srsh.roll_number = sp.roll_number " +
@@ -874,7 +727,6 @@ public class TranscriptService {
 
     
 
->>>>>>> Stashed changes
         }
 }
        

@@ -1,32 +1,12 @@
 package edu.dei.examination.cmsexm.service;
-<<<<<<< Updated upstream
-
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPageEvent;
-import com.itextpdf.text.pdf.PdfTemplate;
-import com.itextpdf.text.pdf.PdfWriter;
-=======
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
->>>>>>> Stashed changes
 
 public class PageNumberEvent implements PdfPageEvent {
 
     Font font = FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.BLACK); // Default font
     private PdfTemplate totalPagesTemplate;
     private BaseFont baseFont;
-<<<<<<< Updated upstream
-=======
     private String rollNumber; // Store the roll number dynamically
     private final String WATERMARK_IMAGE_PATH = "D:/CMS_REPO/cmsexm/src/main/resources/images/DEI-WATERMARK.jpg/"; // Define watermark path
 
@@ -34,7 +14,6 @@ public class PageNumberEvent implements PdfPageEvent {
     public PageNumberEvent(String rollNumber) {
         this.rollNumber = rollNumber;
     }
->>>>>>> Stashed changes
 
     @Override
     public void onOpenDocument(PdfWriter writer, Document document) {
@@ -54,23 +33,6 @@ public class PageNumberEvent implements PdfPageEvent {
 
     @Override
     public void onEndPage(PdfWriter writer, Document document) {
-<<<<<<< Updated upstream
-        // Get the direct content of the PDF
-        PdfContentByte cb = writer.getDirectContent();
-        
-        // Set the current page number text
-        String currentPageText = "Page " + writer.getPageNumber() + " of ";
-
-        // Align the page number text
-        float x = document.right() - 50; // Adjust to control horizontal position
-        float y = document.bottom() - 20; // Adjust to control vertical position
-
-        // Write the current page number placeholder text on the PDF
-        ColumnText.showTextAligned(cb, Element.ALIGN_RIGHT, new Phrase(currentPageText, font), x, y, 0);
-
-        // Store the position where the total number of pages will be inserted later
-        cb.addTemplate(totalPagesTemplate, x + 5, y); // Leave space for the total page number
-=======
         PdfContentByte cb = writer.getDirectContent();
 
         // Position for page number
@@ -87,7 +49,6 @@ public class PageNumberEvent implements PdfPageEvent {
 
         // Add watermark image
         addWatermark(writer, document);
->>>>>>> Stashed changes
     }
 
     @Override
@@ -100,9 +61,6 @@ public class PageNumberEvent implements PdfPageEvent {
         totalPagesTemplate.endText();
     }
 
-<<<<<<< Updated upstream
-    // The following methods are optional and not used in this implementation but included to fulfill the PdfPageEvent interface
-=======
     // Method to add dynamic QR Code (including roll_number)
     private void addDynamicQrCode(PdfWriter writer, Document document, float pageNumY) {
         try {
@@ -146,7 +104,6 @@ public class PageNumberEvent implements PdfPageEvent {
     }
 
     // The following methods are optional and not used in this implementation
->>>>>>> Stashed changes
     @Override
     public void onParagraph(PdfWriter writer, Document document, float paragraphPosition) {}
 
