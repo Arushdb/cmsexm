@@ -1,10 +1,13 @@
 package edu.dei.examination.cmsexm.repository;
 
-import edu.dei.examination.cmsexm.model.TranscriptData;
+import edu.dei.examination.cmsexm.model.Transcript;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
+
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,9 +18,10 @@ public class TranscriptRepository {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
 
-    // SQL Query
-    private final String query = "SELECT srsh.sgpa Sgpa,srsh.roll_number, " +
+    // Method to get transcript data
+    private final String transcriptQuery = "SELECT srsh.sgpa Sgpa,srsh.roll_number, " +
             "substring(pch.semester_code,3,2) as sem, " +
             "concat(substring(pr.session_start_date,1,4), '-', substring(pr.session_end_date,1,4)) as session, " +
             "concat(sc.course_code, ':', cmps.course_name) as course_code_name, " +
@@ -44,26 +48,100 @@ public class TranscriptRepository {
             "AND cmps.session_end_date = pr.session_end_date " +
             "JOIN cms_live.student_program sp ON sp.roll_number = srsh.roll_number " +
             "AND sp.program_id = pch.program_id " +
-                       
             "WHERE srsh.roll_number = ? AND sp.program_status = 'PAS' AND srsh.status = 'PAS' " +
-            "group by sc.semester_start_date,sc.course_code order by sc.semester_start_date,sc.course_code";
-
-    // Method to get Transcript data based on Roll Number
-    public List<TranscriptData> getTranscriptData(String roll_number) {
-        return jdbcTemplate.query(query, new Object[]{roll_number}, new RowMapper<TranscriptData>() {
+            "GROUP BY sc.semester_start_date, sc.course_code ORDER BY sc.semester_start_date, sc.course_code";
+   
+    public List<Transcript> getTranscript(String rollNumber) {
+        return jdbcTemplate.query(transcriptQuery, new Object[]{rollNumber}, new RowMapper<Transcript>() {
             @Override
-            public TranscriptData mapRow(ResultSet rs, int roll_number) throws SQLException {
-            	TranscriptData transcriptData = new TranscriptData();
-            	transcriptData.setRoll_number(rs.getString("roll_number"));
-                transcriptData.setSem(rs.getString("sem"));
-                transcriptData.setSession(rs.getString("session"));
-                transcriptData.setCourseCodeName(rs.getString("course_code_name"));
-                transcriptData.setFinalGradePoint(rs.getString("final_grade_point"));
-                transcriptData.setCredit(rs.getString("credit"));
-                transcriptData.setSgpa(rs.getString("Sgpa"));
-                return transcriptData;
+            public Transcript mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Transcript Transcript = new Transcript();
+                Transcript.setRoll_number(rs.getString("roll_number"));
+                Transcript.setSem(rs.getString("sem"));
+                Transcript.setSession(rs.getString("session"));
+                Transcript.setCourseCodeName(rs.getString("course_code_name"));
+                Transcript.setFinalGradePoint(rs.getString("final_grade_point"));
+                Transcript.setCredit(rs.getString("credit"));
+                Transcript.setSgpa(rs.getString("Sgpa"));
+                return Transcript;
             }
         });
     }
-}
 
+    public String getTranscriptNumber(String rollNumber) {
+        String query = "SELECT transcript_number FROM cms_live.student_program WHERE roll_number = ? GROUP BY roll_number";
+        return jdbcTemplate.queryForObject(query, new Object[]{rollNumber}, String.class);
+    }
+
+    public Integer getLastSerialNumber() {
+        String query = "SELECT value FROM cms_live.system_values WHERE code = 'TRNCPT'";
+        return jdbcTemplate.queryForObject(query, Integer.class);
+    }
+
+    public void updateLastSerialNumber(int newSerialNumber) {
+        String query = "UPDATE cms_live.system_values SET value = ? WHERE code = 'TRNCPT'";
+        jdbcTemplate.update(query, newSerialNumber);
+    }
+
+    public void updateStudentSerialNumber(String formattedSerialNumber, String rollNumber) {
+        String query = "UPDATE cms_live.student_program SET transcript_number = ? WHERE roll_number = ?";
+        jdbcTemplate.update(query, formattedSerialNumber, rollNumber);
+    }
+
+    public Integer countByRollNumber(String rollNumber) {
+        String query = "SELECT COUNT(*) FROM cms_live.student_program WHERE roll_number = ? ORDER BY program_completion_date DESC LIMIT 1";
+        return jdbcTemplate.queryForObject(query, new Object[]{rollNumber}, Integer.class);
+    }
+
+    public String getProgramStatus(String rollNumber) {
+        String query = "SELECT program_status FROM cms_live.student_program WHERE roll_number = ? ORDER BY program_completion_date DESC LIMIT 1";
+        return jdbcTemplate.queryForObject(query, new Object[]{rollNumber}, String.class);
+    }
+
+    public Transcript getTranscriptByRollNumber(String rollNumber) {
+        String sql = "SELECT t1.FromDate, t1.ToDate, t2.duration, t2.medium, t2.roll_number, t2.student_first_name, t2.program_name, t2.enrollment_number, t2.date_of_birth, t2.cgpa " +
+                     "FROM ( " +
+                     "    SELECT srsh.roll_number, MIN(SUBSTRING(sp.registered_from_session, 1, 4)) AS FromDate, " +
+                     "           MAX(SUBSTRING(sp.passed_to_session, 1, 4)) AS ToDate " +
+                     "    FROM cms_live.student_registration_semester_header srsh " +
+                     "    JOIN cms_live.program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
+                     "    JOIN cms_live.student_program sp ON srsh.roll_number = sp.roll_number " +
+                     "    AND pch.program_id = sp.program_id AND srsh.entity_id = sp.entity_id " +
+                     "    AND pch.specialization_id = sp.specialization_id AND pch.branch_id = sp.branch_id " +
+                     "    JOIN cms_live.program_master pm ON pm.program_id = sp.program_id " +
+                     "    JOIN cms_live.student_master sm ON sm.enrollment_number = sp.enrollment_number " +
+                     "    WHERE sp.program_status IN ('PAS', 'SWT') AND srsh.roll_number = ? " +
+                     ") AS t1 " +
+                     "JOIN ( " +
+                     "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, sm.student_first_name, pm.program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
+                     "    FROM cms_live.student_registration_semester_header srsh " +
+                     "    JOIN cms_live.program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
+                     "    JOIN cms_live.student_program sp ON srsh.roll_number = sp.roll_number " +
+                     "    AND pch.program_id = sp.program_id AND srsh.entity_id = sp.entity_id " +
+                     "    AND pch.specialization_id = sp.specialization_id AND pch.branch_id = sp.branch_id " +
+                     "    JOIN cms_live.program_master pm ON pm.program_id = sp.program_id " +
+                     "    JOIN cms_live.student_master sm ON sm.enrollment_number = sp.enrollment_number " +
+                     "    WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
+                     "    ORDER BY sp.program_completion_date DESC LIMIT 1 " +
+                     ") AS t2 ON t1.roll_number = t2.roll_number";
+
+        return jdbcTemplate.queryForObject(sql, new Object[]{rollNumber, rollNumber}, new RowMapper<Transcript>() {
+            @Override
+            public Transcript mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Transcript transcript = new Transcript();
+                transcript.setRoll_number(rs.getString("roll_number"));
+                transcript.setStudent_first_name(rs.getString("student_first_name"));
+                transcript.setProgram_name(rs.getString("program_name"));
+                transcript.setEnrollment_number(rs.getString("enrollment_number"));
+                transcript.setDuration(rs.getString("duration"));
+                transcript.setMedium(rs.getString("medium"));
+                transcript.setDate_of_birth(rs.getString("date_of_birth"));
+                transcript.setCgpa(rs.getString("cgpa"));
+                transcript.setFromDate(rs.getString("FromDate"));
+                transcript.setToDate(rs.getString("ToDate"));
+                return transcript;
+            }
+        });
+    }
+    
+}

@@ -20,6 +20,13 @@ public class Transcript {
 	    private String cgpa;
 	    private String FromDate;
 	    private String ToDate;
+	   
+		private String sem;
+	    private String session;
+	    private String courseCodeName;
+	    private String finalGradePoint;
+	    private String credit;
+	    private String Sgpa;
 	    
 
 	    // Getters and Setters
@@ -81,6 +88,57 @@ public class Transcript {
 		public void setToDate(String toDate) {
 			ToDate = toDate;
 		}
+		
+		 public String getSem() {
+		        return sem;
+		    }
+
+		    public void setSem(String sem) {
+		        this.sem = sem;
+		    }
+
+		    public String getSession() {
+		        return session;
+		    }
+
+		    public void setSession(String session) {
+		        this.session = session;
+		    }
+
+		    public String getCourseCodeName() {
+		        return courseCodeName;
+		    }
+
+		    public void setCourseCodeName(String courseCodeName) {
+		        this.courseCodeName = courseCodeName;
+		    }
+
+		    public String getFinalGradePoint() {
+		        return finalGradePoint;
+		    }
+
+		    public void setFinalGradePoint(String finalGradePoint) {
+		        this.finalGradePoint = finalGradePoint;
+		    }
+
+		    public String getCredit() {
+		        return credit;
+		    }
+
+		    public void setCredit(String credit) {
+		        this.credit = credit;
+		    }
+
+			
+			
+			public String getSgpa() {
+		        return Sgpa;
+		    }
+
+		    public void setSgpa(String Sgpa) {
+		        this.Sgpa = Sgpa;
+		    }
+
 		
 		
 		

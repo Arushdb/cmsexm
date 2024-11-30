@@ -1,6 +1,6 @@
 package edu.dei.examination.cmsexm.controller;
 
-import edu.dei.examination.cmsexm.service.TranscriptService;
+import edu.dei.examination.cmsexm.service.TranscriptServiceImpl;
 import edu.dei.examination.cmsexm.model.Transcript;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,26 +19,26 @@ import java.io.IOException;
 public class TranscriptController {
 
     @Autowired
-    private TranscriptService transcriptService;
+    private TranscriptServiceImpl transcriptServiceImpl;
 
     @GetMapping("/generate")
     public ResponseEntity<?> generateTranscript(@RequestParam("roll_number") String roll_number, HttpServletResponse response) {
         // Validate if roll number exists
-        if (!transcriptService.rollNumberExists(roll_number)) {
+        if (!transcriptServiceImpl.rollNumberExists(roll_number)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Roll Number is Incorrect.");
         }
         // Check if the student has passed the program
-        if (!transcriptService.isStudentPassed(roll_number)) {
+        if (!transcriptServiceImpl.isStudentPassed(roll_number)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Roll Number Not Passed the Program.");
         }
 
         try {
-            Transcript transcript = transcriptService.getTranscriptByRollNumber(roll_number);
+            Transcript transcript = transcriptServiceImpl.getTranscriptByRollNumber(roll_number);
 
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "attachment; filename=transcript_" + roll_number + ".pdf");
 
-            transcriptService.generateTranscriptPdf(transcript, response.getOutputStream());
+            transcriptServiceImpl.generateTranscriptPdf(transcript, response.getOutputStream());
             return ResponseEntity.ok().build();
         } catch (IOException e) {
             e.printStackTrace();
