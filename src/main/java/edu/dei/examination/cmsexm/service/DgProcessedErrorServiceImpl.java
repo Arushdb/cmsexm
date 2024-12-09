@@ -7,12 +7,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVWriter;
 
+
 import edu.dei.examination.cmsexm.model.DgExtract;
 import edu.dei.examination.cmsexm.model.DgFormat;
 import edu.dei.examination.cmsexm.model.Dgmain;
 import edu.dei.examination.cmsexm.model.UserRoles;
-import edu.dei.examination.cmsexm.repository.DgExtractRepository;
-import edu.dei.examination.cmsexm.repository.DgMainRepository;
+import edu.dei.examination.cmsexm.repository.DgProcessedErrorRepository;
+import edu.dei.examination.cmsexm.repository.DgProcessedErrorMainRepository;
 import javassist.expr.NewArray;
 
 import java.io.File;
@@ -42,23 +43,23 @@ import org.springframework.stereotype.Service;
 @PropertySource("classpath:digilocker.properties")
 @Service
 
-public class DgMainServiceImpl implements DgMainService {
+public class DgProcessedErrorServiceImpl implements DgProcessedErrorService {
 	
 	//@Autowired
 	//EntityManager em;
 	
 	@Autowired
-	private DgMainRepository  theDgMainRepository  ;
+	private DgProcessedErrorMainRepository  theDgProcessedErrorMainRepository  ;
 	
 	@Autowired
-	private DgExtractRepository  theDgExtractRepository  ;
+	private DgProcessedErrorRepository  theDgProcessedErrorRepository  ;
 	
 	
 	
 	
-//	public DgMainServiceImpl(DgMainRepository theDgMainRepository) {
+//	public DgMainServiceImpl(DgProcessedErrorMainRepository theDgProcessedErrorMainRepository) {
 //	
-//		this.theDgMainRepository = theDgMainRepository;
+//		this.theDgProcessedErrorMainRepository = theDgProcessedErrorMainRepository;
 //	}
 
 //	public static void main(String[] str) {
@@ -76,7 +77,7 @@ public class DgMainServiceImpl implements DgMainService {
 		// Read Dg controller for  unprocessed data
 	    
 	    
-		List <Dgmain> pcklist = getDgpcklist("N");
+		List <Dgmain> pcklist = getDgpcklist("E");
 		DgExtract ex = new DgExtract();
 		List<DgExtract> exlist=null;
 		Date rundate =new Date();
@@ -89,7 +90,7 @@ public class DgMainServiceImpl implements DgMainService {
 		List<Map<String, Object>> subjectdata  = new ArrayList<>();
 		List<Map<String, Object>> maxsubject  = new ArrayList<>();
 		Map<String, Object> totcreditpoint  = null;
-				List<Map<String, Object>> dgformat =theDgExtractRepository.getdgformat();
+				List<Map<String, Object>> dgformat =theDgProcessedErrorRepository.getdgformat();
 		Gson gson1 = new Gson();
 		JsonElement jsonElement1 = gson1.toJsonTree(dgformat);
 		Type collectionType1 = new TypeToken<List<DgFormat>>(){}.getType();
@@ -99,7 +100,7 @@ public class DgMainServiceImpl implements DgMainService {
 		int totsub =0;
 		String totsubc ;
 		String currentUsersHomeDir = System.getProperty("user.home");
-		String dglocker = currentUsersHomeDir + File.separator + "dglocker";
+		String dglocker = currentUsersHomeDir + File.separator + "dglocker_error";
 		
 		//File file = new File("C:\\Arush\\"+session+"_"+course_name+"_"+roman+"_"+"Rundate_"+rundt+".csv");
 		File theDir = new File(dglocker);
@@ -133,7 +134,7 @@ public class DgMainServiceImpl implements DgMainService {
 		        String sem="";
 		        String roman="";
 				try {
-					studentstaticdata = theDgExtractRepository.getstudentlist
+					studentstaticdata = theDgProcessedErrorRepository.getstudentlist
 							(pckobj.getProgramCourseKey(),pckobj.getSemesterStartDate());
 					if(!(studentstaticdata.size()>0)) {
 						continue;
@@ -148,7 +149,7 @@ public class DgMainServiceImpl implements DgMainService {
 					branch= (String) studentstaticdata.get(0).get("branch");
 					spec= (String) studentstaticdata.get(0).get("specialization");
 					
-					maxsubject=theDgExtractRepository.getmaxsubject(pck, pckobj.getSemesterStartDate());
+					maxsubject=theDgProcessedErrorRepository.getmaxsubject(pck, pckobj.getSemesterStartDate());
 					
 					totsubc=(String)maxsubject.get(0).get("totsub");
 					totsub = Integer.parseInt(totsubc);
@@ -179,10 +180,10 @@ public class DgMainServiceImpl implements DgMainService {
 			for(Map<String, Object> student:studentstaticdata) {
 				
 				String rollno = (String )student.get("rroll");
-				subjectdata = theDgExtractRepository.getsubjectlist(rollno,
+				subjectdata = theDgProcessedErrorRepository.getsubjectlist(rollno,
 						pckobj.getProgramCourseKey(),pckobj.getSemesterStartDate());
 				
-				totcreditpoint=theDgExtractRepository.gettotcreditpoint(rollno,pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
+				totcreditpoint=theDgProcessedErrorRepository.gettotcreditpoint(rollno,pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
 				
 				
 				writecsv(student,format,writer,subjectdata,totcreditpoint,totsub,roman);
@@ -190,9 +191,11 @@ public class DgMainServiceImpl implements DgMainService {
 			}
 			log[0]=pckobj.getProgramCourseKey()+"_"+pckobj.getSemesterStartDate()+"_"+pckobj.getSemesterEndDate();
 			logwriter.writeNext(log);
-			theDgExtractRepository.updatestatus(rundate, pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
+			theDgProcessedErrorRepository.updatestatus(rundate, pckobj.getProgramCourseKey(), pckobj.getSemesterStartDate());
 			writer.close();
 		}
+				
+				
 
 		 catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -205,6 +208,10 @@ public class DgMainServiceImpl implements DgMainService {
 		
 		logwriter.close();
 		
+		
+
+	    // After processing all CSV files, update the dg_error table
+	    theDgProcessedErrorRepository.updatedgerrorstatus();
 		
 		
 		//  Get student digilocker  static data  like name ,father name ... of each student
@@ -386,9 +393,11 @@ public class DgMainServiceImpl implements DgMainService {
 	@Override
 	public List<Dgmain> getDgpcklist(String status) {
 		// TODO Auto-generated method stub
-		return theDgMainRepository.findByStatus("N");
+		return theDgProcessedErrorMainRepository.findByStatus("E");
 		
 	}
+	
+
 
 	// Get student list of pck to be processed
 	//public List<DgExtract> getstudentlist(){
@@ -400,6 +409,11 @@ public class DgMainServiceImpl implements DgMainService {
 		 
 		// return studentList;
 		//}
+	
+	
+	
+	
+	
 	
 
 	
