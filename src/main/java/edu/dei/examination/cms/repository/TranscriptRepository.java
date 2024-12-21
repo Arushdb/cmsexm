@@ -50,7 +50,7 @@ public class TranscriptRepository {
             "AND cmps.session_end_date = pr.session_end_date " +
             "JOIN student_program sp ON sp.roll_number = srsh.roll_number " +
             "AND sp.program_id = pch.program_id " +
-            "WHERE srsh.roll_number = ? AND sp.program_status = 'PAS' AND srsh.status = 'PAS' " +
+            "WHERE srsh.roll_number = ? AND sp.program_status IN ('PAS','SWT') AND srsh.status = 'PAS' " +
             "GROUP BY sc.semester_start_date, sc.course_code ORDER BY sc.semester_start_date, sc.course_code";
    
     public List<Transcript> getTranscript(String rollNumber) {
@@ -123,7 +123,7 @@ public class TranscriptRepository {
                      "    AND pch.specialization_id = sp.specialization_id AND pch.branch_id = sp.branch_id " +
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number " +
-                     "    WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
+                     "    WHERE sp.program_status IN ('PAS', 'SWT') AND srsh.roll_number = ? " +
                      "    ORDER BY sp.program_completion_date DESC LIMIT 1 " +
                      ") AS t2 ON t1.roll_number = t2.roll_number";
 

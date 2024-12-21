@@ -2,17 +2,27 @@ package edu.dei.examination.cms.service;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 
+import java.nio.file.Paths;
+
+
 public class PageNumberEvent implements PdfPageEvent {
 
     Font font = FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.BLACK); // Default font
     private PdfTemplate totalPagesTemplate;
     private BaseFont baseFont;
     private String rollNumber; // Store the roll number dynamically
-    private final String WATERMARK_IMAGE_PATH = "D:/CMS_REPO/cmsexm/src/main/resources/images/DEI-WATERMARK.jpg/"; // Define watermark path
+
+   // private final String WATERMARK_IMAGE_PATH = "D:/CMS_REPO/cmsexm/src/main/resources/images/DEI-WATERMARK.jpg/"; // Define watermark path
+    private final String WATERMARK_IMAGE_PATH;
+ 
+
 
     // Constructor to accept roll_number
     public PageNumberEvent(String rollNumber) {
         this.rollNumber = rollNumber;
+
+        this.WATERMARK_IMAGE_PATH = Paths.get("src", "main", "resources", "images", "DEI-WATERMARK.jpg").toString();
+
     }
 
     @Override
