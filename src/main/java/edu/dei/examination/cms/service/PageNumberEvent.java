@@ -2,7 +2,7 @@ package edu.dei.examination.cms.service;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 
-import java.nio.file.Paths;
+import java.net.URL;
 
 
 public class PageNumberEvent implements PdfPageEvent {
@@ -21,7 +21,14 @@ public class PageNumberEvent implements PdfPageEvent {
     public PageNumberEvent(String rollNumber) {
         this.rollNumber = rollNumber;
 
-        this.WATERMARK_IMAGE_PATH = Paths.get("src", "main", "resources", "images", "DEI-WATERMARK.jpg").toString();
+        
+        // Use getClass().getResource() to dynamically locate the image on the classpath
+        URL resourceUrl = getClass().getResource("/images/DEI-WATERMARK.jpg");
+        if (resourceUrl != null) {
+            this.WATERMARK_IMAGE_PATH = resourceUrl.toString();
+        } else {
+            throw new IllegalArgumentException("Watermark image not found in the specified path.");
+        }
 
     }
 
