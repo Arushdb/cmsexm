@@ -33,7 +33,7 @@ public interface DegreeDgExtractRepository extends JpaRepository<DegreeDgExtract
 					+"		      from (select ss.result_declare_date as doi,  dn.name as 'course_name',pm.program_code as 'academic_course_id',pm.program_type as EXAM_TYPE, " 
 					+"			 sm.student_first_name, sm.gender, date_format(sm.date_of_birth,'%d/%m/%Y') dob, sm.father_first_name,cast(srsh.sgpa as char(6)) as SGPA, "
 					+"			 sm.mother_first_name, sp.roll_number, sp.enrollment_number, sp.entity_id, srsh.program_course_key, pch.program_id, "
-					+"			 br.component_description 'branch', dvs.component_description 'division1',"
+					+"			 br.component_description 'branch', if((dvs.component_description = 'First with Distinction'),'First Division with Distinction',concat(dvs.component_description,' ','Division')) 'division1',"
 					+"			 spcl.component_description 'Specialization', pch.semester_code, sp.program_status,if(sp.program_status = 'PAS', sp.cgpa, '') as cgpa, sp.division,"
 					+"			 sp.passed_to_session, year(pr.session_start_date) passedSession, year(pr.session_end_date) passedToSession," 
 					+"			 sp.current_semester ,abc.ABC_ID ,abc.AADHAAR_NAME ,sa.theory_sgpa,sa.practical_sgpa,sp.registered_from_session,sp.theory_cgpa,sp.practical_cgpa from "
