@@ -30,7 +30,7 @@ public interface DegreeDgExtractRepository extends JpaRepository<DegreeDgExtract
 					+"			 cast(s.passedToSession as char(4)) as YEAR, '' as MONTH,ucase(s.division1) as DIVISION,'' as GRADE,s.doi as DOI," 
 					+"		       if(s.program_id = '0001009',concat('T',' ',s.theory_cgpa,'  ','P',' ',s.practical_cgpa),s.cgpa) as CGPA,"
 					+"			s.ABC_ID as ABC_ACCOUNT_ID,'' as SUB1NM,s.AADHAAR_NAME ,'' as DIVISION_TH,'' as DIVISION_PR "
-					+"		      from (select ss.result_declare_date as doi,  dn.name as 'course_name',pm.program_code as 'academic_course_id',pm.program_type as EXAM_TYPE, " 
+					+"		      from (select cd.convocation_date as doi,  dn.name as 'course_name',pm.program_code as 'academic_course_id',pm.program_type as EXAM_TYPE, " 
 					+"			 sm.student_first_name, sm.gender, date_format(sm.date_of_birth,'%d/%m/%Y') dob, sm.father_first_name,cast(srsh.sgpa as char(6)) as SGPA, "
 					+"			 sm.mother_first_name, sp.roll_number, sp.enrollment_number, sp.entity_id, srsh.program_course_key, pch.program_id, "
 					+"			 br.component_description 'branch', if((dvs.component_description = 'First with Distinction'),'First Division with Distinction',concat(dvs.component_description,' ','Division')) 'division1',"
@@ -57,7 +57,7 @@ public interface DegreeDgExtractRepository extends JpaRepository<DegreeDgExtract
 					+"			 join cms_live.student_scrutiny ss on ss.program_course_key = srsh.program_course_key and "
 					+"			          ss.semester_start_date = srsh.session_start_date and ss.roll_number = '*' "
 					+"			join cms_live.system_table_two  as dvs on dvs.component_code = sp.division and dvs.group_code = 'DVSCOD'"
-					+"		    left join dg_abc_id as abc on abc.REGN_NO=sm.enrollment_number "
+					+"		    join convocation_dates cd on sp.passed_from_session =cd.passed_from_session left join dg_abc_id as abc on abc.REGN_NO=sm.enrollment_number "
 					+"			 where sp.program_id = ?1  and sp.passed_from_session = ?2 and program_status = 'PAS' "
 					+"			 group by  srsh.roll_number,sp.program_id)s ; ")
 	List<Map<String, Object>> getdegreestudentlist(String programId ,Date ssd);
