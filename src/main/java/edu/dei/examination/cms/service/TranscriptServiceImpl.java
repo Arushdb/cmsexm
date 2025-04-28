@@ -45,7 +45,7 @@ public class TranscriptServiceImpl {
 
 	// Handle image inside the service
 	private final String HEADER_IMAGE_PATH = "/images/deiLogoHeader.png";
-	private final String WATERMARK_IMAGE_PATH = "/images/DEI-WATERMARK.jpg";
+//	private final String WATERMARK_IMAGE_PATH = "/images/DEI-WATERMARK.jpg";
 
 	// Define a logger for the class
 	private static final Logger logger = LoggerFactory.getLogger(TranscriptServiceImpl.class);
@@ -206,7 +206,8 @@ public class TranscriptServiceImpl {
 			gapBetweenTables.setSpacingBefore(5); // Set spacing before the next table (adjust the value as needed)
 			document.add(gapBetweenTables); // Add the gap to the document
 
-			createTranscriptTables(transcript.getRoll_number(), document); // Call the modified table creation method
+		//	createTranscriptTables(transcript.getRoll_number(), document); // Call the modified table creation method
+			createTranscriptTables(transcript.getRoll_number(), document, writer);
 
 			// Move to a new page before the certificate section
 			document.newPage();
@@ -420,16 +421,15 @@ public class TranscriptServiceImpl {
 	}
 
 	/**
-	 * Create the table header (called once).
+	 * Create the table header (called on transcript pages).
 	 */
 	private PdfPTable createTranscriptHeaderTable() throws DocumentException {
-		PdfPTable table = new PdfPTable(5); // 5 columns: SEM, SESSION, SUBJECT CODE & TITLE, GRADE POINT, CREDITS
+		PdfPTable table = new PdfPTable(4); // 4 columns: SEM & SESSION, SUBJECT CODE & TITLE, GRADE POINT, CREDITS
 		table.setWidthPercentage(100);
-		table.setWidths(new float[] { 1, 2, 5, 1, 2 }); // Set column widths
+		table.setWidths(new float[] { 2, 6, 1, 2 }); // Set column widths
 
 		// Add table headers only once
-		table.addCell(getTableHeaderCell("SEM"));
-		table.addCell(getTableHeaderCell("SESSION"));
+		table.addCell(getTableHeaderCell("SEM / SESSION"));
 		table.addCell(getTableHeaderCell("SUBJECT CODE & TITLE"));
 		table.addCell(getTableHeaderCell("GRADE POINT"));
 		table.addCell(getTableHeaderCell("CREDITS"));
@@ -437,100 +437,101 @@ public class TranscriptServiceImpl {
 		return table;
 	}
 
-	private void createTranscriptTables(String roll_number, Document document) throws DocumentException {
-		Font contentFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK); // Font for content
-		Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLACK); // Font for bold
+	private void createTranscriptTables(String roll_number, Document document, PdfWriter writer) throws DocumentException {
+		Font contentFont = FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.BLACK);
+		Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, BaseColor.BLACK);
 		List<Transcript> Transcript = transcriptRepository.getTranscript(roll_number);
 
 		String previousSem = "";
 		int totalRows = Transcript.size();
-		int i = 0; // Start with the first row
+		int i = 0;
+		boolean isFirstPage = true;
+		int lastPageNumber = writer.getPageNumber(); // Track last page number
 
-		while (i < totalRows) { // Use a while loop for more control
+		while (i < totalRows) {
 			Transcript row = Transcript.get(i);
 
-			// If it's a new SEM, create a new table
 			if (!row.getSem().equals(previousSem)) {
-				// Create a new table for the current semester
-				PdfPTable table = new PdfPTable(5); // 5 columns: SEM, SESSION, SUBJECT CODE & TITLE, GRADE POINT,
-													// CREDITS
-				table.setWidthPercentage(100);
-				table.setWidths(new float[] { 1, 2, 5, 1, 2 }); // Set column widths
-
-				// Convert SEM to Roman numeral
-				String semInRoman = convertToRomanNumerals(row.getSem());
-
-				// Add SEM cell with rowspan for the current semester
 				int countSemRows = getRowCountForSem(Transcript, row.getSem());
-				PdfPCell semCell = new PdfPCell(new Phrase(semInRoman, contentFont));
-				semCell.setRowspan(countSemRows + 1); // Include the summary row in the rowspan
-				semCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-				semCell.setVerticalAlignment(Element.ALIGN_MIDDLE); // Center vertically
-				table.addCell(semCell);
+				float estimatedHeight = (countSemRows + 2) * 20f;
 
-				// Add SESSION cell with rowspan
-				PdfPCell sessionCell = new PdfPCell(new Phrase(row.getSession(), contentFont));
-				sessionCell.setRowspan(countSemRows + 1); // Include the summary row in the rowspan
-				sessionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-				sessionCell.setVerticalAlignment(Element.ALIGN_MIDDLE); // Center vertically
-				table.addCell(sessionCell);
+				float yPos = writer.getVerticalPosition(true);
+				int currentPage = writer.getPageNumber();
 
-				// Add subject-related rows for the current semester
+				// Trigger new page if space not sufficient
+				if (yPos < estimatedHeight + 60) {
+					document.newPage();
+					currentPage = writer.getPageNumber();
+
+					// Add header only if not the last page (e.g. certificate page is assumed after transcript)
+					if (!isFirstPage) {
+						document.add(createTranscriptHeaderTable());
+					}
+				}
+				// If not a new page but this is the very first data, no header needed
+				else if (!isFirstPage && currentPage > lastPageNumber) {
+					document.add(createTranscriptHeaderTable());
+				}
+
+				lastPageNumber = currentPage;
+				isFirstPage = false;
+
+				// Create semester table with 4 columns
+				PdfPTable table = new PdfPTable(4);
+				table.setWidthPercentage(100);
+				table.setWidths(new float[] { 2, 6, 1, 2 });
+
+				// Add merged SEM & SESSION cell
+				String semSession = convertToRomanNumerals(row.getSem()) + " / " + row.getSession();
+				PdfPCell semSessionCell = new PdfPCell(new Phrase(semSession, contentFont));
+				semSessionCell.setRowspan(countSemRows + 1); // +1 for SGPA summary
+				semSessionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+				semSessionCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+				table.addCell(semSessionCell);
+
+				// Add subject rows
 				for (int j = 0; j < countSemRows; j++) {
-					// Ensure that 'i' is still in bounds before accessing
 					if (i < totalRows) {
-						// Add subject-related columns for the current semester
 						table.addCell(new PdfPCell(new Phrase(Transcript.get(i).getCourseCodeName(), contentFont)));
-						table.addCell(
-								new PdfPCell(new Phrase(Transcript.get(i).getFinalGradePoint(), contentFont)));
-						table.addCell(new PdfPCell(new Phrase(Transcript.get(i).getCredit(), contentFont)));
-						i++; // Increment to move to the next row in Transcript
+						table.addCell(new PdfPCell(new Phrase(Transcript.get(i).getFinalGradePoint(), contentFont)));
+
+						PdfPCell creditCell = new PdfPCell(new Phrase(Transcript.get(i).getCredit(), contentFont));
+						creditCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+						table.addCell(creditCell);
+
+						i++;
 					}
 				}
 
-				// Retrieve SGPA directly from the current row
+				// Add SGPA summary row
 				String sgpa = row.getSgpa();
+				PdfPCell summaryCell = new PdfPCell(new Phrase("S.G.P.A.: " + sgpa, boldFont));
+				summaryCell.setColspan(3);
+				summaryCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+				table.addCell(summaryCell);
 
-				// Add the summary row after all subject rows
-				PdfPCell summaryCell = new PdfPCell(new Phrase("S.G.P.A.: " + sgpa, boldFont)); // Update with SGPA
-				summaryCell.setColspan(3); // Span across subject code, grade point, and credits
-				summaryCell.setHorizontalAlignment(Element.ALIGN_RIGHT); // Align text to the right
-				table.addCell(summaryCell); // This will occupy the space of the last 3 columns
-
-				// Add empty cells for the SEM and SESSION columns in the summary row
-				table.addCell(new Phrase("")); // Empty cell for SEM
-				table.addCell(new Phrase("")); // Empty cell for SESSION
-
-				// Add the completed table for the current semester to the document
+				// Add the full semester table to the document
 				document.add(table);
 
-				// Add a gap between tables (adjust the height as needed)
-				Paragraph gap = new Paragraph(""); // You can adjust this to set the height of the gap
-				gap.setSpacingBefore(5); // Add spacing before the gap
-				document.add(gap); // Add the gap directly to the document
+				// Add spacing after each semester
+				Paragraph gap = new Paragraph("");
+				gap.setSpacingBefore(5);
+				document.add(gap);
 
-				// Update previousSem to the current semester
-				previousSem = row.getSem(); // Update to the current semester
+				previousSem = row.getSem();
 			} else {
-				// If not a new SEM, just increment to move to the next row
 				i++;
 			}
 		}
 	}
 
-	/**
-	 * Helper function to convert a number to Roman numerals.
-	 */
+
 	private String convertToRomanNumerals(String sem) {
 		int semNumber = Integer.parseInt(sem);
 		String[] romanNumerals = { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
-
 		return romanNumerals[semNumber];
 	}
 
-	/**
-	 * Helper function to count the number of rows for a given SEM.
-	 */
 	private int getRowCountForSem(List<Transcript> Transcript, String sem) {
 		int count = 0;
 		for (Transcript row : Transcript) {
@@ -538,7 +539,6 @@ public class TranscriptServiceImpl {
 				count++;
 			}
 		}
-
 		return count;
 	}
 
@@ -546,7 +546,6 @@ public class TranscriptServiceImpl {
 		Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLACK);
 		PdfPCell cell = new PdfPCell(new Phrase(text, font));
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		// cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
 		cell.setPadding(5);
 		return cell;
 	}
@@ -560,27 +559,23 @@ public class TranscriptServiceImpl {
 
 		@Override
 		public void onStartPage(PdfWriter writer, Document document) {
-			// String img = imagePath;
-			Image image;
 			try {
-				image = Image.getInstance(this.getClass().getResource(imagePath));
+				Image image = Image.getInstance(this.getClass().getResource(imagePath));
 				image.setAlignment(Element.ALIGN_RIGHT);
-				image.setAbsolutePosition(25, 700); // Adjust the position as needed
+				image.setAbsolutePosition(25, 700);
 				image.scalePercent(22f, 22f);
 				writer.getDirectContent().addImage(image, true);
 
-				// Add vertical space dynamically after the image (estimated space based on
-				// image size)
-				float imageHeight = image.getScaledHeight(); // Get the scaled height of the image
-				float imageBottom = 700 - imageHeight; // Calculate the bottom Y position of the image
-				float spaceBelowImage = imageBottom - 30; // Leave an additional margin (50) below the image
+				float imageHeight = image.getScaledHeight();
+				float imageBottom = 700 - imageHeight;
+				float spaceBelowImage = imageBottom - 30;
 
-				// Ensure that content starts below the image by adding a placeholder paragraph
-				// or adjusting document Y position
 				if (spaceBelowImage > 0) {
-					document.add(new Paragraph("\n\n\n\n")); // Add new lines or padding to push content
+					document.add(new Paragraph("\n\n\n\n"));
 				}
-			}
+			} 
+	
+
 			
 			 catch (DocumentException | IOException e) {
 				// TODO Auto-generated catch block
