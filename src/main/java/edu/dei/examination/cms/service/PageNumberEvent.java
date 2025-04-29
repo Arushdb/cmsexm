@@ -56,7 +56,7 @@ public class PageNumberEvent implements PdfPageEvent {
         addDynamicQrCode(writer, document, pageNumY); // Pass the vertical position for alignment
 
         // Add watermark image
-        addWatermark(writer, document);
+     //   addWatermark(writer, document);
     }
 
     @Override
@@ -92,24 +92,24 @@ public class PageNumberEvent implements PdfPageEvent {
     }
 
     // Method to add watermark on each page
-    private void addWatermark(PdfWriter writer, Document document) {
-        try {
-            PdfContentByte canvas = writer.getDirectContentUnder();
-            Image watermarkImage = Image.getInstance(WATERMARK_IMAGE_PATH);
+  //  private void addWatermark(PdfWriter writer, Document document) {
+   //     try {
+   //         PdfContentByte canvas = writer.getDirectContentUnder();
+   //         Image watermarkImage = Image.getInstance(WATERMARK_IMAGE_PATH);
 
             // Position watermark at the center of the page
-            float x = (document.getPageSize().getWidth() - watermarkImage.getScaledWidth()) / 2;
-            float y = (document.getPageSize().getHeight() - watermarkImage.getScaledHeight()) / 2;
-            watermarkImage.setAbsolutePosition(x, y);
-            watermarkImage.scaleToFit(300, 300); // Adjust the size if necessary
+    //        float x = (document.getPageSize().getWidth() - watermarkImage.getScaledWidth()) / 2;
+     //       float y = (document.getPageSize().getHeight() - watermarkImage.getScaledHeight()) / 2;
+     //       watermarkImage.setAbsolutePosition(x, y);
+//            watermarkImage.scaleToFit(300, 300); // Adjust the size if necessary
 
             // Add the watermark to the canvas
-            canvas.addImage(watermarkImage);
+       //     canvas.addImage(watermarkImage);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+       // } catch (Exception e) {
+      //      e.printStackTrace();
+     //   }
+  //  }
 
     // The following methods are optional and not used in this implementation
     @Override
