@@ -35,7 +35,7 @@ public interface DegreeDgExtractRepository extends JpaRepository<DegreeDgExtract
 					+"			 sm.mother_first_name, sp.roll_number, sp.enrollment_number, sp.entity_id, srsh.program_course_key, pch.program_id, "
 					+"			 br.component_description 'branch', if((dvs.component_description = 'First with Distinction'),'First Division with Distinction',concat(dvs.component_description,' ','Division')) 'division1',"
 					+"			 spcl.component_description 'Specialization', pch.semester_code, sp.program_status,if(sp.program_status = 'PAS', sp.cgpa, '') as cgpa, sp.division,"
-					+"			 sp.passed_to_session, year(pr.session_start_date) passedSession, year(sp.passed_to_session)) passedToSession," 
+					+"			 sp.passed_to_session, year(pr.session_start_date) passedSession, year(sp.passed_to_session) passedToSession," 
 					+"			 sp.current_semester ,abc.ABC_ID ,abc.AADHAAR_NAME ,sa.theory_sgpa,sa.practical_sgpa,sp.registered_from_session,sp.theory_cgpa,sp.practical_cgpa from "
 							
 					+"			  cms_live.student_registration_semester_header as srsh"  
