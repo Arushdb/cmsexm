@@ -33,6 +33,9 @@ public class PckChange {
 
     @Column(name = "specialization_id")
     private String specializationId;
+    
+    @Column(name = "semester_code")
+    private String Semester;
 
     @Column(name = "status")
     private String status;
@@ -86,6 +89,15 @@ public class PckChange {
     public void setSpecializationId(String specializationId) {
         this.specializationId = specializationId;
     }
+    
+    public String getSemester() {
+        return Semester;
+    }
+    public void setSemester(String Semester) {
+        this.Semester = Semester;
+    }
+    
+    
     public String getStatus() {
         return status;
     }

@@ -20,13 +20,14 @@ public class PckChangeServiceImpl implements PckChangeService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)  // Ensure rollback for all exceptions
     @Scheduled(fixedRateString = "${run-frquency.minutes}", timeUnit = java.util.concurrent.TimeUnit.MINUTES)
     @Override
     public void processPckChanges() {
         // Get all records with status 'N'
         List<PckChange> changes = repository.findByStatus("N");
         for (PckChange change : changes) {
+        	try {
             String oldPck = change.getOldPck();
             String newPck = change.getNewPck();
             Date ssd = change.getSemesterStartDate();
@@ -34,6 +35,7 @@ public class PckChangeServiceImpl implements PckChangeService {
             String programId = change.getProgramId();
             String branchId = change.getBranchId();
             String specializationId = change.getSpecializationId();
+            String semester = change.getSemester();
             Long id = change.getId();
 
             // 1. Insert into student_registration_semester_header
@@ -43,9 +45,12 @@ public class PckChangeServiceImpl implements PckChangeService {
                     "student_process_status, register_due_date, entity_id, ?, registered_credit, " +
                     "registered_theory_credit_excluding_audit, registered_practical_credit_excluding_audit, " +
                     "registration_credit_excluding_audit, reason_description, switch_type, switch_rule, old_status " +
-                    "FROM cms_live.student_registration_semester_header " +
-                    "WHERE program_course_key = ? AND session_start_date = ?";
-            jdbcTemplate.update(query1, newPck, oldPck, ssd);
+                    "FROM cms_live.student_registration_semester_header srsh " +
+                    "WHERE srsh.program_course_key = ? AND srsh.session_start_date = ? AND NOT EXISTS ("
+                    + "SELECT 1 FROM cms_live.student_registration_semester_header e "
+                    + "WHERE e.program_course_key = ? AND e.roll_number = srsh.roll_number AND e.session_start_date = ?"
+                    + "      )";
+            jdbcTemplate.update(query1, newPck, oldPck, ssd,newPck,ssd);
             
             //2. Insert into course_evaluation_component
             String query2="insert into cms_live.course_evaluation_component"
@@ -55,9 +60,18 @@ public class PckChangeServiceImpl implements PckChangeService {
             		+ "             from (select program_id,course_code from cms_live.student_course sc join cms_live.program_course_header pch on sc.program_course_key=pch.program_course_key "
             		+ "            where sc.program_course_key = ? "
             		+ "            and semester_start_date = ? group by sc.course_code)seta"
-            		+ "            join cms_live.course_evaluation_component cec on cec.course_code =seta.course_code and seta.program_id =cec.program_id ";
+            		+ "            join cms_live.course_evaluation_component cec on cec.course_code =seta.course_code"
+            		+ " and seta.program_id =cec.program_id   AND NOT EXISTS ("
+            		+ "          SELECT 1 FROM cms_live.course_evaluation_component e "
+            		+ "          WHERE e.program_id = ? AND e.course_code = seta.course_code )";
 
-            		jdbcTemplate.update(query2, programId, oldPck, ssd);
+            		jdbcTemplate.update(query2, programId, oldPck, ssd,programId);
+            		
+            		//3. Update semester_processing_control
+            		 String query3 = "UPDATE semester_processing_control " +
+                             "SET status = 'COM' " +
+                             "WHERE program_course_key = ? AND semester_start_date = ? AND process = 'SEP'";
+        jdbcTemplate.update(query3, oldPck, ssd);
 
            
 
@@ -96,6 +110,7 @@ public class PckChangeServiceImpl implements PckChangeService {
             jdbcTemplate.update(query7, newPck, oldPck, ssd);
 
             // 8. Insert into student_program
+            if ("SM1".equalsIgnoreCase(semester) || "SM5".equalsIgnoreCase(semester)) {
             String query8 = "INSERT INTO cms_live.student_program " +
                     "SELECT sp.cgpa, sp.enrollment_number, sp.roll_number, sp.register_date, sp.program_completion_date, sp.current_semester, " +
                     "sp.program_status, sp.insert_time, sp.modification_time, sp.creator_id, sp.modifier_id, sp.entity_id,?, " +
@@ -109,6 +124,7 @@ public class PckChangeServiceImpl implements PckChangeService {
                     "sp.branch_id = pch.branch_id AND sp.specialization_id = pch.specialization_id AND sp.entity_id = srsh.entity_id " +
                     "WHERE srsh.program_course_key = ? AND srsh.session_start_date = ?";
             jdbcTemplate.update(query8,programId, oldPck, ssd);
+            }
 
             // 9. Insert into semester_processing_control
             String query9 = "INSERT INTO cms_live.semester_processing_control " +
@@ -164,6 +180,11 @@ public class PckChangeServiceImpl implements PckChangeService {
             // After all queries execute successfully, update the record in pck_change_controller to mark it processed (status = 'P')
             String updateQuery = "UPDATE exam_live.pck_change_controller SET status = 'P' WHERE id = ?";
             jdbcTemplate.update(updateQuery, id);
+        	} catch (Exception e) {
+                // Transaction will auto rollback due to @Transactional
+                // Optional: Add logging here
+                throw e; // Required to propagate for rollback
+            }
         }
     }
 }
