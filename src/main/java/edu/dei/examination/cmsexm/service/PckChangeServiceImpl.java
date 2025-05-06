@@ -72,6 +72,13 @@ public class PckChangeServiceImpl implements PckChangeService {
                              "SET status = 'COM' " +
                              "WHERE program_course_key = ? AND semester_start_date = ? AND process = 'SEP'";
         jdbcTemplate.update(query3, oldPck, ssd);
+        
+      //3. Update semester_processing_control
+		 String pcdquery = "INSERT INTO program_course_detail" +
+				"select ?, course_code, course_category, available, course_group," +
+				 "insert_time, modification_time, creator_id, modifier_id, learning_mode" +
+				"from program_course_detail where program_course_key = ? " ;
+         jdbcTemplate.update(pcdquery,  newPck, oldPck);
 
            
 
@@ -80,24 +87,45 @@ public class PckChangeServiceImpl implements PckChangeService {
                     "SELECT roll_number, ?, semester_start_date, semester_end_date, course_code, course_name, orginal_course_code, " +
                     "course_status, student_status, insert_time, modification_time, creator_id, modifier_id, " +
                     "attempt_number, course_group, entity_id, old_student_status, credits " +
-                    "FROM cms_live.student_course WHERE program_course_key = ? AND semester_start_date = ?";
-            jdbcTemplate.update(query4, newPck, oldPck, ssd);
+                    "FROM cms_live.student_course WHERE program_course_key = ? AND semester_start_date = ?" +
+                    "AND NOT EXISTS ( " +
+                    "    SELECT 1 FROM cms_live.student_course existing " +
+                    "    WHERE existing.roll_number = sc.roll_number AND existing.program_course_key = ? " +
+                    "    AND existing.semester_start_date = sc.semester_start_date AND existing.course_code = sc.course_code " +
+                    ")";
+            jdbcTemplate.update(query4, newPck, oldPck, ssd, newPck);
+           
 
             // 5. Insert into student_marks_summary
             String query5 = "INSERT INTO cms_live.student_marks_summary " +
                     "SELECT university_code, entity_id, roll_number, ?, semester_start_date, semester_end_date, " +
                     "total_internal, total_external, total_marks, course_code, internal_grade, external_grade, final_grade_point, " +
                     "insert_time, modification_time, creator_id, modifier_id, earned_credits, publish_grades, ref_no, remarks, grace_marks " +
-                    "FROM cms_live.student_marks_summary WHERE program_course_key = ? AND semester_start_date = ?";
-            jdbcTemplate.update(query5, newPck, oldPck, ssd);
+                    "FROM cms_live.student_marks_summary WHERE program_course_key = ? AND semester_start_date = ?" +
+                    "AND NOT EXISTS ( " +
+                    "    SELECT 1 FROM cms_live.student_marks_summary existing " +
+                    "    WHERE existing.roll_number = sms.roll_number AND existing.program_course_key = ? " +
+                    "    AND existing.semester_start_date = sms.semester_start_date AND existing.course_code = sms.course_code " +
+                    ")";
+            jdbcTemplate.update(query5, newPck, oldPck, ssd, newPck);
+            
 
             // 6. Insert into student_marks
             String query6 = "INSERT INTO cms_live.student_marks " +
                     "SELECT university_code, entity_id, roll_number, ?, evaluation_id, marks, old_marks, grades, pass_fail, status, " +
                     "course_code, semester_start_date, semester_end_date, insert_time, modification_time, creator_id, modifier_id, " +
                     "attempt_number, requested_marks, requester_remarks, issue_status, teacher_remarks, attendence " +
-                    "FROM cms_live.student_marks WHERE program_course_key = ? AND semester_start_date = ?";
-            jdbcTemplate.update(query6, newPck, oldPck, ssd);
+                    "FROM cms_live.student_marks WHERE program_course_key = ? AND semester_start_date = ?" +
+                    "AND NOT EXISTS ( " +
+                    "    SELECT 1 FROM cms_live.student_marks existing " +
+                    "    WHERE existing.roll_number = sm.roll_number " +
+                    "    AND existing.program_course_key = ? " +
+                    "    AND existing.evaluation_id = sm.evaluation_id " +
+                    "    AND existing.course_code = sm.course_code " +
+                    "    AND existing.semester_start_date = sm.semester_start_date " +
+                    ")";
+            jdbcTemplate.update(query6, newPck, oldPck, ssd, newPck);
+            
 
             // 7. Insert into student_aggregate
             String query7 = "INSERT INTO cms_live.student_aggregate " +
@@ -106,8 +134,15 @@ public class PckChangeServiceImpl implements PckChangeService {
                     "point_secured_theory_cgpa, point_secured_practical_cgpa, earned_theory_credit_cgpa, earned_practical_credit_cgpa, " +
                     "earned_theory_aud_credit, earned_practical_aud_credit, theory_sgpa, practical_sgpa, sgpa, weighted_percentage, cgpa, " +
                     "theorycgpa, practicalcgpa, entity_id " +
-                    "FROM cms_live.student_aggregate WHERE program_course_key = ? AND semester_start_date = ?";
-            jdbcTemplate.update(query7, newPck, oldPck, ssd);
+                    "FROM cms_live.student_aggregate WHERE program_course_key = ? AND semester_start_date = ?" +
+                    "AND NOT EXISTS ( " +
+                    "    SELECT 1 FROM cms_live.student_aggregate existing " +
+                    "    WHERE existing.roll_number = sa.roll_number " +
+                    "    AND existing.program_course_key = ? " +
+                    "    AND existing.semester_start_date = sa.semester_start_date " +
+                    ")";
+            jdbcTemplate.update(query7, newPck, oldPck, ssd, newPck);
+            
 
             // 8. Insert into student_program
             if ("SM1".equalsIgnoreCase(semester) || "SM5".equalsIgnoreCase(semester)) {
@@ -122,7 +157,14 @@ public class PckChangeServiceImpl implements PckChangeService {
                     "JOIN cms_live.program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                     "JOIN cms_live.student_program sp ON sp.roll_number = srsh.roll_number AND sp.program_id = pch.program_id AND " +
                     "sp.branch_id = pch.branch_id AND sp.specialization_id = pch.specialization_id AND sp.entity_id = srsh.entity_id " +
-                    "WHERE srsh.program_course_key = ? AND srsh.session_start_date = ?";
+                    "WHERE srsh.program_course_key = ? AND srsh.session_start_date = ? " +
+                    "AND NOT EXISTS ( " +
+                    "    SELECT 1 FROM cms_live.student_program existing " +
+                    "    WHERE existing.roll_number = sp.roll_number AND existing.program_id = pch.program_id " +
+                    "    AND existing.branch_id = pch.branch_id AND existing.specialization_id = pch.specialization_id " +
+                    "    AND existing.entity_id = sp.entity_id" +
+                    ")";
+
             jdbcTemplate.update(query8,programId, oldPck, ssd);
             }
 
