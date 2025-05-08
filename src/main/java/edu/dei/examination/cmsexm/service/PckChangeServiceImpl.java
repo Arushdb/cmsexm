@@ -67,11 +67,7 @@ public class PckChangeServiceImpl implements PckChangeService {
 
             		jdbcTemplate.update(query2, programId, oldPck, ssd,programId);
             		
-            		//3. Update semester_processing_control
-            		 String query3 = "UPDATE semester_processing_control " +
-                             "SET status = 'COM' " +
-                             "WHERE program_course_key = ? AND semester_start_date = ? AND process = 'SEP'";
-        jdbcTemplate.update(query3, oldPck, ssd);
+            		
         
       //Insert into program_course_detail
 		 String pcdquery = "INSERT INTO program_course_detail " +
@@ -166,12 +162,12 @@ public class PckChangeServiceImpl implements PckChangeService {
                     "WHERE srsh.program_course_key = ? AND srsh.session_start_date = ? " +
                     "AND NOT EXISTS ( " +
                     "    SELECT 1 FROM cms_live.student_program existing " +
-                    "    WHERE existing.roll_number = sp.roll_number AND existing.program_id = pch.program_id " +
+                    "    WHERE existing.roll_number = sp.roll_number AND existing.program_id = ?" +
                     "    AND existing.branch_id = pch.branch_id AND existing.specialization_id = pch.specialization_id " +
                     "    AND existing.entity_id = sp.entity_id" +
                     ")";
 
-            jdbcTemplate.update(query8,programId, oldPck, ssd);
+            jdbcTemplate.update(query8,programId, oldPck, ssd,programId);
             }
 
             // 9. Insert into semester_processing_control
@@ -259,6 +255,12 @@ public class PckChangeServiceImpl implements PckChangeService {
                             "    WHERE existing.program_course_key = ? AND existing.roll_number = ss.roll_number AND existing.semester_start_date = ss.semester_start_date " +
                             ")";
                     jdbcTemplate.update(query15, newPck, oldPck, ssd, newPck);
+                    
+                  //16. Update semester_processing_control
+           		 String query3 = "UPDATE semester_processing_control " +
+                            "SET status = 'COM' " +
+                            "WHERE program_course_key = ? AND semester_start_date = ? AND process = 'SEP'";
+       jdbcTemplate.update(query3, oldPck, ssd);
             
             
             
