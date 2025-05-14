@@ -23,10 +23,10 @@ public interface DegreeDgExtractRepository extends JpaRepository<DegreeDgExtract
 	
 	@Query(name = "getdegreestudentlist" ,nativeQuery = true,value =
 			"select  'DAYALBAGH EDUCATIONAL INSTITUTE (DEEMED TO BE UNIVERSITY)' as ORG_NAME  , s.academic_course_id as ACADEMIC_COURSE_ID," 
-					+"			concat (ucase(s.course_name),if(s.branch='NONE','',concat(' in ',s.branch)),"
-					+ "							if(s.specialization not in ('NONE'), concat(' with Specialization in ',s.specialization),'')) as COURSE_NAME,'' as SUB_COURSE_NAME,"
+					+"			concat (ucase(s.course_name),if(s.branch='NONE','',concat(' IN ',s.branch)),"
+					+ "							if(s.specialization not in ('NONE'), concat(' WITH SPECIALIZATION IN ',s.specialization),'')) as COURSE_NAME,'' as SUB_COURSE_NAME,"
 					+"			 s.enrollment_number as REGN_NO, s.roll_number as RROLL, "
-					+"			 s.student_first_name as CNAME , s.gender as GENDER, s.dob as DOB , CAST('O' AS CHAR) as MRKS_REC_STATUS," 
+					+"			 s.student_first_name as CNAME , s.gender as GENDER, s.dob as DOB , CONVERT('O' USING utf8) as MRKS_REC_STATUS," 
 					+"			 cast(s.passedToSession as char(4)) as YEAR, '' as MONTH,ucase(s.division1) as DIVISION,'' as GRADE,s.doi as DOI," 
 					+"		       if(s.program_id = '0001009',concat('T',' ',s.theory_cgpa,'  ','P',' ',s.practical_cgpa),s.cgpa) as CGPA,"
 					+"			s.ABC_ID as ABC_ACCOUNT_ID,'' as SUB1NM,s.AADHAAR_NAME ,'' as DIVISION_TH,'' as DIVISION_PR "
