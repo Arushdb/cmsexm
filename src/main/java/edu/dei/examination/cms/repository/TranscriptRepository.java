@@ -115,17 +115,22 @@ public class TranscriptRepository {
                      "    WHERE sp.program_status IN ('PAS', 'SWT') AND srsh.roll_number = ? " +
                      ") AS t1 " +
                      "JOIN ( " +
-                     "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, sm.student_first_name, pm.program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
+                     "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, "
+                     + "sm.student_first_name,concat(pm.program_name,' ','(',if(stt1.component_description ='NONE','',stt1.component_description),')',' ',\r\n"
+                     + "                         ' WITH SPECIALIZATION IN ',if(stt2.component_description='NONE','',stt2.component_description)) as program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
                      "    FROM student_registration_semester_header srsh " +
                      "    JOIN program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                      "    JOIN student_program sp ON srsh.roll_number = sp.roll_number " +
                      "    AND pch.program_id = sp.program_id AND srsh.entity_id = sp.entity_id " +
                      "    AND pch.specialization_id = sp.specialization_id AND pch.branch_id = sp.branch_id " +
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
-                     "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number " +
+                     "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number" +
+                     "  JOIN system_table_two stt1 on pch.branch_id = stt1.component_code  and stt1.group_code = 'BRNCOD'\r\n" +
+                     "  JOIN system_table_two stt2 on pch.specialization_id = stt2.component_code  and stt2.group_code = 'SPCLCD' " +
                      "    WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
                      "    ORDER BY sp.program_completion_date DESC LIMIT 1 " +
                      ") AS t2 ON t1.roll_number = t2.roll_number";
+
 
         return cmsJdbcTemplate.queryForObject(sql, new Object[]{rollNumber, rollNumber}, new RowMapper<Transcript>() {
             @Override
