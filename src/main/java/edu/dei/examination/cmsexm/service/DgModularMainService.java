@@ -1,5 +1,6 @@
 package edu.dei.examination.cmsexm.service;
 
+import java.util.Date;
 import java.util.List;
 
 import edu.dei.examination.cmsexm.model.DgModularMain;
@@ -10,7 +11,10 @@ public interface DgModularMainService {
     // ---- DgModularMain related ----
     List<DgModularMain> getDgProgramList(String status);
 
-   
+    List<DgModularSem> getSemestersByProgramIdAndModuleGroupAndSessionStartDate(
+            String programId, String moduleGroup, Date sessionStartDate);
 
-    List<DgModularSem> getSemestersByProgramIdAndModuleGroupAndStatus(String programId, String moduleGroup, String status);
+    // ---- DgModularController update ----
+    int updateDgModularControlStatus(Date runtime, String programId, String modularGroup, Date sessionStartDate);
+    
 }

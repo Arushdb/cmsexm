@@ -34,6 +34,14 @@ public class DgModularSem {
     private Date sessionEndDate;
 
     private String status;
+    
+    @Column(name = "semester_start_date")
+    @Temporal(TemporalType.DATE)
+    private Date semesterStartDate;
+
+    @Column(name = "semester_end_date")
+    @Temporal(TemporalType.DATE)
+    private Date semesterEndDate;
 
     // --- Getters & Setters ---
 
@@ -108,4 +116,25 @@ public class DgModularSem {
     public void setStatus(String status) {
         this.status = status;
     }
+    
+    
+    public Date getSemesterStartDate() {
+        return semesterStartDate;
+    }
+
+    public void setSemesterStartDate(Date semesterStartDate) {
+        this.semesterStartDate = semesterStartDate;
+    }
+    
+    
+    
+   
+    public Date getSemesterEndDate() {
+        return semesterEndDate;
+    }
+
+    public void setSemesterEndDate(Date semesterEndDate) {
+        this.semesterEndDate = semesterEndDate;
+    }
+
 }
