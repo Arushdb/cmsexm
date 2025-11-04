@@ -11,11 +11,11 @@ import org.springframework.data.jpa.repository.Query;
 
 import edu.dei.examination.cmsexm.model.DgModularExtract;
 import edu.dei.examination.cmsexm.model.DgModularMain;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface DgModularExtractRepository extends JpaRepository<DgModularExtract, Integer> {
 	
-	
-//this query is for inserting the data in the modular_students_sgpa before executing this code  insert into exam_live.modular_students_sgpa
+	//this query is for inserting the data in the modular_students_sgpa before executing this code  insert into exam_live.modular_students_sgpa
   //  SELECT id + 210 AS id, session_start_date, roll_number, semester, SGPA, sgpa_list, program_code
 //FROM (
 //SELECT
@@ -55,7 +55,7 @@ public interface DgModularExtractRepository extends JpaRepository<DgModularExtra
 //GROUP BY sms.roll_number
 //) t;
 	//Actual Queries Start
-
+	
 	@Query(name ="getdgformat" ,nativeQuery = true,value = 
 			" select * from dg_format order by sqno "			)
 	List<Map<String, Object>> getdgformat();
@@ -111,12 +111,12 @@ public interface DgModularExtractRepository extends JpaRepository<DgModularExtra
 		+	" join cms_live.degree_name as dn on dn.id = sp.program_id and dn.group_code = 'PROGRM' "
 		+	" join cms_live.student_scrutiny ss on ss.program_course_key = srsh.program_course_key and "
 		+	"          ss.semester_start_date = srsh.session_start_date and ss.roll_number = '*' "
-		+   " join (select mss.remarks,mss.modular_group, mss.sgpa,mss.roll_number,ms.program_course_key,ms.module,ms.session_start_date,ms.session_end_date "
+		+   " join (select mss.remarks,mss.modular_group, mss.sgpa,mss.roll_number,ms.program_course_key,ms.module,ms.semester_start_date,ms.semester_end_date "
 	    +   " from exam_live.dg_modular_controller dmc join exam_live.modular_sem ms on dmc.program_id =ms.program_id "
 	    +   "  and ms.module_group =dmc.module_group "
 	    +   "  join exam_live.modular_students_sgpa mss on mss.program_id=ms.program_id and ms.module_group = mss.modular_group )setG "
 	    +   "  on setG.roll_number =srsh.roll_number and setG.module =pch.semester_code and setG.program_course_key=srsh.program_course_key "
-	    +   "  and setG.session_start_date = srsh.session_start_date and setG.session_end_date =srsh.session_end_Date "
+	    +   "  and setG.semester_start_date = srsh.session_start_date and setG.semester_end_date =srsh.session_end_Date "
 		+   " left join dg_abc_id as abc on abc.REGN_NO=sm.enrollment_number "
 		+	" where pch.program_course_key in (?1, ?2) and srsh.session_start_date in (?3,?4) and srsh.entity_id =?5  "
 		+	" group by srsh.entity_id, srsh.roll_number)s "
@@ -164,10 +164,15 @@ public interface DgModularExtractRepository extends JpaRepository<DgModularExtra
 	
 	Map<String, Object> gettotcreditpoint(String rollno,String pck1, String pck2);
 	
-	@Modifying
+	@Modifying(clearAutomatically = true)
+    @Transactional
     @Query(nativeQuery = true, value =
-            "UPDATE dg_modular_controller SET status='C', run_time=?1 " +
-            "WHERE program_id=?2 AND module_group=?3 AND semester_start_date=?4")
-    int updatestatus(Date runtime, String program_id, String module_group, Date semester_start_date);
+        "UPDATE exam_live.dg_modular_controller " +
+        "SET status = 'C', run_time = ?1 " +
+        "WHERE program_id = ?2 AND module_group = ?3 AND session_start_date = ?4")
+    int updateDgModularControlStatus(Date runtime, String programId, String moduleGroup, Date sessionStartDate);
+
+	
+
 	
 }

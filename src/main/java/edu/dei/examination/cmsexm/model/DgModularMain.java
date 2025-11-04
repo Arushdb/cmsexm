@@ -24,13 +24,13 @@ import java.util.Date;
 	    @Column(name = "module_group", length = 15)
 	    private String moduleGroup;
 
-	    @Column(name = "semester_start_date")
+	    @Column(name = "session_start_date")
 	    @Temporal(TemporalType.DATE)
-	    private Date semesterStartDate;
+	    private Date sessionStartDate;
 
-	    @Column(name = "semester_end_date")
+	    @Column(name = "session_end_date")
 	    @Temporal(TemporalType.DATE)
-	    private Date semesterEndDate;
+	    private Date sessionEndDate;
 
 	    @Column(nullable = false, length = 2)
 	    private String status ;
@@ -76,20 +76,20 @@ import java.util.Date;
 	        this.moduleGroup = moduleGroup;
 	    }
 
-	    public Date getSemesterStartDate() {
-	        return semesterStartDate;
+	    public Date getSessionStartDate() {
+	        return sessionStartDate;
 	    }
 
-	    public void setSemesterStartDate(Date semesterStartDate) {
-	        this.semesterStartDate = semesterStartDate;
+	    public void setSessionStartDate(Date sessionStartDate) {
+	        this.sessionStartDate = sessionStartDate;
 	    }
 
-	    public Date getSemesterEndDate() {
-	        return semesterEndDate;
+	    public Date getSessionEndDate() {
+	        return sessionEndDate;
 	    }
 
-	    public void setSemesterEndDate(Date semesterEndDate) {
-	        this.semesterEndDate = semesterEndDate;
+	    public void setSessionEndDate(Date sessionEndDate) {
+	        this.sessionEndDate = sessionEndDate;
 	    }
 
 	    public String getStatus() {
