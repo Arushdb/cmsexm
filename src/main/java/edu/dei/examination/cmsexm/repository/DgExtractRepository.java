@@ -38,7 +38,7 @@ public interface DgExtractRepository extends JpaRepository<DgExtract, Integer> {
 		+   "       ELSE 'REGULAR' END  as exam_type,'' as tot_grade_points,'' as grand_tot_max,'' as grand_tot_mrks, "
 		+	" '' as grand_tot_credit_points,"
 		+   "    s.cgpa as cgpa,"
-		+   "   if(s.program_id = '0001009' or s.program_id = '0001264',concat('Thoery SGPA',' - ',s.theory_sgpa,' , ','Practical SGPA',' - ',s.practical_sgpa,' ; ','Theory CGPA',' - ',s.theory_cgpa,' , ','Practical CGPA',' - ',s.practical_cgpa),' ') as remarks,"
+		+   "   IF( s.program_id IN ('0001009', '0001264'), CONCAT( 'Theory SGPA - ', IFNULL(s.theory_sgpa, ''),' , Practical SGPA - ', IFNULL(s.practical_sgpa, ''),IFNULL(s.theory_cgpa, ''), IFNULL(s.practical_cgpa, '')),' ') AS remarks,"
 		+   "   s.sgpa as sgpa, "
 		+   "  s.ABC_ID as abc_account_id,'' as term_type,'' as tot_grade,s.AADHAAR_NAME ,"
 		+   "   cast(substring(s.registered_from_session,1,4) as char(4)) as ADMISSION_YEAR "
@@ -49,7 +49,7 @@ public interface DgExtractRepository extends JpaRepository<DgExtract, Integer> {
 		+	" spcl.component_description 'Specialization', pch.semester_code, sp.program_status,if(sp.current_semester = pch.semester_code "
 		+	" and sp.program_status = 'PAS', sp.cgpa, '') as cgpa, "
 		+	" sp.passed_to_session, year(pr.session_start_date) passedSession, year(pr.session_end_date) passedToSession, "
-		+	" sp.current_semester ,abc.ABC_ID ,abc.AADHAAR_NAME ,sa.theory_sgpa,sa.practical_sgpa,sp.registered_from_session,sp.theory_cgpa,sp.practical_cgpa from "
+		+	" sp.current_semester ,abc.ABC_ID ,abc.AADHAAR_NAME ,sa.theory_sgpa,sa.practical_sgpa,sp.registered_from_session,IF( sp.current_semester = pch.semester_code AND sp.program_status = 'PAS',CONCAT(' ; Theory CGPA - ', IFNULL(sp.theory_cgpa, '')),'') AS theory_cgpa,IF(sp.current_semester = pch.semester_code AND sp.program_status = 'PAS', CONCAT(' , Practical CGPA - ', IFNULL(sp.practical_cgpa, '')), '') AS practical_cgpa from "
 		
 		+	"  cms_live.student_registration_semester_header as srsh  "
 		+	" join cms_live.program_course_header as   pch on pch.program_course_key = srsh.program_course_key "
