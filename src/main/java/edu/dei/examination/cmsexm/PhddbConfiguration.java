@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(entityManagerFactoryRef = "phdEntityManagerFactory",
-    transactionManagerRef = "phdTransactionManager", basePackages = {"edu.dei.examination.phd.repository"})
+    transactionManagerRef = "phdTransactionManager", basePackages = {"edu.dei.examination.phd"})
 public class PhddbConfiguration {
 	
 	
@@ -31,7 +31,7 @@ public class PhddbConfiguration {
 	  @Bean(name = "phdEntityManagerFactory")
 	  public LocalContainerEntityManagerFactoryBean barEntityManagerFactory(
 	      EntityManagerFactoryBuilder builder, @Qualifier("phdDataSource") DataSource dataSource) {
-	    return builder.dataSource(dataSource).packages("edu.dei.examination.phd.model").persistenceUnit("phd")
+	    return builder.dataSource(dataSource).packages("edu.dei.examination.phd").persistenceUnit("phd")
 	        .build();
 	  }
 

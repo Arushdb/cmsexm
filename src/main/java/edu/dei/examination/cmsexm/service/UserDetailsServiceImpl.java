@@ -2,6 +2,7 @@ package edu.dei.examination.cmsexm.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NamedQueries;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import edu.dei.examination.cmsexm.model.Login;
 import edu.dei.examination.cmsexm.model.Menu;
 import edu.dei.examination.cmsexm.model.User;
+import edu.dei.examination.cmsexm.model.UserIdentifier;
 import edu.dei.examination.cmsexm.model.UserRoles;
+import edu.dei.examination.cmsexm.repository.UserIdentifierRepository;
 import edu.dei.examination.cmsexm.repository.UserRepository;
 
 
@@ -31,6 +34,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	
 	@Autowired
 	UserRepository userRepository; 
+	
+	@Autowired
+	UserIdentifierRepository userIdentifierRepository;
 	
 	@Autowired
 	@Qualifier("examEntityManagerFactory")
@@ -55,7 +61,27 @@ public List<UserRoles> getdefaultrole(Long id){
  
  return roleList;
 }
-	
+
+public String resolveUsername(String loginId) {
+
+	  // 1️⃣ Try admin/dean username
+	  Optional<User> user = userRepository.findByUsername(loginId);
+	  if (user.isPresent()) {
+	    return user.get().getUsername();
+	  }
+
+	  // 2️⃣ Try identifier table
+	  Optional<UserIdentifier> ui =
+			  userIdentifierRepository.findActiveByLoginId(loginId);
+	  
+
+	  if (ui.isPresent()) {
+	    return ui.get().getUser().getUsername();
+	  }
+
+	  throw new UsernameNotFoundException("Invalid login ID");
+	}
+
 	
 public  JSONArray getNewMenu(int role_id){
 		

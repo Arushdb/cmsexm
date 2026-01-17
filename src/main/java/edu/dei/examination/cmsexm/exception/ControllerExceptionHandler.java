@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-@ControllerAdvice
+@ControllerAdvice(basePackages = "edu.dei.examination.cmsexm")
 public class ControllerExceptionHandler {
 	
 	@ExceptionHandler(ResourceNotFoundException.class)

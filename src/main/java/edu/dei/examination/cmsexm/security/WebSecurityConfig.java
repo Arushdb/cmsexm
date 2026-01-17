@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -22,7 +23,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import edu.dei.examination.cmsexm.security.jwt.AuthEntryPointJwt;
@@ -33,6 +37,7 @@ import edu.dei.examination.cmsexm.service.UserDetailsServiceImpl;
 @Configuration
 @EnableWebSecurity
 @EnableScheduling
+@Order(1)
 @EnableGlobalMethodSecurity(
 		// securedEnabled = true,
 		// jsr250Enabled = true,
@@ -68,27 +73,47 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				
 	}
 	
-	@Bean
-	public CorsFilter corsFilter() {
-		
-		CorsConfiguration corsConfiguration = new CorsConfiguration();
-		corsConfiguration.setAllowCredentials(true);
-		corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-		
-		corsConfiguration.setAllowedHeaders(Arrays.asList("Origin","Access-Control-Allow-Origin","Content-Type",
-				"Accept","Authorization","Origin","Accept","X-Requested-With"));
-		
-		corsConfiguration.setExposedHeaders(Arrays.asList("Origin","Content-Type","Accept",
-				"Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
-		
-		corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
-		
-		org.springframework.web.cors.UrlBasedCorsConfigurationSource thesource = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-				thesource.registerCorsConfiguration("/**", corsConfiguration);
-		//theurlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-		return new CorsFilter(thesource);
-	}
+//	@Bean
+//	public CorsFilter corsFilter() {
+//		
+//		CorsConfiguration corsConfiguration = new CorsConfiguration();
+//		corsConfiguration.setAllowCredentials(true);
+//		corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+//		
+//		corsConfiguration.setAllowedHeaders(Arrays.asList("Origin","Access-Control-Allow-Origin","Content-Type",
+//				"Accept","Authorization","Origin","Accept","X-Requested-With"));
+//		
+//		corsConfiguration.setExposedHeaders(Arrays.asList("Origin","Content-Type","Accept",
+//				"Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
+//		
+//		corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+//		
+//		org.springframework.web.cors.UrlBasedCorsConfigurationSource thesource = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+//				thesource.registerCorsConfiguration("/**", corsConfiguration);
+//		//theurlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+//		return new CorsFilter(thesource);
+//	}
 	
+	
+	 @Bean
+	    public CorsConfigurationSource corsConfigurationSource() {
+	        CorsConfiguration config = new CorsConfiguration();
+	        config.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Angular
+	        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+	        config.setAllowedHeaders(Arrays.asList("*"));
+	        config.setAllowCredentials(true); // if using cookies / Authorization header
+	        // 🔥 MOST IMPORTANT — Without this you won't see cookies
+	        config.setExposedHeaders(Arrays.asList("Set-Cookie"));
+
+	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	        source.registerCorsConfiguration("/**", config);  // apply to all paths
+	        return source;
+	    }
+	 
+	 @Bean
+	    public RestTemplate restTemplate() {
+	        return new RestTemplate();
+	    }
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -97,6 +122,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests()
+			.antMatchers("/api/scholars/**").hasAuthority("ADMIN")
 			.antMatchers("/api/phd/**").permitAll()
 			.antMatchers("/api/auth/**").permitAll()
 			.antMatchers("/api/test/**").permitAll() 
