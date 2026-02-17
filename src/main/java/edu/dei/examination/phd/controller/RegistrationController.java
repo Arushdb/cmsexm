@@ -101,9 +101,25 @@ public class RegistrationController {
                		
     		){
     	
+    	 // 1️⃣ Extract JWT claims
+        Claims claims = jwtUtils.getClaims(authHeader);
+        String username = claims.getSubject();
+        
+        
+        int semid  =Integer.parseInt(semesterId);
+        int schid  =Integer.parseInt(scholarid);
+        
+    	
+    	scholarregService.registerForSemester(schid, semid, username);
+    	
     	
     	System.out.println("semid"+semesterId+":scholarid"+scholarid);
-    	return null;
+    	return ResponseEntity.ok(
+                ApiResponse.success(
+                        "You are successfully registered",
+                        null
+                )
+        );
     	
     }
     

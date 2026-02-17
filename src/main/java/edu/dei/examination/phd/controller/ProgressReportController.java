@@ -1,55 +1,115 @@
 package edu.dei.examination.phd.controller;
 
 
-import edu.dei.examination.phd.dto.ProgressReportRequest;
-import edu.dei.examination.phd.model.ProgressReport;
-import edu.dei.examination.phd.service.ProgressReportService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
+import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import io.jsonwebtoken.Claims;
+import edu.dei.examination.phd.service.ProgressReportService;
+import edu.dei.examination.cmsexm.security.jwt.JwtUtils;
+import edu.dei.examination.cmsexm.service.UserDetailsImpl;
+import edu.dei.examination.phd.dto.ApiResponse;
+import edu.dei.examination.phd.dto.ProgressReportRequest;
+import edu.dei.examination.phd.dto.ProgressReportResponse;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import javax.validation.Valid;
-
-//imports omitted for brevity
 @RestController
-@RequestMapping("/api/progress-reports")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/progress")
 public class ProgressReportController {
 
- private final ProgressReportService svc;
- public ProgressReportController(ProgressReportService svc) { this.svc = svc; }
+    private final ProgressReportService service;
+    private final JwtUtils jwtUtils;
 
- @GetMapping
- public ResponseEntity<List<ProgressReport>> getByScholar(@RequestParam Integer scholarId) {
-     return ResponseEntity.ok(svc.findByScholar(scholarId));
- }
+    public ProgressReportController(
+            ProgressReportService service,
+            JwtUtils jwtUtils) {
+        this.service = service;
+        this.jwtUtils = jwtUtils;
+    }
 
- @PostMapping
- public ResponseEntity<?> create(@Valid @RequestBody ProgressReportRequest req, BindingResult br) {
-     if (br.hasErrors()) {
-         return ResponseEntity.badRequest().body(br.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.toList()));
-     }
-     try {
-         // map DTO -> entity
-         ProgressReport pr = new ProgressReport();
-         // scholar will be set in service
-         pr.setSemesterId(req.getSemesterId());
-         pr.setPeriodStart(req.getPeriodStart());
-         pr.setPeriodEnd(req.getPeriodEnd());
-         pr.setSummary(req.getSummary());
-         pr.setCommitteeState(req.getCommitteeState());
-         pr.setMeetingDate(req.getMeetingDate());
-         pr.setNextActions(req.getNextActions());
+    /* -------- Save Draft -------- */
+    @PostMapping("/save")
+    public ResponseEntity<ApiResponse<?>> saveDraft(
+            @RequestBody ProgressReportRequest request){
+    
+            //@RequestHeader("Authorization") String authHeader) {
 
-         ProgressReport created = svc.createReport(req.getScholarId(), pr);
-         return ResponseEntity.ok(created);
-     } catch (IllegalArgumentException ex) {
-         return ResponseEntity.badRequest().body(ex.getMessage());
-     }
- }
- // other endpoints...
+        //Claims claims = jwtUtils.getClaims(authHeader);
+        //Integer userId = claims.get("userId", Integer.class);
+        
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+            UserDetailsImpl userDetails =
+                (UserDetailsImpl) authentication.getPrincipal();
+
+            Integer userId = userDetails.getId().intValue();
+
+        service.saveDraft(userId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Draft saved successfully", null)
+        );
+    }
+
+    /* -------- Submit -------- */
+    @PostMapping("/submit")
+    public ResponseEntity<ApiResponse<?>> submit(
+            @RequestBody ProgressReportRequest req){
+            
+    	 
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+            UserDetailsImpl userDetails =
+                (UserDetailsImpl) authentication.getPrincipal();
+
+            Integer userId = userDetails.getId().intValue();
+        service.submitReport(userId, req);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Report submitted successfully", null)
+        );
+    }
+    
+    @GetMapping("/semester/{semesterRegistrationId}")
+    public ResponseEntity<ApiResponse<?>> getReportBySemester(
+            @PathVariable Integer semesterRegistrationId) {
+
+    	 Authentication authentication =
+                 SecurityContextHolder.getContext().getAuthentication();
+
+             UserDetailsImpl userDetails =
+                 (UserDetailsImpl) authentication.getPrincipal();
+
+             Integer userId = userDetails.getId().intValue();
+        
+
+        ProgressReportResponse response =
+                service.getReportBySemester(userId, semesterRegistrationId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Report fetched successfully", response)
+        );
+    }
+    
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<?>> getAllReports(
+            @RequestHeader("Authorization") String authHeader) {
+
+        Claims claims = jwtUtils.getClaims(authHeader);
+        Integer userId = claims.get("userId", Integer.class);
+
+        List<ProgressReportResponse> reports =
+                service.getAllReports(userId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Reports fetched successfully", reports)
+        );
+    }
+
+
 }

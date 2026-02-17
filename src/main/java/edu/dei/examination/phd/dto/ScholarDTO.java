@@ -15,6 +15,7 @@ public class ScholarDTO {
     private int gender_id ;
     private LocalDate dob;
     private int programid;
+    private String programname;
     
     
   
@@ -79,6 +80,10 @@ public class ScholarDTO {
 	public int getProgramid() { return programid; }
 
 	public void setProgramid(int programid) { this.programid = programid; }
+
+	public String getProgramname() { return programname; }
+
+	public void setProgramname(String programname) { this.programname = programname; }
 	
 	
     

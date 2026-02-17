@@ -1,67 +1,144 @@
-package edu.dei.examination.phd.model;
+package edu.dei.examination.phd.model ;
 
 import javax.persistence.*;
+
+import edu.dei.examination.phd.enums.ProgressStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "progress_reports")
+@Table(name = "progress_report")
 public class ProgressReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer reportId;
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scholar_id", nullable = false)
-    private Scholars scholar;
+    @Column(name = "scholar_id")
+    private Integer scholarId;
 
-    private Integer semesterId;
+    @Column(name = "semester_registration_id")
+    private Integer semesterRegistrationId;
 
+    @Column(name = "last_semester_registration_id")
+    private Integer lastSemesterRegistrationId;
+
+    @Column(name = "attendence", precision = 5, scale = 2)
+    private Double attendence;
+
+    @Column(name="research_work")
+    private String researchWork;
+    private String conference;
+    @Column(name = "research_paper")
+    private String researchPaper;
+    private String tours;
+
+    @Column(name = "insert_time")
+    private LocalDateTime insertTime;
+    
+    
+    @Enumerated(EnumType.STRING)        
+    @Column(name = "progress_status")
+    private ProgressStatus  progressStatus;
+
+    @Column(name = "period_start")
     private LocalDate periodStart;
+
+    @Column(name = "period_end")
     private LocalDate periodEnd;
 
-    @Column(columnDefinition = "TEXT")
     private String summary;
 
-    private String committeeState;
+    @Column(name = "committee_state")
+    private Boolean committeeState;
+
+    @Column(name = "meeting_date")
     private LocalDate meetingDate;
-    @Column(columnDefinition = "TEXT")
+
+    @Column(name = "next_actions")
     private String nextActions;
 
-    private LocalDateTime createdAt;
-
-    public ProgressReport() {}
-
     @PrePersist
-    public void prePersist() { createdAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        this.insertTime = LocalDateTime.now();
+        if (this.progressStatus == null) {
+            this.progressStatus =ProgressStatus.DRAFT ;
+        }
+    }
 
-    // getters & setters
-    public Integer getReportId() { return reportId; }
-    public void setReportId(Integer reportId) { this.reportId = reportId; }
-    public Scholars getScholar() { return scholar; }
-    public void setScholar(Scholars scholar) { this.scholar = scholar; }
-    public Integer getSemesterId() { return semesterId; }
-    public void setSemesterId(Integer semesterId) { this.semesterId = semesterId; }
-    public LocalDate getPeriodStart() { return periodStart; }
-    public void setPeriodStart(LocalDate periodStart) { this.periodStart = periodStart; }
-    public LocalDate getPeriodEnd() { return periodEnd; }
-    public void setPeriodEnd(LocalDate periodEnd) { this.periodEnd = periodEnd; }
-    public String getSummary() { return summary; }
-    public void setSummary(String summary) { this.summary = summary; }
-    public String getCommitteeState() { return committeeState; }
-    public void setCommitteeState(String committeeState) { this.committeeState = committeeState; }
-    public LocalDate getMeetingDate() { return meetingDate; }
-    public void setMeetingDate(LocalDate meetingDate) { this.meetingDate = meetingDate; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+	public Integer getId() { return id; }
 
-	public String getNextActions() {
-		return nextActions;
+	public void setId(Integer id) { this.id = id; }
+
+	public Integer getScholarId() { return scholarId; }
+
+	public void setScholarId(Integer scholarId) { this.scholarId = scholarId; }
+
+	public Integer getSemesterRegistrationId() { return semesterRegistrationId; }
+
+	public void setSemesterRegistrationId(Integer semesterRegistrationId) {
+		this.semesterRegistrationId = semesterRegistrationId;
 	}
 
-	public void setNextActions(String nextActions) {
-		this.nextActions = nextActions;
+	public Integer getLastSemesterRegistrationId() { return lastSemesterRegistrationId; }
+
+	public void setLastSemesterRegistrationId(Integer lastSemesterRegistrationId) {
+		this.lastSemesterRegistrationId = lastSemesterRegistrationId;
 	}
+
+	public Double getAttendence() { return attendence; }
+
+	public void setAttendence(Double attendence) { this.attendence = attendence; }
+
+	public String getResearchWork() { return researchWork; }
+
+	public void setResearchWork(String researchWork) { this.researchWork = researchWork; }
+
+	public String getConference() { return conference; }
+
+	public void setConference(String conference) { this.conference = conference; }
+
+	public String getResearchPaper() { return researchPaper; }
+
+	public void setResearchPaper(String researchPaper) { this.researchPaper = researchPaper; }
+
+	public String getTours() { return tours; }
+
+	public void setTours(String tours) { this.tours = tours; }
+
+	public LocalDateTime getInsertTime() { return insertTime; }
+
+	public void setInsertTime(LocalDateTime insertTime) { this.insertTime = insertTime; }
+
+	public ProgressStatus getProgressStatus() { return progressStatus; }
+
+	public void setProgressStatus(ProgressStatus progressStatus) { this.progressStatus = progressStatus; }
+
+	public LocalDate getPeriodStart() { return periodStart; }
+
+	public void setPeriodStart(LocalDate periodStart) { this.periodStart = periodStart; }
+
+	public LocalDate getPeriodEnd() { return periodEnd; }
+
+	public void setPeriodEnd(LocalDate periodEnd) { this.periodEnd = periodEnd; }
+
+	public String getSummary() { return summary; }
+
+	public void setSummary(String summary) { this.summary = summary; }
+
+	public Boolean getCommitteeState() { return committeeState; }
+
+	public void setCommitteeState(Boolean committeeState) { this.committeeState = committeeState; }
+
+	public LocalDate getMeetingDate() { return meetingDate; }
+
+	public void setMeetingDate(LocalDate meetingDate) { this.meetingDate = meetingDate; }
+
+	public String getNextActions() { return nextActions; }
+
+	public void setNextActions(String nextActions) { this.nextActions = nextActions; }
+
     
+    // getters and setters
 }

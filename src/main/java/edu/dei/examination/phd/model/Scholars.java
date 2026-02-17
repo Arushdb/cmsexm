@@ -24,7 +24,7 @@ public class Scholars {
     @Column(name = "scholar_id")
     private Integer scholarId;
 
-    @Column(name = "program_id", nullable = false)
+    @Column(name = "program_id", nullable = false,insertable = false,updatable = false)
     private Integer programId;
 
     @Column(name = "registration_no")
@@ -120,6 +120,10 @@ public class Scholars {
 
     @Column(name = "mode")
     private String mode;
+    
+    @ManyToOne
+    @JoinColumn(name = "program_id")
+    private Program program;
 
     /* ---------- AUTO TIMESTAMP ---------- */
     @PrePersist

@@ -122,11 +122,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests()
-			.antMatchers("/api/scholars/**").hasAuthority("ADMIN")
+			.antMatchers("/api/scholars/**").hasAnyAuthority("ADMIN","SCHOLAR")
 			.antMatchers("/api/phd/**").permitAll()
 			.antMatchers("/api/auth/**").permitAll()
-			.antMatchers("/api/test/**").permitAll() 
-			.anyRequest().authenticated();
+			.antMatchers("/api/test/**").permitAll() ;
+			//.anyRequest().authenticated();
 		/////////////////////////////////////////////////////////////////////////////////////////
 //			.and()
 //			.formLogin()

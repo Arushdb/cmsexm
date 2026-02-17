@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -32,12 +33,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
           .csrf().disable() // disable for demo; enable & configure CSRF for browser forms in prod
           .authorizeRequests()
              // public endpoints
+             .antMatchers("/api/progress/**").hasAuthority("SCHOLAR")
              .antMatchers("/api/progress-reports", "/api/progress-reports/**").permitAll()
              .antMatchers("/api/topics", "/api/topics/**").permitAll()
              // remarks list is public; adding remark restricted by method-level @PreAuthorize
              .antMatchers("/api/remarks").permitAll()
+           
              .anyRequest().authenticated()
-          .and()
-             .httpBasic();
+             .and()
+             .sessionManagement()
+                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);;
+        //  .and()
+         //    .httpBasic();
     }
 }

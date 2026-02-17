@@ -40,6 +40,9 @@ public class ScholarSemester {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    
+    @Column(name = "created_by")
+    private String createdBy;
 
     /* ---------- Enum ---------- */
     public enum ReviewStatus {
@@ -114,4 +117,15 @@ public class ScholarSemester {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+	
+
+	public String getCreatedBy() { return createdBy; }
+
+	public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    
+    
 }

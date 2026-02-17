@@ -6,7 +6,11 @@ public enum ERole {
     ROLE_MODERATOR,
     ROLE_ADMIN,
     SCHOLAR,
-    ADMIN
+    ADMIN,
+    SUPERVISOR,
+    HOD,
+    DEAN,
+    CO_SUPERVISOR
     
 
 }
