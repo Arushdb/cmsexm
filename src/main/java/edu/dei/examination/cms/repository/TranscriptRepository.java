@@ -116,7 +116,7 @@ public class TranscriptRepository {
                      "    ) AS t1 " +
                      "    JOIN ( " +
                      "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, " +
-                     "   sm.student_first_name,CONCAT(pm.program_name, ' ',IF(stt1.component_description = 'NONE','', " +
+                     "   sm.student_first_name,CONCAT(if(srsh.session_start_date between pme.start_date and end_date,pme.program_name,pm.program_name), ' ',IF(stt1.component_description = 'NONE','', " +
                      "   CONCAT('(', stt1.component_description, ') ')),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
                      "    FROM student_registration_semester_header srsh " +
                      "    JOIN program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
@@ -127,7 +127,7 @@ public class TranscriptRepository {
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number" +
                      "    JOIN system_table_two stt1 on pch.branch_id = stt1.component_code  and stt1.group_code = 'BRNCOD'" +
                      "    JOIN system_table_two stt2 on pch.specialization_id = stt2.component_code  and stt2.group_code = 'SPCLCD' " +
-                     "    WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
+                     "    left join program_master_extension pme on sp.program_id=pme.program_id WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
                      "    ORDER BY sp.program_completion_date DESC LIMIT 1 " +
                      ") AS t2 ON t1.roll_number = t2.roll_number";
 
