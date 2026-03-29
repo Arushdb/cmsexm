@@ -24,8 +24,7 @@ public class ProgressReport {
     @Column(name = "last_semester_registration_id")
     private Integer lastSemesterRegistrationId;
 
-    @Column(name = "attendence", precision = 5, scale = 2)
-    private Double attendence;
+    
 
     @Column(name="research_work")
     private String researchWork;
@@ -58,6 +57,9 @@ public class ProgressReport {
 
     @Column(name = "next_actions")
     private String nextActions;
+    
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -87,9 +89,7 @@ public class ProgressReport {
 		this.lastSemesterRegistrationId = lastSemesterRegistrationId;
 	}
 
-	public Double getAttendence() { return attendence; }
 
-	public void setAttendence(Double attendence) { this.attendence = attendence; }
 
 	public String getResearchWork() { return researchWork; }
 
@@ -138,6 +138,10 @@ public class ProgressReport {
 	public String getNextActions() { return nextActions; }
 
 	public void setNextActions(String nextActions) { this.nextActions = nextActions; }
+
+	public LocalDateTime getSubmittedAt() { return submittedAt; }
+
+	public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
 
     
     // getters and setters

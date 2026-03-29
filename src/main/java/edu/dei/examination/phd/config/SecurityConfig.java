@@ -34,6 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
           .authorizeRequests()
              // public endpoints
              .antMatchers("/api/progress/**").hasAuthority("SCHOLAR")
+             .antMatchers("/api/documents/**").hasAuthority("SCHOLAR")
              .antMatchers("/api/progress-reports", "/api/progress-reports/**").permitAll()
              .antMatchers("/api/topics", "/api/topics/**").permitAll()
              // remarks list is public; adding remark restricted by method-level @PreAuthorize

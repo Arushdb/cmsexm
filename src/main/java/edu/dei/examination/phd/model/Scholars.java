@@ -29,6 +29,8 @@ public class Scholars {
 
     @Column(name = "registration_no")
     private String registrationNo;
+    
+    private String enrolmentno;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
@@ -66,8 +68,7 @@ public class Scholars {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @Column(name = "enrolmentno")
-    private Integer enrolmentno;
+   
 
     @Column(name = "user_id")
     private Integer userId;
@@ -189,11 +190,11 @@ public class Scholars {
         this.userId = userId;
     }
 
-    public Integer getEnrolmentno() {
+    public String getEnrolmentno() {
         return enrolmentno;
     }
 
-    public void setEnrolmentno(Integer enrolmentno) {
+    public void setEnrolmentno(String enrolmentno) {
         this.enrolmentno = enrolmentno;
     }
 
@@ -204,6 +205,110 @@ public class Scholars {
     public void setApplicationNumber(String applicationNumber) {
         this.applicationNumber = applicationNumber;
     }
+
+	public String getPhone() { return phone; }
+
+	public void setPhone(String phone) { this.phone = phone; }
+
+	public String getCategory() { return category; }
+
+	public void setCategory(String category) { this.category = category; }
+
+	public LocalDate getAdmissionDate() { return admissionDate; }
+
+	public void setAdmissionDate(LocalDate admissionDate) { this.admissionDate = admissionDate; }
+
+	public LocalDate getExpectedCompletion() { return expectedCompletion; }
+
+	public void setExpectedCompletion(LocalDate expectedCompletion) { this.expectedCompletion = expectedCompletion; }
+
+	public Integer getStatusId() { return statusId; }
+
+	public void setStatusId(Integer statusId) { this.statusId = statusId; }
+
+	public Integer getPrimarySupervisorId() { return primarySupervisorId; }
+
+	public void setPrimarySupervisorId(Integer primarySupervisorId) { this.primarySupervisorId = primarySupervisorId; }
+
+	public LocalDateTime getCreatedAt() { return createdAt; }
+
+	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+	public LocalDate getDateOfBirth() { return dateOfBirth; }
+
+	public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
+	public String getDepartmentCode() { return departmentCode; }
+
+	public void setDepartmentCode(String departmentCode) { this.departmentCode = departmentCode; }
+
+	public String getFathername() { return fathername; }
+
+	public void setFathername(String fathername) { this.fathername = fathername; }
+
+	public String getMothername() { return mothername; }
+
+	public void setMothername(String mothername) { this.mothername = mothername; }
+
+	public String getAddressForCorrespondence() { return addressForCorrespondence; }
+
+	public void setAddressForCorrespondence(String addressForCorrespondence) {
+		this.addressForCorrespondence = addressForCorrespondence;
+	}
+
+	public byte[] getNameInHindi() { return nameInHindi; }
+
+	public void setNameInHindi(byte[] nameInHindi) { this.nameInHindi = nameInHindi; }
+
+	public LocalDate getRegistrationDate() { return registrationDate; }
+
+	public void setRegistrationDate(LocalDate registrationDate) { this.registrationDate = registrationDate; }
+
+	public LocalDate getDateJrf() { return dateJrf; }
+
+	public void setDateJrf(LocalDate dateJrf) { this.dateJrf = dateJrf; }
+
+	public LocalDate getDateJrfExp() { return dateJrfExp; }
+
+	public void setDateJrfExp(LocalDate dateJrfExp) { this.dateJrfExp = dateJrfExp; }
+
+	public LocalDate getDateExtension() { return dateExtension; }
+
+	public void setDateExtension(LocalDate dateExtension) { this.dateExtension = dateExtension; }
+
+	public String getResearchTopicEng() { return researchTopicEng; }
+
+	public void setResearchTopicEng(String researchTopicEng) { this.researchTopicEng = researchTopicEng; }
+
+	public String getResearchTopicHnd() { return researchTopicHnd; }
+
+	public void setResearchTopicHnd(String researchTopicHnd) { this.researchTopicHnd = researchTopicHnd; }
+
+	public String getSubject() { return subject; }
+
+	public void setSubject(String subject) { this.subject = subject; }
+
+	public Integer getSupervisorId() { return supervisorId; }
+
+	public void setSupervisorId(Integer supervisorId) { this.supervisorId = supervisorId; }
+
+	public Integer getCoSupervisorId() { return coSupervisorId; }
+
+	public void setCoSupervisorId(Integer coSupervisorId) { this.coSupervisorId = coSupervisorId; }
+
+	public String getAdmissionSession() { return admissionSession; }
+
+	public void setAdmissionSession(String admissionSession) { this.admissionSession = admissionSession; }
+
+	public String getMode() { return mode; }
+
+	public void setMode(String mode) { this.mode = mode; }
+
+	public Program getProgram() { return program; }
+
+	public void setProgram(Program program) { this.program = program; }
+    
+    
 }
 
 ///////////////////////////////////////////////

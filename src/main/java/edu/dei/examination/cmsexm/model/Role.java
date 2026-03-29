@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table(name = "roles")
+@Table(name = "exam_live.roles", schema = "exam_live")
 public class Role {
 	
 	

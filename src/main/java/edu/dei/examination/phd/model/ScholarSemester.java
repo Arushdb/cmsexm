@@ -16,8 +16,7 @@ public class ScholarSemester {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "scholar_semester_id")
-    private Integer scholarSemesterId;
+    private Integer id;
 
     @Column(name = "scholar_id", nullable = false)
     private Integer scholarId;
@@ -53,19 +52,17 @@ public class ScholarSemester {
 
     /* ---------- Getters & Setters ---------- */
 
-    public Integer getScholarSemesterId() {
-        return scholarSemesterId;
-    }
-
-    public void setScholarSemesterId(Integer scholarSemesterId) {
-        this.scholarSemesterId = scholarSemesterId;
-    }
+ 
 
     public Integer getScholarId() {
         return scholarId;
     }
 
-    public void setScholarId(Integer scholarId) {
+    public Integer getId() { return id; }
+
+	public void setId(Integer id) { this.id = id; }
+
+	public void setScholarId(Integer scholarId) {
         this.scholarId = scholarId;
     }
 

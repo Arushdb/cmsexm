@@ -31,7 +31,7 @@ public class PhddbConfiguration {
 	  @Bean(name = "phdEntityManagerFactory")
 	  public LocalContainerEntityManagerFactoryBean barEntityManagerFactory(
 	      EntityManagerFactoryBuilder builder, @Qualifier("phdDataSource") DataSource dataSource) {
-	    return builder.dataSource(dataSource).packages("edu.dei.examination.phd").persistenceUnit("phd")
+	    return builder.dataSource(dataSource).packages("edu.dei.examination.phd","edu.dei.examination.cmsexm.model").persistenceUnit("phd")
 	        .build();
 	  }
 

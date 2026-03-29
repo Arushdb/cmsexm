@@ -29,4 +29,9 @@ public class RemarkService {
         // optionally: check that context exists (e.g., progress report id exists) — implement in service if desired
         return remarkRepo.save(r);
     }
+
+	public List<ReviewerRemark> getRemarksForScholar(Integer contextId) {
+		// TODO Auto-generated method stub
+		return remarkRepo.findByReviewContextAndContextIdAndIsPrivateFalseAndIsDeletedFalse("PROGRESS_REPORT", contextId);
+	}
 }

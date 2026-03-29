@@ -10,6 +10,7 @@ import edu.dei.examination.phd.repository.ScholarsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,13 +48,19 @@ public class ProgressReportService {
                         request.getSemesterRegistrationId()
                 )
                 .orElse(new ProgressReport());
+        
+        if ("SUBMITTED".equals(report.getProgressStatus().toString()) || 
+        		"APPROVED".equals(report.getProgressStatus().toString())) {
+            throw new RuntimeException("Progress report is locked. Changes are not allowed.");
+        }
 
+        validateEditable(report);
         report.setScholarId(scholar.getScholarId());
         report.setSemesterRegistrationId(request.getSemesterRegistrationId());
         report.setLastSemesterRegistrationId(
                 request.getLastSemesterRegistrationId()
         );
-        report.setAttendence(request.getAttendence());
+       
         report.setResearchWork(request.getResearchWork());
         report.setConference(request.getConference());
         report.setResearchPaper(request.getResearchPaper());
@@ -85,8 +92,15 @@ public class ProgressReportService {
         if (report.getProgressStatus() == ProgressStatus.SUBMITTED) {
             throw new IllegalArgumentException("Report already submitted");
         }
+        
+        if (report.getProgressStatus() == ProgressStatus.APPROVED) {
+            throw new IllegalArgumentException("Report already approved");
+            
+        }
+        validateEditable(report);
 
         report.setProgressStatus(ProgressStatus.SUBMITTED);
+        report.setSubmittedAt(LocalDateTime.now());
 
         reportRepo.save(report);
     }
@@ -131,7 +145,7 @@ public class ProgressReportService {
 
         dto.setId(report.getId());
         dto.setSemesterRegistrationId(report.getSemesterRegistrationId());
-        dto.setAttendence(report.getAttendence());
+       
         dto.setResearchWork(report.getResearchWork());
         dto.setConference(report.getConference());
         dto.setResearchPaper(report.getResearchPaper());
@@ -146,6 +160,10 @@ public class ProgressReportService {
         return dto;
     }
 
-
+    private void validateEditable(ProgressReport report) {
+        if (!"DRAFT".equals(report.getProgressStatus().toString())) {
+            throw new RuntimeException("Progress report cannot be modified.");
+        }
+    }
 
 }

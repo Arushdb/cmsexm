@@ -8,6 +8,7 @@ public enum ProgressStatus {
     REVIEWED,
     REJECTED,
     APPROVED,
-    UNDERREVIEW
+    UNDERREVIEW,
+    REVISION_REQUIRED
 
 }

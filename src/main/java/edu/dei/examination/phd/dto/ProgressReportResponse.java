@@ -1,17 +1,19 @@
 package edu.dei.examination.phd.dto;
 
 import edu.dei.examination.phd.enums.*;
+import edu.dei.examination.phd.model.ReviewerRemark;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProgressReportResponse {
 
     private Integer id;
+    private Integer scholarId;
     private Integer semesterRegistrationId;
     private Integer lastSemesterRegistrationId;
-
-    private Double attendence;
+  
 
     private String researchWork;
     private String conference;
@@ -30,6 +32,8 @@ public class ProgressReportResponse {
     private LocalDate meetingDate;
 
     private LocalDateTime insertTime;
+    
+    private List<ReviewerRemark> remarks;
 
     public ProgressReportResponse() {
     }
@@ -60,13 +64,7 @@ public class ProgressReportResponse {
         this.lastSemesterRegistrationId = lastSemesterRegistrationId;
     }
 
-    public Double getAttendence() {
-        return attendence;
-    }
-
-    public void setAttendence(Double attendence) {
-        this.attendence = attendence;
-    }
+   
 
     public String getResearchWork() {
         return researchWork;
@@ -163,4 +161,15 @@ public class ProgressReportResponse {
     public void setInsertTime(LocalDateTime insertTime) {
         this.insertTime = insertTime;
     }
+
+	public Integer getScholarId() { return scholarId; }
+
+	public void setScholarId(Integer scholarId) { this.scholarId = scholarId; }
+
+	public List<ReviewerRemark> getRemarks() { return remarks; }
+
+	public void setRemarks(List<ReviewerRemark> remarks) { this.remarks = remarks; }
+
+	
+    
 }

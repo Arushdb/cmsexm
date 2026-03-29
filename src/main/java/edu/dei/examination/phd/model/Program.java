@@ -11,7 +11,8 @@ public class Program {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long program_id;
+    @Column(name = "program_id")
+    private Long programId;
 
     @Column(name = "name", nullable = false, length = 100)
     private String programName;
@@ -46,7 +47,11 @@ public class Program {
         return programName;
     }
 
-    public Long getProgram_id() { return program_id; }
+   
+
+	public Long getProgramId() { return programId; }
+
+	public void setProgramId(Long programId) { this.programId = programId; }
 
 	public void setProgramName(String programName) {
         this.programName = programName;

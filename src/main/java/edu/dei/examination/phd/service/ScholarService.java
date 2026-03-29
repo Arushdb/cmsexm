@@ -10,8 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.dei.examination.phd.dto.CreateScholarsRequest;
 import edu.dei.examination.phd.dto.ScholarDTO;
 import edu.dei.examination.phd.dto.ScholarDashboardDTO;
+import edu.dei.examination.phd.enums.ProgressStatus;
+import edu.dei.examination.phd.exception.ScholarValidationException;
+import edu.dei.examination.phd.model.ProgressReport;
+import edu.dei.examination.phd.model.ScholarSemester;
 import edu.dei.examination.phd.model.Scholars;
+import edu.dei.examination.phd.model.Semesters;
+import edu.dei.examination.phd.repository.ScholarSemesterRepository;
 import edu.dei.examination.phd.repository.ScholarsRepository;
+import edu.dei.examination.phd.repository.SemesterRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,6 +37,11 @@ public class ScholarService {
 	
 	@Autowired
 	ScholarsRepository thescholarsRepository;
+	
+	@Autowired
+	ScholarSemesterRepository theScholarSemesterRepository;
+	@Autowired
+	SemesterRepository theSemesterRepository;
 
 	 @PersistenceContext(unitName = "phd") 
     private EntityManager em;
@@ -84,7 +96,7 @@ public class ScholarService {
         return "SCH-" + row[2] + "-" + row[0];
     }
     
-    @Transactional(readOnly = true, transactionManager = "phdTransactionManager")
+    @Transactional(transactionManager = "phdTransactionManager")
     public ScholarDashboardDTO getScholarDashboard(int scholarId) {
 
         // ---------- 1. Fetch Scholar Info ----------
@@ -113,8 +125,8 @@ public class ScholarService {
         // ---------- 2. Fetch Latest Progress Report ----------
         List<Object[]> reportList = em.createNativeQuery(
                 " SELECT pr.id, pr.semester_registration_id , pr.progress_status  , " +
-                " pr.next_actions, pr.insert_time ,s.semester_name ,s.start_date startdate,s.end_date enddate " +
-                " FROM progress_report as pr  join semesters as s on s.semester_id=pr.semester_registration_id " +
+                " pr.next_actions, pr.submitted_at ,s.semester_name ,s.start_date startdate,s.end_date enddate, " +
+                " s.submission_deadline FROM progress_report as pr  join semesters as s on s.semester_id=pr.semester_registration_id " +
                 " WHERE pr.scholar_id = :scholarId " +
                 " ORDER BY pr.insert_time DESC")
             .setParameter("scholarId", scholarId)
@@ -133,7 +145,9 @@ public class ScholarService {
             dashboard.setNextActions((String) r[3]);
                       
             java.sql.Timestamp submittime = (Timestamp)r[4];
-            String sumittime=Convert_timestamp_tohuman(submittime) ;
+            String sumittime="";
+            if(submittime!=null)
+            	sumittime=Convert_timestamp_tohuman(submittime) ;
             dashboard.setSubmittedOn(sumittime);
             
             dashboard.setSemestername((String )r[5]);
@@ -143,9 +157,48 @@ public class ScholarService {
              sqlDate = (java.sql.Date) r[7];
             LocalDate enddate = sqlDate.toLocalDate();
             
+            sqlDate = (java.sql.Date) r[8];
+            LocalDate deadline = sqlDate.toLocalDate();
+            
+            if (deadline != null) {
+                dashboard.setDeadline(deadline);
+            }
+            LocalDate today = LocalDate.now();
+            
+            boolean allowed = !today.isAfter(deadline);
+         // check scholar extension
+            if (!allowed) {
+
+                List<Object> extension = em.createNativeQuery(
+                        "SELECT extended_until " +
+                        "FROM progress_report_extension " +
+                        "WHERE scholar_id = :scholarId " +
+                        "AND semester_id = :semesterId " +
+                        "AND CURDATE() <= extended_until")
+                    .setParameter("scholarId", scholarId)
+                    .setParameter("semesterId", dashboard.getSemesterRegistrationId())
+                    .setMaxResults(1)
+                    .getResultList();
+
+                if (!extension.isEmpty()) {
+                    allowed = true;
+
+                    java.sql.Date extDate = (java.sql.Date) extension.get(0);
+                    dashboard.setExtensionDeadline(extDate.toLocalDate());
+                }
+            }
+
+            dashboard.setSubmissionAllowed(allowed);
+
+//            if (today.isAfter(deadline)) {
+//                dashboard.setSubmissionAllowed(false);
+//            } else {
+//                dashboard.setSubmissionAllowed(true);
+//            }
            
             dashboard.setStartdate(startDate);
             dashboard.setEnddate(enddate);
+            
         
             
            
@@ -157,9 +210,50 @@ public class ScholarService {
 //                );
 //            }
         }
+        // if first time entry
+        if (reportList.isEmpty()) {
+
+            ProgressReport pr = new ProgressReport();
+            pr.setScholarId(scholarId);
+            pr.setProgressStatus(ProgressStatus.DRAFT);
+            
+           
+            ScholarSemester latestSemester = theScholarSemesterRepository.findTopByScholarIdOrderBySemesterIdDesc(
+            		scholarId)
+    				.orElse(null);
+
+    		if (latestSemester != null) {
+    			if (latestSemester.getReviewStatus() != ScholarSemester.ReviewStatus.Approved) {
+
+    				pr.setSemesterRegistrationId(latestSemester.getSemesterId());
+
+    			}else {
+    				throw new ScholarValidationException("Last semester  review is already approved");
+    			}
+    		}
+            
+            
+            		
+
+            em.persist(pr);
+
+            dashboard.setReportId(pr.getId());
+            dashboard.setProgressStatus("DRAFT");
+            dashboard.setSemesterRegistrationId(pr.getSemesterRegistrationId());
+            Semesters semester= theSemesterRepository.findById(pr.getSemesterRegistrationId()).orElse(null); 
+            if(semester==null) {
+            	throw new ScholarValidationException("Semester not available");
+            }
+            dashboard.setSemestername(semester.getSemesterName());
+            
+        }
 
         return dashboard;
     }
+    
+//    public boolean isProgressEntryAllowed(Date) {
+//    	
+//    }
     
     public String  Convert_timestamp_tohuman(Timestamp timestamp) {
     

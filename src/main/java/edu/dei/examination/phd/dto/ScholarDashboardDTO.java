@@ -14,6 +14,10 @@ public class ScholarDashboardDTO {
     private String semestername;
     private LocalDate startdate;
     private LocalDate enddate;
+    private LocalDate deadline;
+    private boolean submissionAllowed;
+    private LocalDate extensionDeadline;
+    
     
     
     
@@ -38,6 +42,15 @@ public class ScholarDashboardDTO {
 	public void setStartdate(LocalDate startdate) { this.startdate = startdate; }
 	public LocalDate getEnddate() { return enddate; }
 	public void setEnddate(LocalDate enddate) { this.enddate = enddate; }
+	public LocalDate getDeadline() { return deadline; }
+	public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
+	public boolean isSubmissionAllowed() { return submissionAllowed; }
+	public void setSubmissionAllowed(boolean submissionAllowed) { this.submissionAllowed = submissionAllowed; }
+	public LocalDate getExtensionDeadline() { return extensionDeadline; }
+	public void setExtensionDeadline(LocalDate extensionDeadline) { this.extensionDeadline = extensionDeadline; }
+	
+	
+	
 	
 	
 	
