@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import edu.dei.examination.phd.model.ScholarSemester;
 import edu.dei.examination.phd.model.ScholarSemester.ReviewStatus;
+import edu.dei.examination.phd.model.Scholars;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,21 +15,24 @@ public interface ScholarSemesterRepository
         extends JpaRepository<ScholarSemester, Integer> {
 
     /* All semesters of a scholar */
-    List<ScholarSemester> findByScholarId(Integer scholarId);
+    List<ScholarSemester> findByScholarScholarId(Integer scholarId);
 
     /* One scholar + one semester */
-    Optional<ScholarSemester> findByScholarIdAndSemesterId(
+    Optional<ScholarSemester> findByScholarScholarIdAndSemesterSemesterId(
             Integer scholarId,
             Integer semesterId
     );
 
     /* Latest semester */
      
-    Optional<ScholarSemester> findTopByScholarIdOrderBySemesterIdDesc(
+    Optional<ScholarSemester> findTopByScholarScholarIdOrderBySemesterSemesterIdDesc(
             Integer scholarId
     );
 
-
+    Optional<ScholarSemester> findTopByScholarScholarIdAndReviewStatusNotOrderBySemesterSemesterIdDesc(
+            Integer scholarId,
+            ScholarSemester.ReviewStatus reviewStatus
+    );
     /* Pending/Approved/Rejected */
     List<ScholarSemester> findByReviewStatus(ReviewStatus status);
 
@@ -40,6 +44,8 @@ public interface ScholarSemesterRepository
     List<ScholarSemester> findLowAttendance(
             @Param("min") Double minAttendance
     );
+
+	//Optional<Scholars> findByScholarIdAndSemesterId(Integer scholarId, int semid);
     
    
     

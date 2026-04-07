@@ -11,12 +11,12 @@ import java.util.Optional;
 public interface ScholarSupervisorRepository
         extends JpaRepository<ScholarSupervisor, Integer> {
 
-    List<ScholarSupervisor> findByScholarIdAndIsActiveTrue(Integer scholarId);
-
-    Optional<ScholarSupervisor> findByScholarIdAndRoleAndIsActiveTrue(
-            Integer scholarId,
-            SupervisorRole role
-    );
+//    List<ScholarSupervisor> findByScholarIdAndIsActiveTrue(Integer scholarId);
+//
+//    Optional<ScholarSupervisor> findByScholarIdAndRoleAndIsActiveTrue(
+//            Integer scholarId,
+//            SupervisorRole role
+//    );
 
     List<ScholarSupervisor> findBySupervisorIdAndIsActiveTrue(Integer supervisorId);
 }

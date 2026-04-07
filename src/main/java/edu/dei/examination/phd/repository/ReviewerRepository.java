@@ -12,23 +12,26 @@ import java.util.List;
 @Repository
 public interface ReviewerRepository extends JpaRepository<Scholars, Integer> {
 
-    @Query(
-        " SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO("+
-        " sc.scholarId,sc.enrolmentno,sem.academicYear,sc.fullName,p.programName,pr.id,pr.progressStatus,pr.submittedAt)"+
-    
-        "  FROM Scholars sc JOIN ScholarSupervisor ss ON sc.scholarId = ss.scholarId"+
-		"    LEFT JOIN ProgressReport pr ON pr.scholarId = sc.scholarId" +
-		"    JOIN Program p ON sc.programId = p.programId " +
-		"    JOIN Semesters sem ON sem.semesterId=pr.semesterRegistrationId "+
-		"    WHERE ss.supervisorId = :supervisorId " +
-		"    AND ss.isActive = true "+
-		"    AND pr.id = (" +
-		"    SELECT MAX(pr2.id)" +
-		"    FROM ProgressReport pr2"+
-		"    WHERE pr2.scholarId = sc.scholarId)"
-		)
-		    
-   
-    List<ReviewerDashboardDTO> getReviewerDashboard(Integer supervisorId);
+//    @Query(
+//        " SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO("+
+//        " sc.scholarId,sc.enrolmentno,sem.academicYear,pr.semesterRegistrationId,sem.semesterName,"+
+//        " sc.fullName,p.programName,pr.id,pr.progressStatus,pr.submittedAt, "+
+//        " ssm.totalsessions,ssm.attendedsessions ,ssm.attendancePercentage,ssm.attendanceremarks)"+
+//    
+//        "  FROM Scholars sc JOIN ScholarSupervisor ss ON sc.scholarId = ss.scholarId"+
+//		"    LEFT JOIN ProgressReport pr ON pr.scholarId = sc.scholarId" +
+//		"    JOIN Program p ON sc.programId = p.programId " +
+//		"    JOIN Semesters sem ON sem.semesterId=pr.semesterRegistrationId "+
+//		"    JOIN ScholarSemester ssm on ssm.scholarId=sc.scholarId and ssm.semesterId=pr.semesterRegistrationId "+
+//		"    WHERE ss.supervisorId = :supervisorId " +
+//		"    AND ss.isActive = true "+
+//		"    AND pr.id = (" +
+//		"    SELECT MAX(pr2.id)" +
+//		"    FROM ProgressReport pr2"+
+//		"    WHERE pr2.scholarId = sc.scholarId)"
+//		)
+//		    
+//   
+//    List<ReviewerDashboardDTO> getReviewerDashboard(Integer supervisorId);
 
 }

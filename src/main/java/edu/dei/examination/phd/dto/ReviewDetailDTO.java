@@ -13,11 +13,14 @@ public class ReviewDetailDTO {
     private String fullName;
     private String enrolmentno;
     private String programname;
+    private String attendanceremarks;
+   
    // private List<ReviewerRemark> thereviewerRemark;
 
     public ReviewDetailDTO(
             ProgressReport report,
             Double attendancePercentage,
+            String attendanceremarks,
             String previousRemarks,
             String fullName,
             String enrolmentno,
@@ -31,6 +34,7 @@ public class ReviewDetailDTO {
         this.fullName=fullName;
         this.enrolmentno=enrolmentno;
         this.programname=programname;
+        this.attendanceremarks=attendanceremarks;
         //this.thereviewerRemark=thereviewerRemark;
     }
 
@@ -57,6 +61,14 @@ public class ReviewDetailDTO {
 	public String getProgramname() { return programname; }
 
 	public void setProgramname(String programname) { this.programname = programname; }
+
+	public String getAttendanceremarks() { return attendanceremarks; }
+
+	public void setAttendanceremarks(String attendanceremarks) { this.attendanceremarks = attendanceremarks; }
+	
+	
+
+	
 
 	//public List<ReviewerRemark> getThereviewerRemark() { return thereviewerRemark; }
 

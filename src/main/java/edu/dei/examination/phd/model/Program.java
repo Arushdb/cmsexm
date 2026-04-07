@@ -33,6 +33,11 @@ public class Program {
     @JsonIgnore
     @OneToMany(mappedBy = "program", fetch = FetchType.LAZY)
     private List<Scholars> scholars;
+    
+    
+ // 🔥 IMPORTANT RELATION
+    @OneToMany(mappedBy = "program", fetch = FetchType.LAZY)
+    private List<ProgramRoleAssignment> roleAssignments;
 
     // ===== Constructors =====
 

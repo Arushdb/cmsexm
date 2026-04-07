@@ -23,6 +23,7 @@ public class RemarkRequest {
    
     private Integer parentRemarkId;
     private String  createdAt;
+    private String  decision;
 
     // getters & setters
     public String getReviewContext() { return reviewContext; }
@@ -40,6 +41,10 @@ public class RemarkRequest {
 	public void setRole(String role) { this.role = role; }
 	public String getCreatedAt() { return createdAt; }
 	public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+	public String getDecision() { return decision; }
+	public void setDecision(String decision) { this.decision = decision; }
+	
+	
 	
 	
 	

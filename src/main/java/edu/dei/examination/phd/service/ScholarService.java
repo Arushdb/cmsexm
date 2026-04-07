@@ -123,15 +123,35 @@ public class ScholarService {
         scholarDTO.setProgramname((String)scholarRow[9]);
 
         // ---------- 2. Fetch Latest Progress Report ----------
+//        List<Object[]> reportList =  em.createNativeQuery(
+//                " SELECT pr.id, pr.scholar_semester_id , pr.progress_status  , " +
+//                " pr.next_actions, pr.submitted_at ,s.semester_name ,s.start_date startdate,s.end_date enddate, " +
+//                " s.submission_deadline FROM progress_report as pr  join semesters as s on s.semester_id=pr.semester_registration_id " +
+//                " WHERE pr.scholar_id = :scholarId  and  is_Active = '1' " +
+//                " ORDER BY pr.insert_time DESC")
+//            .setParameter("scholarId", scholarId)
+//            .setMaxResults(1)
+//            .getResultList();
+        
+        
         List<Object[]> reportList = em.createNativeQuery(
-                " SELECT pr.id, pr.semester_registration_id , pr.progress_status  , " +
-                " pr.next_actions, pr.submitted_at ,s.semester_name ,s.start_date startdate,s.end_date enddate, " +
-                " s.submission_deadline FROM progress_report as pr  join semesters as s on s.semester_id=pr.semester_registration_id " +
-                " WHERE pr.scholar_id = :scholarId " +
-                " ORDER BY pr.insert_time DESC")
-            .setParameter("scholarId", scholarId)
-            .setMaxResults(1)
-            .getResultList();
+        	    " SELECT pr.id, pr.scholar_semester_id, pr.progress_status, " +
+        	    " pr.next_actions, pr.submitted_at, s.semester_name, " +
+        	    " s.start_date AS startdate, s.end_date AS enddate, " +
+        	    " s.submission_deadline " +
+        	    " FROM progress_report pr " +
+
+        	    " JOIN scholar_semesters ss ON ss.id = pr.scholar_semester_id " +   // ✅ FIX
+        	    " JOIN semesters s ON s.semester_id = ss.semester_id " +           // ✅ FIX
+
+        	    " WHERE ss.scholar_id = :scholarId " +                             // ✅ BETTER
+        	    " AND s.is_active = 1 " +                                         // ✅ FIX CASE
+
+        	    " ORDER BY pr.insert_time DESC"
+        	)
+        	.setParameter("scholarId", scholarId)
+        	.setMaxResults(1)
+        	.getResultList(); 
 
         ScholarDashboardDTO dashboard = new ScholarDashboardDTO();
         dashboard.setScholar(scholarDTO);
@@ -140,7 +160,11 @@ public class ScholarService {
             Object[] r = reportList.get(0);
 
             dashboard.setReportId(((Number) r[0]).intValue());
-            dashboard.setSemesterRegistrationId(((Number) r[1]).intValue());
+            Integer scholarsemesterid = ((Number)r[1]).intValue();
+            ScholarSemester ssm =theScholarSemesterRepository.findById(scholarsemesterid)
+            		.orElseThrow(()->new RuntimeException("Scholar Semester record not found"));
+            //dashboard.setSemesterRegistrationId(((Number) r[1]).intValue());
+           dashboard.setSemesterRegistrationId(ssm.getSemester().getSemesterId());
             dashboard.setProgressStatus((String) r[2]);
             dashboard.setNextActions((String) r[3]);
                       
@@ -212,39 +236,65 @@ public class ScholarService {
         }
         // if first time entry
         if (reportList.isEmpty()) {
+        	
+        	
 
             ProgressReport pr = new ProgressReport();
-            pr.setScholarId(scholarId);
+            //pr.setScholarId(scholarId);
+//            ScholarSemester ssm=theScholarSemesterRepository
+//            		.findTopByScholarScholarIdOrderBySemesterSemesterIdDesc(scholarId)
+//            		.orElseThrow(()->new RuntimeException("Scholar semester not found")) ;
+            ScholarSemester ssm=theScholarSemesterRepository.
+            		findTopByScholarScholarIdAndReviewStatusNotOrderBySemesterSemesterIdDesc(scholarId, 
+            				ScholarSemester.ReviewStatus.Approved)
+            		.orElseThrow(()->new RuntimeException("Last semester  review is already approved .Valid Scholar semester not found")) ;
+            		
+            
+         
+            pr.setScholarSemester(ssm);
             pr.setProgressStatus(ProgressStatus.DRAFT);
             
            
-            ScholarSemester latestSemester = theScholarSemesterRepository.findTopByScholarIdOrderBySemesterIdDesc(
-            		scholarId)
-    				.orElse(null);
+//            ScholarSemester latestSemester = 
+//            		theScholarSemesterRepository.findTopByScholarScholarIdOrderBySemesterSemesterIdDesc
+//            		(scholarId).orElseThrow(()->new RuntimeException("Scholar semester not found"));
+////            		findTopByScholarIdOrderBySemesterIdDesc(
+//            		scholarId)
+//    				.orElse(null);
 
-    		if (latestSemester != null) {
-    			if (latestSemester.getReviewStatus() != ScholarSemester.ReviewStatus.Approved) {
-
-    				pr.setSemesterRegistrationId(latestSemester.getSemesterId());
-
-    			}else {
-    				throw new ScholarValidationException("Last semester  review is already approved");
-    			}
-    		}
+//    		if (latestSemester != null) {
+//    			if (latestSemester.getReviewStatus() != ScholarSemester.ReviewStatus.Approved) {
+//
+//    				pr.setSemesterRegistrationId(latestSemester.getSemester().getSemesterId());
+//    				pr.setScholarSemester(latestSemester);
+//
+//    			}else {
+//    				throw new ScholarValidationException("Last semester  review is already approved");
+//    			}
+//    		}
             
             
             		
 
-            em.persist(pr);
+            
 
             dashboard.setReportId(pr.getId());
             dashboard.setProgressStatus("DRAFT");
-            dashboard.setSemesterRegistrationId(pr.getSemesterRegistrationId());
-            Semesters semester= theSemesterRepository.findById(pr.getSemesterRegistrationId()).orElse(null); 
+            dashboard.setSemesterRegistrationId(pr.getScholarSemester().getSemester().getSemesterId());
+           
+            Semesters semester= theSemesterRepository.
+            		findById(pr.getScholarSemester().getSemester().getSemesterId()).orElse(null); 
             if(semester==null) {
             	throw new ScholarValidationException("Semester not available");
             }
+            LocalDate today = LocalDate.now();
+            Boolean allowed = !today.isAfter(semester.getSubmissiondeadline());
+            dashboard.setSubmissionAllowed(allowed);
+            
+           
             dashboard.setSemestername(semester.getSemesterName());
+            if (allowed)
+            	em.persist(pr);
             
         }
 

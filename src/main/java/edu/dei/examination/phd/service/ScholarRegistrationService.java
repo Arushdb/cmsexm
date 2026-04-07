@@ -37,13 +37,19 @@ public class ScholarRegistrationService {
 		 ScholarValidationException("Scholar not found: " + scholarId));
 
 		// check existing
-		scholarSemesterrepo.findByScholarIdAndSemesterId(scholarId, semesterId).ifPresent(r -> {
-			throw new ScholarValidationException("Already registered for this semester");
-		});
+		scholarSemesterrepo
+		.findByScholarScholarIdAndSemesterSemesterId(scholarId, semesterId)
+		.orElseThrow(()->new RuntimeException("Already registered for this semester"));
+//		(scholarId, semesterId).ifPresent(r -> {
+//			throw new ScholarValidationException("Already registered for this semester");
+//		});
 
 		ScholarSemester sreg = new ScholarSemester();
+		
+		Semesters sems=semesterRepo.findById(semesterId).orElseThrow();
+		;
 //        sreg.setScholar(sch);
-        sreg.setSemesterId(semesterId);
+        sreg.setSemester(sems);
         sreg.setScholarId(scholarId);
         sreg.setRegistrationDate(LocalDate.now());
 //       
@@ -98,13 +104,16 @@ public class ScholarRegistrationService {
 		Scholars sch = scholarRepo.findByUserId(userid)
 				.orElseThrow(() -> new IllegalArgumentException("Scholar not found: "));
 
-		scholarSemesterrepo.findByScholarIdAndSemesterId(sch.getScholarId(), semid).ifPresent(ss -> {
+		scholarSemesterrepo
+		.findByScholarScholarIdAndSemesterSemesterId(sch.getScholarId(), semid)
+		.orElseThrow(()-> new RuntimeException("You are already registered"));
+		//.findByScholarIdAndSemesterId(sch.getScholarId(), semid).ifPresent(ss -> {
 
-			throw new ScholarValidationException("You are already registered ");
+			//throw new ScholarValidationException("You are already registered ");
 
-		});
+		//});
 
-		ScholarSemester latestSemester = scholarSemesterrepo.findTopByScholarIdOrderBySemesterIdDesc(sch.getScholarId())
+		ScholarSemester latestSemester = scholarSemesterrepo.findTopByScholarScholarIdOrderBySemesterSemesterIdDesc(sch.getScholarId())
 				.orElse(null);
 
 		if (latestSemester != null) {

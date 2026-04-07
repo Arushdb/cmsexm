@@ -2,8 +2,10 @@ package edu.dei.examination.phd.service;
 
 import edu.dei.examination.phd.enums.SupervisorRole;
 import edu.dei.examination.phd.model.ScholarSupervisor;
-
+import edu.dei.examination.phd.model.Scholars;
 import edu.dei.examination.phd.repository.ScholarSupervisorRepository;
+import edu.dei.examination.phd.repository.ScholarsRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,31 +15,34 @@ import java.util.List;
 public class ScholarSupervisorService {
 
     private final ScholarSupervisorRepository scholarSupervisorRepository;
+    private final ScholarsRepository scholarsRepository;
+    
 
     public ScholarSupervisorService(
-            ScholarSupervisorRepository scholarSupervisorRepository) {
+            ScholarSupervisorRepository scholarSupervisorRepository,ScholarsRepository scholarsRepository) {
 
         this.scholarSupervisorRepository = scholarSupervisorRepository;
+        this.scholarsRepository=scholarsRepository;
     }
 
     // Get all supervisors of a scholar
-    public List<ScholarSupervisor> getSupervisorsByScholar(Integer scholarId) {
-
-        return scholarSupervisorRepository
-                .findByScholarIdAndIsActiveTrue(scholarId);
-    }
+//    public List<ScholarSupervisor> getSupervisorsByScholar(Scholars Scholar) {
+//
+//        return scholarSupervisorRepository
+//                .findByScholarIdAndIsActiveTrue(Scholar);
+//    }
 
     // Get primary supervisor of scholar
-    public ScholarSupervisor getPrimarySupervisor(Integer scholarId) {
-
-        return scholarSupervisorRepository
-                .findByScholarIdAndRoleAndIsActiveTrue(
-                        scholarId,
-                        SupervisorRole.PRIMARY
-                )
-                .orElseThrow(() ->
-                        new RuntimeException("Primary supervisor not assigned"));
-    }
+//    public ScholarSupervisor getPrimarySupervisor(Integer scholarId) {
+//
+//        return scholarSupervisorRepository
+//                .findByScholarIdAndRoleAndIsActiveTrue(
+//                        scholarId,
+//                        SupervisorRole.PRIMARY
+//                )
+//                .orElseThrow(() ->
+//                        new RuntimeException("Primary supervisor not assigned"));
+//    }
 
     // Get scholars under a supervisor
     public List<ScholarSupervisor> getScholarsBySupervisor(Integer supervisorId) {
@@ -53,8 +58,9 @@ public class ScholarSupervisorService {
             SupervisorRole role) {
 
         ScholarSupervisor ss = new ScholarSupervisor();
+        Scholars scholar =scholarsRepository.findByScholarId(scholarId).orElseThrow();
 
-        ss.setScholarId(scholarId);
+        ss.setScholar(scholar);
         ss.setSupervisorId(supervisorId);
         ss.setRole(role);
         ss.setIsActive(true);

@@ -2,6 +2,8 @@ package edu.dei.examination.phd.model ;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.dei.examination.phd.enums.ProgressStatus;
 
 import java.time.LocalDate;
@@ -15,11 +17,10 @@ public class ProgressReport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "scholar_id")
-    private Integer scholarId;
-
-    @Column(name = "semester_registration_id")
-    private Integer semesterRegistrationId;
+       
+    @ManyToOne
+    @JoinColumn(name = "scholar_semester_id")
+    private ScholarSemester scholarSemester;
 
     @Column(name = "last_semester_registration_id")
     private Integer lastSemesterRegistrationId;
@@ -60,6 +61,11 @@ public class ProgressReport {
     
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
+    
+    // 🔁 Inverse side
+    @JsonIgnore
+    @OneToOne(mappedBy = "progressReport")
+    private Report report;
 
     @PrePersist
     protected void onCreate() {
@@ -73,15 +79,7 @@ public class ProgressReport {
 
 	public void setId(Integer id) { this.id = id; }
 
-	public Integer getScholarId() { return scholarId; }
-
-	public void setScholarId(Integer scholarId) { this.scholarId = scholarId; }
-
-	public Integer getSemesterRegistrationId() { return semesterRegistrationId; }
-
-	public void setSemesterRegistrationId(Integer semesterRegistrationId) {
-		this.semesterRegistrationId = semesterRegistrationId;
-	}
+	
 
 	public Integer getLastSemesterRegistrationId() { return lastSemesterRegistrationId; }
 
@@ -90,6 +88,14 @@ public class ProgressReport {
 	}
 
 
+
+	public ScholarSemester getScholarSemester() { return scholarSemester; }
+
+	public void setScholarSemester(ScholarSemester scholarSemester) { this.scholarSemester = scholarSemester; }
+
+	public Report getReport() { return report; }
+
+	public void setReport(Report report) { this.report = report; }
 
 	public String getResearchWork() { return researchWork; }
 

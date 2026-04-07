@@ -6,6 +6,7 @@ package edu.dei.examination.phd.model;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(
@@ -122,9 +123,17 @@ public class Scholars {
     @Column(name = "mode")
     private String mode;
     
+    @OneToMany(mappedBy = "scholar")
+    private List<ScholarSupervisor> supervisors;
+    
     @ManyToOne
     @JoinColumn(name = "program_id")
     private Program program;
+    
+ // 🔥 Relationship to Department
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 
     /* ---------- AUTO TIMESTAMP ---------- */
     @PrePersist

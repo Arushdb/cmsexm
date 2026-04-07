@@ -13,9 +13,15 @@ public class ReviewerDashboardDTO {
     private String programName;
 
     private Integer reportId;
+    private Integer scholarSemesterId;
     private String status;
     private String submittedOn;
     private String session;
+    private String semesterName;
+    private Integer totalsessions;
+    private Integer attendedsessions;
+    private Double attendancePercentage;
+    private String attendanceremarks;
     
 
     // Constructor (used in JPQL query)
@@ -23,11 +29,18 @@ public class ReviewerDashboardDTO {
     		Integer scholarId,
     		String enrolmentno,
     		String academicyear,
+    		Integer scholarSemesterId,
+    		String semesterName,
             String scholarName,
             String programName,
             Integer reportId,
             ProgressStatus status,
-            LocalDateTime submittedAt) {
+            LocalDateTime submittedAt,
+            Integer totalsessions,
+            Integer attendedsessions,
+            Double attendancePercentage,
+            String attendanceremarks
+            ) {
 
         this.scholarId = scholarId;
         this.scholarName = scholarName;
@@ -37,12 +50,19 @@ public class ReviewerDashboardDTO {
         this.status = status != null ? status.name() : null;
         this.enrolmentno=enrolmentno;
         this.session=academicyear;
+        this.scholarSemesterId=scholarSemesterId;
+        this.semesterName=semesterName;
         
 
         // Convert timestamp to string
         if (submittedAt != null) {
             this.submittedOn = submittedAt.toString();
         }
+        this.totalsessions=totalsessions;
+        this.attendedsessions=attendedsessions;
+        this.attendancePercentage=attendancePercentage;
+        this.attendanceremarks=attendanceremarks;
+        
     }
 
     // Getters
@@ -90,6 +110,33 @@ public class ReviewerDashboardDTO {
 	public String getSession() { return session; }
 
 	public void setSession(String session) { this.session = session; }
+
+	public Integer getScholarSemesterId() { return scholarSemesterId; }
+
+	public void setScholarSemesterId(Integer scholarSemesterId) { this.scholarSemesterId = scholarSemesterId; }
+
+	public String getSemesterName() { return semesterName; }
+
+	public void setSemesterName(String semesterName) { this.semesterName = semesterName; }
+
+	public Integer getTotalsessions() { return totalsessions; }
+
+	public void setTotalsessions(Integer totalsessions) { this.totalsessions = totalsessions; }
+
+	public Integer getAttendedsessions() { return attendedsessions; }
+
+	public void setAttendedsessions(Integer attendedsessions) { this.attendedsessions = attendedsessions; }
+
+	public Double getAttendancePercentage() { return attendancePercentage; }
+
+	public void setAttendancePercentage(Double attendancePercentage) { this.attendancePercentage = attendancePercentage; }
+
+	public String getAttendanceremarks() { return attendanceremarks; }
+
+	public void setAttendanceremarks(String attendanceremarks) { this.attendanceremarks = attendanceremarks; }
+	
+	
+	
     
     
 }

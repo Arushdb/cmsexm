@@ -109,6 +109,7 @@ public class RemarkController {
         // set reviewerRole from principal roles (optional override)
         r.setRole(role);;
         r.setIsPrivate(Boolean.TRUE.equals(req.getIsPrivate()));
+        r.setIsDeleted(false);
         // optionally set reviewerId if principal maps to a supervisor record
         r.setParentRemarkId(req.getParentRemarkId());
         

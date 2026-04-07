@@ -14,8 +14,8 @@ public class ScholarSupervisor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "scholar_id", nullable = false)
-    private Integer scholarId;
+//    @Column(name = "scholar_id", nullable = false)
+//    private Integer scholarId;
 
     @Column(name = "supervisor_id", nullable = false)
     private Integer supervisorId;
@@ -31,9 +31,13 @@ public class ScholarSupervisor {
     private LocalDate assignedOn = LocalDate.now();
 
     public Integer getId() { return id; }
+    
+    @ManyToOne
+    @JoinColumn(name = "scholar_id")
+    private Scholars scholar;
 
-    public Integer getScholarId() { return scholarId; }
-    public void setScholarId(Integer scholarId) { this.scholarId = scholarId; }
+//    public Integer getScholarId() { return scholarId; }
+//    public void setScholarId(Integer scholarId) { this.scholarId = scholarId; }
 
     public Integer getSupervisorId() { return supervisorId; }
     public void setSupervisorId(Integer supervisorId) { this.supervisorId = supervisorId; }
@@ -46,4 +50,8 @@ public class ScholarSupervisor {
 
     public LocalDate getAssignedOn() { return assignedOn; }
     public void setAssignedOn(LocalDate assignedOn) { this.assignedOn = assignedOn; }
+	public Scholars getScholar() { return scholar; }
+	public void setScholar(Scholars scholar) { this.scholar = scholar; }
+    
+    
 }

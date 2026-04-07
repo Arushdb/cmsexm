@@ -2,6 +2,7 @@ package edu.dei.examination.phd.controller;
 
 import edu.dei.examination.cmsexm.service.UserDetailsImpl;
 import edu.dei.examination.phd.dto.ApiResponse;
+import edu.dei.examination.phd.dto.RemarkRequest;
 import edu.dei.examination.phd.dto.ReviewDetailDTO;
 import edu.dei.examination.phd.dto.ReviewerDashboardDTO;
 import edu.dei.examination.phd.model.ProgressReport;
@@ -12,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reviewer")
@@ -105,15 +107,61 @@ public class ReviewerController {
     // ===============================
     // 3️⃣ Submit Review Decision
     // ===============================
-    @PostMapping("/review")
-    public ResponseEntity<String> reviewReport(
-            @RequestParam Integer reportId,
-            @RequestParam String decision,
-            @RequestParam(required = false) String remarks) {
+    
+    
+  // ===============================
+  // 5️⃣ Submit Decision
+  // ===============================
+//  @PostMapping("/submit-review")
+//  public ResponseEntity<String> requestRevision(
+//           @RequestBody RemarkRequest  payload) {
+//
+//      reviewerService.submitReview(payload);
+//
+//      return ResponseEntity.ok("Revision requested successfully");
+//  }
+  // ===============================
+  // 3️⃣ Submit Review Decision
+  // ===============================
 
-        reviewerService.reviewReport(reportId, decision, remarks);
+    
+    
+    
+    
+//    @PostMapping("/review")
+//    public ResponseEntity<Map<String,String>> reviewReport(
+//            @RequestParam Integer reportId,
+//            @RequestParam String decision,
+//            @RequestParam(required = false) String remarks) {
+//
+//        reviewerService.reviewReport(reportId, decision, remarks);
+//        
+//        return ResponseEntity.ok(Map.of(
+//                "message", "Review submitted successfully"
+//            ));
+//
+//       // return ResponseEntity.ok("Review submitted successfully");
+//    }
+    
+    @PostMapping("/attendance")
+    public ResponseEntity<Map<String,String>> markAttendance(
+            @RequestParam Integer scholarSemesterId,
+            @RequestParam Integer scholarid,
+            @RequestParam Integer totalsessions,
+            @RequestParam Integer attendedsessions,
+            @RequestParam Double attendancePercentage,
+            @RequestParam(required = false) String attendanceremarks
+            ) {
 
-        return ResponseEntity.ok("Review submitted successfully");
+        reviewerService.saveAttendance(scholarSemesterId,scholarid ,totalsessions, attendedsessions,
+        		attendancePercentage,attendanceremarks);
+        
+        return ResponseEntity.ok(Map.of(
+                "message", "Review submitted successfully"
+            ));
+
+       // return ResponseEntity.ok("Review submitted successfully");
     }
+    
 
 }

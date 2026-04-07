@@ -31,6 +31,9 @@ public class Semesters {
 	    private LocalDate  regEndDate;
 	 	@Column(name ="is_active" )
 	 	private Boolean active;
+	 	@Column(name ="submission_deadline" )
+	 	private LocalDate  submissiondeadline;
+	 	
 	 	
 	 	 @Column(name = "academic_year", length = 10)
 	     private String academicYear;  // e.g. "2025-26"
@@ -69,6 +72,13 @@ public class Semesters {
 		public void setAcademicYear(String academicYear) { this.academicYear = academicYear; }
 
 		public Integer getSemesterId() { return semesterId; }
+
+		public LocalDate getSubmissiondeadline() { return submissiondeadline; }
+
+		public void setSubmissiondeadline(LocalDate submissiondeadline) { this.submissiondeadline = submissiondeadline; }
+		
+		
+		
 		
 		
 

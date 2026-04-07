@@ -7,6 +7,7 @@ import edu.dei.examination.phd.repository.ProgressReportRepository;
 
 import edu.dei.examination.phd.repository.ScholarsRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,17 +23,24 @@ import edu.dei.examination.phd.dto.ProgressReportResponse;
 import edu.dei.examination.phd.enums.ProgressStatus;
 
 @Service
-@Transactional
 public class ProgressReportService {
 
-    private final ProgressReportRepository reportRepo;
+    private final ProgressReportRepository progressReportRepository;
     private final ScholarsRepository scholarRepo;
+    
+    private final ScholarSemesterRepository scholarSemesterRepository;
+    @Autowired
+    ReportService reportservice;
 
     public ProgressReportService(
-            ProgressReportRepository reportRepo,
-            ScholarsRepository scholarRepo) {
-        this.reportRepo = reportRepo;
+            ProgressReportRepository progressReportRepository,
+            ScholarsRepository scholarRepo,
+            ReportRepository reportRepository,
+            ScholarSemesterRepository scholarSemesterRepository) {
+        this.progressReportRepository = progressReportRepository;
         this.scholarRepo = scholarRepo;
+       
+        this.scholarSemesterRepository= scholarSemesterRepository;
     }
 
     /* ================= SAVE DRAFT ================= */
@@ -41,13 +49,31 @@ public class ProgressReportService {
         Scholars scholar = scholarRepo.findByUserId(userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Scholar not found"));
+        
+         ScholarSemester ssm=   scholarSemesterRepository.findByScholarScholarIdAndSemesterSemesterId(scholar.getScholarId(),
+        		request.getSemesterRegistrationId())
+        		 .orElseThrow(()->new RuntimeException("Scholar semester not found"));
 
-        ProgressReport report = reportRepo
-                .findByScholarIdAndSemesterRegistrationId(
-                        scholar.getScholarId(),
-                        request.getSemesterRegistrationId()
-                )
-                .orElse(new ProgressReport());
+//        ProgressReport report = progressReportRepository
+//                .findByScholarIdAndSemesterRegistrationId(
+//                        scholar.getScholarId(),
+//                        request.getSemesterRegistrationId()
+//                )
+                //.orElse(new ProgressReport());
+         
+         ProgressReport report = progressReportRepository
+     		    .findTopByScholarSemesterIdOrderByIdDesc(ssm.getId())
+     		    .orElseGet(() -> {
+     		        ProgressReport pr = new ProgressReport();
+     		        pr.setScholarSemester(ssm);
+     		        pr.setProgressStatus(ProgressStatus.DRAFT);
+     		        return pr;
+     		    });
+        
+//        ProgressReport report=   progressReportRepository.findByScholarSemesterId(ssm.getId())
+//        		.orElseThrow(()->new RuntimeException("Scholar semester not found"));
+
+        
         
         if ("SUBMITTED".equals(report.getProgressStatus().toString()) || 
         		"APPROVED".equals(report.getProgressStatus().toString())) {
@@ -55,8 +81,12 @@ public class ProgressReportService {
         }
 
         validateEditable(report);
-        report.setScholarId(scholar.getScholarId());
-        report.setSemesterRegistrationId(request.getSemesterRegistrationId());
+//        ScholarSemester ssm=  scholarSemesterRepository.findByScholarScholarIdAndSemesterSemesterId(scholar.getScholarId(),
+//        		request.getSemesterRegistrationId())
+//        		.orElseThrow(()->new RuntimeException("Scholar semester not found"));
+//        report.setScholarId(scholar.getScholarId());
+//        report.setSemesterRegistrationId(request.getSemesterRegistrationId());
+        report.setScholarSemester(ssm);
         report.setLastSemesterRegistrationId(
                 request.getLastSemesterRegistrationId()
         );
@@ -69,25 +99,40 @@ public class ProgressReportService {
         report.setSummary(request.getSummary());
        // report.setNextActions(request.getNextActions());
 
-        report.setProgressStatus(ProgressStatus.DRAFT);
+        //report.setProgressStatus(ProgressStatus.DRAFT);
 
-        reportRepo.save(report);
+        progressReportRepository.save(report);
     }
 
     /* ================= SUBMIT ================= */
-    public void submitReport(Integer userId,ProgressReportRequest request ) {
+    @Transactional(rollbackFor = Exception.class,transactionManager = "phdTransactionManager")
+    public void submitReport(Integer userId,String username,ProgressReportRequest request )   {
+    	
+    	System.out.println("TX ACTIVE: " + 
+    		    org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive());
 
         Scholars scholar = scholarRepo.findByUserId(userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Scholar not found"));
+        
+        ScholarSemester ssm=   scholarSemesterRepository.findByScholarScholarIdAndSemesterSemesterId(scholar.getScholarId(),
+        		request.getSemesterRegistrationId())
+        		 .orElseThrow(()->new RuntimeException("Scholar semester not found"));
+        
+        ProgressReport report = progressReportRepository
+     		    .findTopByScholarSemesterIdOrderByIdDesc(ssm.getId())
+     		    .orElseThrow(()->new RuntimeException("No draft found to submit"));
 
-        ProgressReport report = reportRepo
-                .findByScholarIdAndSemesterRegistrationId(
-                        scholar.getScholarId(),
-                        request.getSemesterRegistrationId()
-                )
-                .orElseThrow(() ->
-                        new IllegalArgumentException("No draft found to submit"));
+//        ProgressReport report = progressReportRepository
+//                .findByScholarIdAndSemesterRegistrationId(
+//                        scholar.getScholarId(),
+//                        request.getSemesterRegistrationId()
+//                )
+//                .orElseThrow(() ->
+//                        new IllegalArgumentException("No draft found to submit"));
+        
+        
+        
 
         if (report.getProgressStatus() == ProgressStatus.SUBMITTED) {
             throw new IllegalArgumentException("Report already submitted");
@@ -101,11 +146,30 @@ public class ProgressReportService {
 
         report.setProgressStatus(ProgressStatus.SUBMITTED);
         report.setSubmittedAt(LocalDateTime.now());
+        
+        
 
-        reportRepo.save(report);
+       
+        
+        progressReportRepository.save(report);
+       
+
+      
+//        ScholarSemester ss = scholarSemesterRepository
+//        		.findByScholarScholarIdAndSemesterSemesterId(report.getsd(), report.getSemesterRegistrationId())
+//        		.orElseThrow(()->new RuntimeException("Scholar semester not found"));
+//        		.findByScholarIdAndSemesterId(report.getScholarId(), report.getSemesterRegistrationId())
+//        		.orElseThrow(()->new RuntimeException("Scholar semester not found"));
+//        
+       
+       
+        
+        
+        reportservice.createReport(username,report);
+        
     }
     
-    
+       
     @Transactional(readOnly = true)
     public ProgressReportResponse getReportBySemester(
             Integer userId,
@@ -114,37 +178,49 @@ public class ProgressReportService {
         Scholars scholar = scholarRepo.findByUserId(userId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Scholar not found"));
+        
+        ScholarSemester ssm=   scholarSemesterRepository.findByScholarScholarIdAndSemesterSemesterId(scholar.getScholarId(),
+        		semesterRegistrationId)
+        		 .orElseThrow(()->new RuntimeException("Scholar semester not found"));
 
-        ProgressReport report = reportRepo
-                .findByScholarIdAndSemesterRegistrationId(
-                        scholar.getScholarId(),
-                        semesterRegistrationId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("No progress report found"));
+//        ProgressReport report = progressReportRepository
+//                .findByScholarIdAndSemesterRegistrationId(
+//                        scholar.getScholarId(),
+//                        semesterRegistrationId)
+//                .orElseThrow(() ->
+//                        new IllegalArgumentException("No progress report found"));
+        
+        ProgressReport report =progressReportRepository.
+        		findTopByScholarSemesterIdOrderByIdDesc(ssm.getId())
+        		.orElseThrow(() ->
+                new IllegalArgumentException("No progress report found"));
+        
 
         return mapToResponse(report);
     }
     
     
-    @Transactional(readOnly = true)
-    public List<ProgressReportResponse> getAllReports(Integer userId) {
-
-        Scholars scholar = scholarRepo.findByUserId(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Scholar not found"));
-
-        return reportRepo.findByScholarId(scholar.getScholarId())
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+    
+    
+//    @Transactional(readOnly = true)
+//    public List<ProgressReportResponse> getAllReports(Integer userId) {
+//
+//        Scholars scholar = scholarRepo.findByUserId(userId)
+//                .orElseThrow(() ->
+//                        new IllegalArgumentException("Scholar not found"));
+//
+//        return progressReportRepository.findByScholarId(scholar.getScholarId())
+//                .stream()
+//                .map(this::mapToResponse)
+//                .collect(Collectors.toList());
+//    }
     
     private ProgressReportResponse mapToResponse(ProgressReport report) {
 
         ProgressReportResponse dto = new ProgressReportResponse();
 
         dto.setId(report.getId());
-        dto.setSemesterRegistrationId(report.getSemesterRegistrationId());
+        dto.setSemesterRegistrationId(report.getScholarSemester().getSemester().getSemesterId());
        
         dto.setResearchWork(report.getResearchWork());
         dto.setConference(report.getConference());

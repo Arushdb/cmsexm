@@ -20,13 +20,13 @@ import java.util.Map;
 @RequestMapping("/api/progress")
 public class ProgressReportController {
 
-    private final ProgressReportService service;
+    private final ProgressReportService progressReportService;
     private final JwtUtils jwtUtils;
 
     public ProgressReportController(
             ProgressReportService service,
             JwtUtils jwtUtils) {
-        this.service = service;
+        this.progressReportService = service;
         this.jwtUtils = jwtUtils;
     }
 
@@ -48,7 +48,7 @@ public class ProgressReportController {
 
             Integer userId = userDetails.getId().intValue();
 
-        service.saveDraft(userId, request);
+            progressReportService.saveDraft(userId, request);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Draft saved successfully", null)
@@ -66,9 +66,11 @@ public class ProgressReportController {
 
             UserDetailsImpl userDetails =
                 (UserDetailsImpl) authentication.getPrincipal();
+            String username =userDetails.getUsername();
+            
 
             Integer userId = userDetails.getId().intValue();
-        service.submitReport(userId, req);
+            progressReportService.submitReport(userId,username, req);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Report submitted successfully", null)
@@ -89,27 +91,27 @@ public class ProgressReportController {
         
 
         ProgressReportResponse response =
-                service.getReportBySemester(userId, semesterRegistrationId);
+                progressReportService.getReportBySemester(userId, semesterRegistrationId);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Report fetched successfully", response)
         );
     }
     
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<?>> getAllReports(
-            @RequestHeader("Authorization") String authHeader) {
-
-        Claims claims = jwtUtils.getClaims(authHeader);
-        Integer userId = claims.get("userId", Integer.class);
-
-        List<ProgressReportResponse> reports =
-                service.getAllReports(userId);
-
-        return ResponseEntity.ok(
-                ApiResponse.success("Reports fetched successfully", reports)
-        );
-    }
+//    @GetMapping("/all")
+//    public ResponseEntity<ApiResponse<?>> getAllReports(
+//            @RequestHeader("Authorization") String authHeader) {
+//
+//        Claims claims = jwtUtils.getClaims(authHeader);
+//        Integer userId = claims.get("userId", Integer.class);
+//
+//        List<ProgressReportResponse> reports =
+//                service.getAllReports(userId);
+//
+//        return ResponseEntity.ok(
+//                ApiResponse.success("Reports fetched successfully", reports)
+//        );
+//    }
 
 
 }
