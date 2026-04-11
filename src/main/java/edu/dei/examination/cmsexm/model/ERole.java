@@ -6,11 +6,12 @@ public enum ERole {
     ROLE_MODERATOR,
     ROLE_ADMIN,
     ROLE_SCHOLAR,
+    ADMIN,
     
     ROLE_SUPERVISOR,
     ROLE_HOD,
     ROLE_DEAN,
-    ROLE_CO_SUPERVISOR
+    ROLE_REVIEWER
     
 
 }

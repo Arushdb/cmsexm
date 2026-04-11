@@ -1,6 +1,7 @@
 package edu.dei.examination.cmsexm.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -45,7 +46,20 @@ public class UserRolesPK implements Serializable {
 	}
 	
 	
-	
+	 // 🔥 VERY IMPORTANT
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserRolesPK)) return false;
+        UserRolesPK that = (UserRolesPK) o;
+        return Objects.equals(user_id, that.user_id) &&
+               Objects.equals(role_id, that.role_id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(role_id, role_id);
+    }
 	
 
 }

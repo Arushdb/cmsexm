@@ -8,13 +8,13 @@ public class JwtResponse {
 	
 	private String token;
 	private String type = "Bearer";
-	private Long id;
+	private Integer id;
 	private String username;
 	
 	private String menuary ;
 	private List<String> roles;
 
-	public JwtResponse(String accessToken, Long id, String username,  List<String> roles) {
+	public JwtResponse(String accessToken, Integer id, String username,  List<String> roles) {
 		this.token = accessToken;
 		this.id = id;
 		this.username = username;
@@ -25,7 +25,7 @@ public class JwtResponse {
 	
 	
 	
-	public JwtResponse(String token, Long id, String username, String menuary, List<String> roles) {
+	public JwtResponse(String token, Integer id, String username, String menuary, List<String> roles) {
 	
 		this.token = token;
 		this.id = id;
@@ -53,13 +53,22 @@ public class JwtResponse {
 		this.type = tokenType;
 	}
 
-	public Long getId() {
-		return id;
-	}
+	
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+
+
+	public Integer getId() { return id; }
+
+
+
+
+	public void setId(Integer id) { this.id = id; }
+
+
+
+
+	public void setRoles(List<String> roles) { this.roles = roles; }
+
 
 
 

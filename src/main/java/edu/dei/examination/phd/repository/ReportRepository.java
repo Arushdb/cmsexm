@@ -44,7 +44,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.id, r.status, r.submittedOn," +
+    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		" FROM Report r " +
@@ -64,7 +64,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.id, r.status, r.submittedOn," +
+    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		"FROM Report r " +
@@ -76,7 +76,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     		"JOIN ssm.semester sem " +
 
     		"WHERE dra.userId = :userId " +
-    		"AND dra.role = 'HOD' " +
+    		"AND dra.role = 'ROLE_HOD' " +
     		"AND dra.isActive = true " +
     		"AND r.currentSequenceNo = 3"
     		)
@@ -85,7 +85,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.id, r.status, r.submittedOn," +
+    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		"FROM Report r " +
@@ -96,7 +96,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     		"JOIN ssm.semester sem " +
 
     		"WHERE fra.userId = :userId " +
-    		"AND fra.role = 'DEAN' " +
+    		"AND fra.role = 'ROLE_DEAN' " +
     		"AND fra.isActive = true " +
     		"AND r.currentSequenceNo = 4"
     		)

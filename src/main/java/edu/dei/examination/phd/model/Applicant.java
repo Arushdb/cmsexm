@@ -25,11 +25,11 @@ import javax.persistence.ColumnResult;
     		+ "        ELSE 0  "
     		+ "    END AS gender_id, "
     		
-    	  + " program_id as programid,home_phone as phone ,selection_date  as admissionDate from phd_selected_candidates a " 
+    	  + " program_id as programid,home_phone as phone ,selection_date  as admissionDate ,a.department_id from phd_selected_candidates a " 
     	  + " join admlive_061225.entity_student b on a.application_number=b.application_number "
     	  + " and  a.academic_year=b.registered_in_session" 
     	  + " join admlive_061225.admission_addresses_master aam  on aam.user_id=b.student_id"
-    	  + " WHERE academic_year = :year AND admission_month = :month  and address_key='PER' ",
+    	  + " WHERE academic_year = :year AND admission_month = :month  and address_key='PER' and a.status='ACT' ",
     resultSetMapping = "ScholarDTOMapping"
 )
 
@@ -47,6 +47,7 @@ import javax.persistence.ColumnResult;
             @ColumnResult(name = "dob", type = LocalDate.class),
             @ColumnResult(name = "programid", type = Integer.class),
             @ColumnResult(name = "admissionDate", type = LocalDate.class),
+            @ColumnResult(name = "department_id", type = Integer.class)
             
         }
     )

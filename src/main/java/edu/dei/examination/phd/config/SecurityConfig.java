@@ -9,10 +9,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
-@Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(2)
+//@Configuration
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
+//@Order(2)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
 
     // simple in-memory users for demo. Replace with JDBC or LDAP in production.
 //    @Override
@@ -27,24 +28,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //            .withUser("admin").password("{noop}adminpass").roles("ADMIN");
 //    }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-          .csrf().disable() // disable for demo; enable & configure CSRF for browser forms in prod
-          .authorizeRequests()
-             // public endpoints
-             .antMatchers("/api/progress/**").hasAuthority("SCHOLAR")
-             .antMatchers("/api/documents/**").hasAuthority("SCHOLAR")
-             .antMatchers("/api/progress-reports", "/api/progress-reports/**").permitAll()
-             .antMatchers("/api/topics", "/api/topics/**").permitAll()
-             // remarks list is public; adding remark restricted by method-level @PreAuthorize
-             .antMatchers("/api/remarks").permitAll()
-           
-             .anyRequest().authenticated()
-             .and()
-             .sessionManagement()
-                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);;
-        //  .and()
-         //    .httpBasic();
-    }
+ //   @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http
+//          .csrf().disable() // disable for demo; enable & configure CSRF for browser forms in prod
+//          .authorizeRequests()
+//             // public endpoints
+////             .antMatchers("/api/progress/**").hasAuthority("SCHOLAR")
+////             .antMatchers("/api/documents/**").hasAuthority("SCHOLAR")
+////             
+////             .antMatchers("/api/scholars/generate/**").permitAll()
+////             //.antMatchers("/cmsexam/api/scholars/**").hasAnyAuthority("ADMIN","SCHOLAR")
+////             .antMatchers("/api/progress-reports", "/api/progress-reports/**").permitAll()
+////             .antMatchers("/api/topics", "/api/topics/**").permitAll()
+////             // remarks list is public; adding remark restricted by method-level @PreAuthorize
+////             .antMatchers("/api/remarks").permitAll()
+//           
+//             .anyRequest().authenticated()
+//             .and()
+//             .sessionManagement()
+//                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);;
+//        //  .and()
+//         //    .httpBasic();
+//    }
 }

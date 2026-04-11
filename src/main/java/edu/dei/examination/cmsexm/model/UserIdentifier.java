@@ -1,14 +1,19 @@
 package edu.dei.examination.cmsexm.model;
 
 
+import java.time.LocalDateTime;
+
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(
-    name = "user_identifiers",
+    name = "exam_live.user_identifiers",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"identifier_type", "identifier_value"})
-    }
+    },
+    schema = "exam_live"
 )
 public class UserIdentifier {
 
@@ -21,6 +26,7 @@ public class UserIdentifier {
        ========================= */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     /* =========================
@@ -32,12 +38,30 @@ public class UserIdentifier {
 
     @Column(name = "identifier_value", nullable = false, length = 50)
     private String identifierValue;
+    
+    public enum IdentifierType {
+        APPLICATION_NO,
+        REGISTRATION_NO,
+        ENROLLMENT_NO
+    }
 
     /* =========================
        STATUS
        ========================= */
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
-    private String status = "ACTIVE";
+    private Status status = Status.ACTIVE;
+    
+    public enum Status {
+        ACTIVE,
+        INACTIVE
+    }
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     /* =========================
        CONSTRUCTORS
@@ -84,11 +108,20 @@ public class UserIdentifier {
         this.identifierValue = identifierValue;
     }
 
-    public String getStatus() {
-        return status;
-    }
+   
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+
+	public Status getStatus() { return status; }
+
+	public void setStatus(Status status) { this.status = status; }
+
+	public LocalDateTime getCreatedAt() { return createdAt; }
+
+	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+	public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+	public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    
 }

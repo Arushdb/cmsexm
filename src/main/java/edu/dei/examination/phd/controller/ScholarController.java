@@ -23,7 +23,7 @@ import io.jsonwebtoken.Claims;
 
 
 @RestController
-@RequestMapping("/api/scholar")
+@RequestMapping("/api/scholars")
 public class ScholarController {
 	
 

@@ -53,7 +53,7 @@ public class RemarkController {
 
     // only supervisors/co-supervisors/HOD/DEAN allowed to add remarks
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPERVISOR','CO_SUPERVISOR','HOD','DEAN','ADMIN','SCHOLAR')")
+    @PreAuthorize("hasAnyRole('SUPERVISOR','REVIEWER','HOD','DEAN','SCHOLAR')")
     public ResponseEntity<?> add(@Valid @RequestBody RemarkRequest req, BindingResult br, Principal principal) {
 //        if (br.hasErrors()) {
 //            return ResponseEntity.badRequest().body(br.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.toList()));
@@ -72,7 +72,7 @@ public class RemarkController {
                            .stream()
                            .map(GrantedAuthority::getAuthority)
                            .filter(r -> r.contains("SUPERVISOR") 
-                        		   || r.contains("CO_SUPERVISOR")
+                        		   || r.contains("REVIEWER")
                                    || r.contains("HOD") 
                                    || r.contains("DEAN")
                                    || r.contains("SCHOLAR"))

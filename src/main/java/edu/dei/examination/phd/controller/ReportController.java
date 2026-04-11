@@ -35,13 +35,15 @@ public class ReportController {
     }
     
     @PostMapping("/review")
-    public ResponseEntity<String> processReview(
+    public ResponseEntity<ApiResponse<?>> processReview(
             @RequestParam Integer reportId,
             @RequestParam String decision ,
             @RequestParam String remarks
              // APPROVE / REJECT
     ) {
         reportService.processReview(reportId, remarks, decision);
-        return ResponseEntity.ok("Review processed successfully");
+        //return ResponseEntity.ok("c");
+        return ResponseEntity.ok(
+                ApiResponse.success("Reviewer processReview data", "success"));
     }
 }

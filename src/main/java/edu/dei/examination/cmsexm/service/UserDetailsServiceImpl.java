@@ -42,17 +42,26 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Qualifier("examEntityManagerFactory")
 	EntityManager em;
 	
+//	@Override
+//	@Transactional
+//	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//		User user = userRepository.findByUsername(username)
+//				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+//
+//		return UserDetailsImpl.build(user);
+//	}
+
 	@Override
 	@Transactional
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+	public UserDetails loadUserByUsername(String username) {
 
-		return UserDetailsImpl.build(user);
+	    User user = userRepository.findByUsernameWithRoles(username)
+	        .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
+
+	    return UserDetailsImpl.build(user);
 	}
 
-
-public List<UserRoles> getdefaultrole(Long id){
+public List<UserRoles> getdefaultrole(Integer id){
  List<UserRoles> roleList =(List<UserRoles>)em.createNamedQuery("getdefaultrole",UserRoles.class )
 			.setParameter("userid",id)
 			.setParameter("defaultrole", true)

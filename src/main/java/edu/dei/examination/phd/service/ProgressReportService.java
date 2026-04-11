@@ -237,7 +237,10 @@ public class ProgressReportService {
     }
 
     private void validateEditable(ProgressReport report) {
-        if (!"DRAFT".equals(report.getProgressStatus().toString())) {
+        if (!"DRAFT".equals(report.getProgressStatus().toString())&&
+        		!"REVISION_REQUIRED".equals(report.getProgressStatus().toString())
+        		
+        		) {
             throw new RuntimeException("Progress report cannot be modified.");
         }
     }

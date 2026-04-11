@@ -99,7 +99,9 @@ public class ReportService {
 	@Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRED, transactionManager = "phdTransactionManager")
 	public Report createReport(String username,ProgressReport progressReport) {
 
-		Report r = new Report();
+		Report r=reportRepository.findByProgressReportId(progressReport.getId())
+				.orElseGet(()-> new Report());
+		//Report r = new Report());
 		r.setProgressReportId(progressReport.getId());
 
 		// reportRepository.findby
@@ -225,7 +227,7 @@ public class ReportService {
 		    // =========================
 		    // 🔴 HANDLE REJECT
 		    // =========================
-		    if ("REJECT".equalsIgnoreCase(action)) {
+		    if ("REJECTED".equalsIgnoreCase(action)) {
 
 		        report.setStatus(ProgressStatus.REJECTED);
 		        report.setCurrentSequenceNo(null);
@@ -246,7 +248,7 @@ public class ReportService {
 		    // =========================
 		    // ✅ HANDLE APPROVE
 		    // =========================
-		    else if ("APPROVE".equalsIgnoreCase(action)) {
+		    else if ("APPROVED".equalsIgnoreCase(action)) {
 
 		        // 🔄 Find next step
 		        ProgressReviewPolicy next = policies.stream()
@@ -287,6 +289,15 @@ public class ReportService {
 		            scholarSemesterRepo.save(ss);
 		        }
 		    }
+		    else if("REVISION_REQUIRED".equalsIgnoreCase(action)) {
+		    	 ProgressReport pr = progressReportRepo.findById(report.getProgressReportId()).orElseThrow();
+		            pr.setProgressStatus(ProgressStatus.REVISION_REQUIRED);
+		    
+              pr.setNextActions(Remarks);
+              progressReportRepo.save(pr);
+              
+		    	
+		    }
 
 		    else {
 		        throw new RuntimeException("Invalid action");
@@ -301,6 +312,7 @@ public class ReportService {
 		    h.setAction(action);   // ✅ FIXED
 		    h.setActedBy(user.getId().intValue());
 		    h.setActedAt(LocalDateTime.now());
+		    h.setRemarks(Remarks);
 
 		    historyRepo.save(h);
 

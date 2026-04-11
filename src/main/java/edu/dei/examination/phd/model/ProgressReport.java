@@ -148,6 +148,7 @@ public class ProgressReport {
 	public LocalDateTime getSubmittedAt() { return submittedAt; }
 
 	public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
+	
 
     
     // getters and setters

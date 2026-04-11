@@ -66,7 +66,7 @@ public class ReviewerService {
         ProgressReport report = progressReportRepository.findById(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
         
-        
+        String  sqno=report.getReport().getCurrentSequenceNo().toString();
 //        ScholarSemester ss = scholarSemesterRepository
 //        		.findByScholarScholarIdAndSemesterSemesterId(report.getScholarId(),
 //        				report.getSemesterRegistrationId())

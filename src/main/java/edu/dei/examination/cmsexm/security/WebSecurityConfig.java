@@ -122,58 +122,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests()
-			.antMatchers("/api/scholars/**").hasAnyAuthority("ADMIN","SCHOLAR")
-			.antMatchers("/api/phd/**").permitAll()
-			.antMatchers("/api/auth/**").permitAll()
-			.antMatchers("/api/test/**").permitAll() ;
-			//.anyRequest().authenticated();
-		/////////////////////////////////////////////////////////////////////////////////////////
-//			.and()
-//			.formLogin()
-//			.loginPage("/login")
-//			.permitAll()
-//			.and()
-//			.logout()
-//				
-//			.logoutSuccessHandler(new LogoutSuccessHandler() {
-//				
-//				@Override
-//				public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-//						throws IOException, ServletException {
-//					// TODO Auto-generated method stub
-//					System.out.println("The User "+authentication.getName()+ "has loggedout ");
-//					UrlPathHelper helper = new UrlPathHelper();
-//					String context = helper.getContextPath(request);
-//					response.sendRedirect(context+"/");
-//					
-//				}
-//			}).permitAll();
-		
+			 .antMatchers("/cmsexam/api/remarks/**").permitAll()
+	         .antMatchers("/cmsexam/api/reviewer/**").permitAll()
+	         .antMatchers("/cmsexam/api/users/**").hasAuthority("ADMIN")      
+	          
+				.antMatchers("/api/auth/**").permitAll()
+				.antMatchers("/cmsexam/api/scholars/generate/**").hasAuthority("ADMIN")
+				.antMatchers("/cmsexam/api/scholars/**").hasAuthority("SCHOLAR")
+			  // ✅ IMPORTANT: MUST COME BEFORE /scholars/**
+            
+            
+            // 🔒 ROLE-BASED ENDPOINTS
+            .antMatchers("/cmsexam/api/progress/**").hasAuthority("SCHOLAR")
+            .antMatchers("/cmsexam/api/documents/**").hasAuthority("SCHOLAR")
+            .antMatchers("/cmsexam/api/register/**").hasAuthority("SCHOLAR")
+            .antMatchers("/cmsexam/api/reports/**").hasAnyAuthority("ADMIN", "SCHOLAR")
+            
+           
+			.anyRequest().authenticated();
 		
 
-		
-//		http
-//		.authorizeRequests()
-//			.antMatchers("/", "/home").permitAll()
-//			.anyRequest().authenticated()
-//			.and()
-//		.formLogin()
-//						
-//			.and()
-//		.logout()
-//		     .logoutSuccessHandler(new LogoutSuccessHandler() {
-//				
-//				@Override
-//				public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-//						throws IOException, ServletException {
-//					System.out.println("The User "+authentication.getName()+ "has logged out ");
-//					UrlPathHelper helper = new UrlPathHelper();
-//					String context = helper.getContextPath(request);
-//					System.out.println("Context :"+context);
-//					response.sendRedirect(context+"/"+"login");
-//				}
-//			})
-//			.permitAll();
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 	
