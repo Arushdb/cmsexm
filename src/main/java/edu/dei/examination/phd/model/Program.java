@@ -12,10 +12,10 @@ public class Program {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "program_id")
-    private Long programId;
+    private Integer programId;
 
     @Column(name = "name", nullable = false, length = 100)
-    private String programName;
+    private String programname;
 
     @Column(name = "mode")
     private String mode;
@@ -37,6 +37,7 @@ public class Program {
     
  // 🔥 IMPORTANT RELATION
     @OneToMany(mappedBy = "program", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ProgramRoleAssignment> roleAssignments;
 
     // ===== Constructors =====
@@ -44,24 +45,17 @@ public class Program {
     public Program() {
     }
 
-       // ===== Getters & Setters =====
+	public String getProgramname() { return programname; }
 
-   
+	public void setProgramname(String programname) { this.programname = programname; }
 
-    public String getProgramName() {
-        return programName;
-    }
+	public List<ProgramRoleAssignment> getRoleAssignments() { return roleAssignments; }
 
-   
+	public void setRoleAssignments(List<ProgramRoleAssignment> roleAssignments) { this.roleAssignments = roleAssignments; }
 
-	public Long getProgramId() { return programId; }
+	
 
-	public void setProgramId(Long programId) { this.programId = programId; }
-
-	public void setProgramName(String programName) {
-        this.programName = programName;
-    }
-
+	
 
 
 	public String getMode() { return mode; }
@@ -82,7 +76,12 @@ public class Program {
 
 	public void setScholars(List<Scholars> scholars) { this.scholars = scholars; }
 
+	public Integer getProgramId() { return programId; }
+
+	public void setProgramId(Integer programId) { this.programId = programId; }
+
   
+	
 }
    
 

@@ -18,6 +18,9 @@ public class ScholarDTO {
     private String programname;
     private Integer department_id;
     private Integer userid;
+    private Integer scholarid;
+    private String enrolmentno;
+    
     
     
   
@@ -31,7 +34,8 @@ public class ScholarDTO {
 
     public ScholarDTO(String appno, String firstName, String category, 
     		String email, String phone, int gender_id,
-			LocalDate dob, int programid, LocalDate admissionDate,Integer department_id ) {
+			LocalDate dob, int programid, LocalDate admissionDate,Integer department_id ,
+			Integer scholarid,String enrolmentno) {
 		
 		this.appno = appno;
 		this.firstName = firstName;
@@ -43,6 +47,9 @@ public class ScholarDTO {
 		this.programid = programid;
 		this.admissionDate = admissionDate;
 		this.department_id=department_id;
+		this.scholarid=scholarid;
+		this.enrolmentno=enrolmentno;
+		 
 	}
 
 	public ScholarDTO() {}
@@ -96,6 +103,17 @@ public class ScholarDTO {
 	public Integer getUserid() { return userid; }
 
 	public void setUserid(Integer userid) { this.userid = userid; }
+
+	public Integer getScholarid() { return scholarid; }
+
+	public void setScholarid(Integer scholarid) { this.scholarid = scholarid; }
+
+	public String getEnrolmentno() { return enrolmentno; }
+
+	public void setEnrolmentno(String enrolmentno) { this.enrolmentno = enrolmentno; }
+	
+	
+	
 	
 	
 	

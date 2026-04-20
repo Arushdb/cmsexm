@@ -15,12 +15,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 	Boolean existsByUsername(String username);
 	
-	@Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE LOWER(u.username) = LOWER(:username)")
+	@Query("SELECT distinct u FROM User u LEFT JOIN FETCH u.roles WHERE LOWER(u.username) = LOWER(:username)")
 	Optional<User> findByUsernameWithRoles(String username);
 
 	
-	@Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.id = :id")
-	Optional<User> findByUseridWithRoles(Integer id);
+	@Query("SELECT  u FROM User u  JOIN FETCH u.roles r WHERE r.id = :id")
+	Optional<List<User>> findByRoleIds(Integer id);
 	
 	@Query("SELECT u FROM User u WHERE " +
 		       "LOWER(u.name) LIKE LOWER(CONCAT('%', :q, '%')) OR " +

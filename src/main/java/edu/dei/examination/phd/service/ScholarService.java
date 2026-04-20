@@ -19,11 +19,15 @@ import edu.dei.examination.phd.dto.ScholarDTO;
 import edu.dei.examination.phd.dto.ScholarDashboardDTO;
 import edu.dei.examination.phd.enums.ProgressStatus;
 import edu.dei.examination.phd.exception.ScholarValidationException;
+import edu.dei.examination.phd.model.ProgramRoleAssignment;
 import edu.dei.examination.phd.model.ProgressReport;
 import edu.dei.examination.phd.model.ScholarSemester;
+import edu.dei.examination.phd.model.ScholarSupervisor;
 import edu.dei.examination.phd.model.Scholars;
 import edu.dei.examination.phd.model.Semesters;
+import edu.dei.examination.phd.repository.ProgramRoleAssignmentRepository;
 import edu.dei.examination.phd.repository.ScholarSemesterRepository;
+import edu.dei.examination.phd.repository.ScholarSupervisorRepository;
 import edu.dei.examination.phd.repository.ScholarsRepository;
 import edu.dei.examination.phd.repository.SemesterRepository;
 
@@ -39,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ScholarService {
@@ -56,6 +61,11 @@ public class ScholarService {
 	
 	@Autowired
 	UserService userservice;
+	
+
+    @Autowired private ScholarsRepository scholarRepo;
+    @Autowired private ScholarSupervisorRepository supervisorRepo;
+    @Autowired private ProgramRoleAssignmentRepository programRoleRepo;
 
 	 @PersistenceContext(unitName = "phd") 
     private EntityManager em;
@@ -384,5 +394,80 @@ public class ScholarService {
     	
     	
     }
+    
+   
 
-}
+
+        // =========================
+        // GET ALL
+        // =========================
+        public List<ScholarDTO> getAll() {
+            return scholarRepo.findAll()
+            		 .stream()
+                     .map(s -> {
+                         ScholarDTO dto = new ScholarDTO();
+                         
+                         dto.setScholarid(s.getScholarId());
+                         dto.setFirstName(s.getFullName());
+                         dto.setEmail(s.getEmail());
+                         dto.setEnrolmentno(s.getEnrolmentno());
+                         dto.setProgramname(s.getProgram().getProgramname());
+                         return dto;
+                     })
+                     .collect(Collectors.toList());
+        }
+
+        // =========================
+        // GET BY ID
+        // =========================
+        public Scholars getById(Integer id) {
+            return scholarRepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Scholar not found"));
+        }
+
+        // =========================
+        // UPDATE
+        // =========================
+        public Scholars update(Integer id, Scholars updated) {
+
+            Scholars s = getById(id);
+
+            s.setFullName(updated.getFullName());
+            s.setEmail(updated.getEmail());
+            s.setPhone(updated.getPhone());
+
+            return scholarRepo.save(s);
+        }
+
+        // =========================
+        // DELETE
+        // =========================
+        public void delete(Integer id) {
+            scholarRepo.deleteById(id);
+        }
+
+        // =========================
+        // GET SUPERVISOR
+        // =========================
+        public List<ScholarSupervisor> getSupervisor(Integer scholarId) {
+            return supervisorRepo.findByScholar_ScholarIdAndIsActiveTrue(scholarId);
+        }
+
+        // =========================
+        // GET PROGRAM ID
+        // =========================
+        private Integer getProgramId(Integer scholarId) {
+            return getById(scholarId).getProgramId();
+        }
+
+        // =========================
+        // GET HOD
+        // =========================
+        public List<ProgramRoleAssignment> getProgramByRole(Integer scholarId,String role) {
+            //return programRoleRepo.findByProgram_IdAndRole(getProgramId(scholarId), "HOD");
+           return  programRoleRepo.findByProgram_ProgramIdAndRole(getProgramId(scholarId), role);
+        }
+
+        
+    }
+

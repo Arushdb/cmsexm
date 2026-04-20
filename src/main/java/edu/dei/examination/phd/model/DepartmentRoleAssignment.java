@@ -4,6 +4,8 @@ package edu.dei.examination.phd.model;
 
 import javax.persistence.*;
 
+import edu.dei.examination.cmsexm.model.User;
+
 @Entity
 @Table(name = "department_role_assignment")
 public class DepartmentRoleAssignment {
@@ -17,9 +19,14 @@ public class DepartmentRoleAssignment {
 
     @Column(name = "role_id", nullable = false)
     private Integer roleId;   // HOD
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+//    @Column(name = "user_id", nullable = false)
+//    private Integer userId;
     private String role;        // 🔥 ADD THIS
     private Boolean isActive;   // 🔥 ADD THIS
     
@@ -43,8 +50,8 @@ public class DepartmentRoleAssignment {
     public Integer getRoleId() { return roleId; }
     public void setRoleId(Integer roleId) { this.roleId = roleId; }
 
-    public Integer getUserId() { return userId; }
-    public void setUserId(Integer userId) { this.userId = userId; }
+//    public Integer getUserId() { return userId; }
+//    public void setUserId(Integer userId) { this.userId = userId; }
 
 	public Department getDepartment() { return department; }
 
@@ -57,6 +64,10 @@ public class DepartmentRoleAssignment {
 	public Boolean getIsActive() { return isActive; }
 
 	public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+
+	public User getUser() { return user; }
+
+	public void setUser(User user) { this.user = user; }
 	
 	
 

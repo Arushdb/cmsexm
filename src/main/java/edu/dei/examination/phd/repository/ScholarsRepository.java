@@ -27,19 +27,7 @@ public interface ScholarsRepository extends JpaRepository<Scholars, Integer> {
 
     /* ---------- COMBINED LOGIC ---------- */
 
-    @Query(
-        "SELECT s FROM Scholars s " +
-        "WHERE s.registrationNo = :loginId " +
-        "   OR s.enrolmentno = :enrolmentNo " +
-        "   OR s.applicationNumber = :loginId " +
-        "   OR s.email = :email"
-    )
-    Optional<Scholars> findScholarForLogin(
-            @Param("loginId") String loginId,
-            @Param("enrolmentNo") Integer enrolmentNo,
-            @Param("email") String email
-    );
-
+   
     /* ---------- FILTERS ---------- */
 
     List<Scholars> findByProgramId(Integer programId);

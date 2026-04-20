@@ -93,7 +93,7 @@ public class ReviewerService {
                 ss.getOverallRemarks(),
                 scholar.getFullName(),
                 scholar.getEnrolmentno(),
-                scholar.getProgram().getProgramName()
+                scholar.getProgram().getProgramname()
                 
                // theReviewerRemark
         );

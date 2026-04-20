@@ -64,4 +64,9 @@ public class UserController {
         return service.searchUsers(q);
     }
     
+    @GetMapping("/rolename/{rolename}")
+    public List<User> getByroles(@PathVariable String rolename) {
+        return service.getUserswithroles(rolename);
+    }
+    
 }

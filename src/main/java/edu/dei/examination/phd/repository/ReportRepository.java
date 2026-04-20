@@ -23,7 +23,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
+    		" sc.fullName, p.programname, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		"FROM Report r " +
@@ -34,7 +34,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     		"JOIN sc.program p " +
     		"JOIN ssm.semester sem " +
 
-    		"WHERE dra.userId = :userId " +
+    		"WHERE dra.user.id = :userId " +
     		"AND dra.role = 'ROLE_SUPERVISOR' " +
     		"AND dra.isActive = true " +
     		"AND r.currentSequenceNo = 1"
@@ -44,7 +44,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
+    		" sc.fullName, p.programname, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		" FROM Report r " +
@@ -55,7 +55,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     		" JOIN ssm.semester sem " +
     		" JOIN ProgramRoleAssignment fra ON fra.program = p" +
 
-    		" WHERE fra.userId = :userId " +
+    		" WHERE fra.user.id = :userId " +
     		" AND r.currentSequenceNo = 2"
     		)
     		List<ReviewerDashboardDTO> getReviewerDashboard(@Param("userId") Integer userId);
@@ -64,7 +64,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
+    		" sc.fullName, p.programname, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		"FROM Report r " +
@@ -75,7 +75,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     		"JOIN sc.program p " +
     		"JOIN ssm.semester sem " +
 
-    		"WHERE dra.userId = :userId " +
+    		"WHERE dra.user.id= :userId " +
     		"AND dra.role = 'ROLE_HOD' " +
     		"AND dra.isActive = true " +
     		"AND r.currentSequenceNo = 3"
@@ -85,19 +85,21 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query(
     		"SELECT new edu.dei.examination.phd.dto.ReviewerDashboardDTO(" +
     		" sc.scholarId, sc.enrolmentno, sem.academicYear, ssm.id, sem.semesterName," +
-    		" sc.fullName, p.programName, r.progressReportId, r.status, r.submittedOn," +
+    		" sc.fullName, p.programname, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
     		"FROM Report r " +
     		"JOIN r.scholarSemester ssm " +
     		"JOIN ssm.scholar sc " +
     		"JOIN sc.program p " +
-    		"JOIN p.roleAssignments fra " +
+    		" JOIN sc.department d " +
+    		" JOIN d.roleAssignments dra "+
+    		
     		"JOIN ssm.semester sem " +
 
-    		"WHERE fra.userId = :userId " +
-    		"AND fra.role = 'ROLE_DEAN' " +
-    		"AND fra.isActive = true " +
+    		"WHERE dra.user.id = :userId " +
+    		"AND dra.role = 'ROLE_DEAN' " +
+    		"AND dra.isActive = true " +
     		"AND r.currentSequenceNo = 4"
     		)
     		List<ReviewerDashboardDTO> getDeanDashboard(@Param("userId") Integer userId);

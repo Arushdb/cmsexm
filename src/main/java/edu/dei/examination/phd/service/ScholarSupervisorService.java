@@ -51,23 +51,25 @@ public class ScholarSupervisorService {
                 .findBySupervisorIdAndIsActiveTrue(supervisorId);
     }
 
-    // Assign supervisor
-    public ScholarSupervisor assignSupervisor(
-            Integer scholarId,
-            Integer supervisorId,
-            SupervisorRole role) {
-
-        ScholarSupervisor ss = new ScholarSupervisor();
-        Scholars scholar =scholarsRepository.findByScholarId(scholarId).orElseThrow();
-
-        ss.setScholar(scholar);
-        ss.setSupervisorId(supervisorId);
-        ss.setRole(role);
-        ss.setIsActive(true);
-        ss.setAssignedOn(LocalDate.now());
-
-        return scholarSupervisorRepository.save(ss);
-    }
+//    // Assign supervisor
+//    public ScholarSupervisor assignSupervisor(
+//            Integer scholarId,
+//            Integer supervisorId,
+//            SupervisorRole role) {
+//
+//        ScholarSupervisor ss = new ScholarSupervisor();
+//        Scholars scholar =scholarsRepository.findByScholarId(scholarId).orElseThrow();
+//        
+//        sup
+//
+//        ss.setScholar(scholar);
+//        ss.setSupervisorId(supervisorId);
+//        ss.setRole(role);
+//        ss.setIsActive(true);
+//        ss.setAssignedOn(LocalDate.now());
+//
+//        return scholarSupervisorRepository.save(ss);
+//    }
 
     // Remove supervisor (soft delete)
     public void deactivateSupervisor(Integer id) {

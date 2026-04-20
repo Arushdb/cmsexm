@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -18,6 +19,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import edu.dei.examination.phd.model.ProgramRoleAssignment;
 
 
 @Entity
@@ -33,6 +39,8 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	private String username;
+	@Column(nullable = false)
+    @JsonIgnore
 	private String password;
 	
 	
@@ -65,7 +73,7 @@ public class User {
 	
 		this.password = password;
 	}
-	
+	@JsonIgnoreProperties("user")
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserIdentifier> identifiers;
 
@@ -75,9 +83,7 @@ public class User {
 
 	public void setId(Integer id) { this.id = id; }
 
-	public String getUsername() {
-		return username;
-	}
+	
 
 	public void setUsername(String username) {
 		this.username = username;
@@ -120,6 +126,10 @@ public class User {
 	public List<UserIdentifier> getIdentifiers() { return identifiers; }
 
 	public void setIdentifiers(List<UserIdentifier> identifiers) { this.identifiers = identifiers; }
+
+	public String getUsername() { return username; }
+
+	
 
 	
 	

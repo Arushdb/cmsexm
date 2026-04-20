@@ -124,7 +124,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			 .antMatchers("/cmsexam/api/remarks/**").permitAll()
 	         .antMatchers("/cmsexam/api/reviewer/**").permitAll()
-	         .antMatchers("/cmsexam/api/users/**").hasAuthority("ADMIN")      
+	         .antMatchers("/cmsexam/api/users/**").hasAuthority("ADMIN")
+	         .antMatchers("/cmsexam/api/assign/**").hasAuthority("ADMIN")
 	          
 				.antMatchers("/api/auth/**").permitAll()
 				.antMatchers("/cmsexam/api/scholars/generate/**").hasAuthority("ADMIN")

@@ -7,9 +7,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 
@@ -23,7 +27,7 @@ public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "department_id")
-    private Long departmentId;
+    private Integer departmentId;
 
     // 🔤 Department Name
     @Column(name = "name", nullable = false, length = 150)
@@ -33,22 +37,30 @@ public class Department {
     @Column(name = "code", nullable = false, length = 20)
     private String departmentCode;
 
-    // 🏫 Faculty / School Name (optional)
-    @Column(name = "faculty_id")
-    private String facultyid;
+//    // 🏫 Faculty / School Name (optional)
+//    @Column(name = "faculty_id")
+//    private String facultyid;
+    
+    // =========================
+    // FACULTY RELATION
+    // =========================
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "faculty_id", nullable = false)
+    @JsonIgnore
+    private Faculty faculty;
 
-    // 📌 Active Flag
-    @Column(name = "is_active")
-    private Boolean isActive = true;
+   
 
     // ================= RELATIONSHIPS =================
 
     // 🔗 One Department → Many Scholars
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Scholars> scholars;
 
     // 🔗 One Department → Many Role Assignments (Supervisor/HOD)
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<DepartmentRoleAssignment> roleAssignments;
 
     // ================= CONSTRUCTORS =================
@@ -62,9 +74,7 @@ public class Department {
 
     // ================= GETTERS & SETTERS =================
 
-    public Long getDepartmentId() {
-        return departmentId;
-    }
+   
 
     public String getDepartmentName() {
         return departmentName;
@@ -84,11 +94,13 @@ public class Department {
 
    
 
-    public String getFacultyid() { return facultyid; }
+  
 
-	public void setFacultyid(String facultyid) { this.facultyid = facultyid; }
+	public Faculty getFaculty() { return faculty; }
 
-	public void setDepartmentId(Long departmentId) { this.departmentId = departmentId; }
+	public void setFaculty(Faculty faculty) { this.faculty = faculty; }
+
+	
 
 	public void setScholars(List<Scholars> scholars) { this.scholars = scholars; }
 
@@ -96,13 +108,7 @@ public class Department {
 		this.roleAssignments = roleAssignments;
 	}
 
-	public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
+	
 
     public List<Scholars> getScholars() {
         return scholars;
@@ -111,4 +117,10 @@ public class Department {
     public List<DepartmentRoleAssignment> getRoleAssignments() {
         return roleAssignments;
     }
+
+	public Integer getDepartmentId() { return departmentId; }
+
+	public void setDepartmentId(Integer departmentId) { this.departmentId = departmentId; }
+    
+    
 }

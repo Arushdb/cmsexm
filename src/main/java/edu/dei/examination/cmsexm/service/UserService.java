@@ -45,6 +45,9 @@ public class UserService {
 
 		// 🔐 BCrypt encoding
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		user.setEmail(dto.getEmail());
+		user.setName(dto.getName());
+		user.setPhone(dto.getPhone());
 		
 
 		Set<Role> roles = new HashSet<>(roleRepository.findAllById(dto.getRoleIds()));
@@ -163,6 +166,7 @@ public class UserService {
 
 	        user.setName(dto.getName());
 	        user.setEmail(dto.getEmail());
+	        user.setPhone(dto.getPhone());
 	        Set<Role> roles =new HashSet<> (roleRepository.findAllById(dto.getRoleIds()));
 	        
 	        user.setRoles(roles);
@@ -184,6 +188,15 @@ public class UserService {
 	    public List<User> searchUsers(String keyword) {
 	        return userRepository.searchUsers(keyword);
 	    }
-	
+	    public List<User> getUserswithroles(String roles) {
+	    	Role role =roleRepository.findByName(ERole.valueOf(roles)).orElseThrow(()->new RuntimeException("Roles not found"));
+	    	
+	    	List<User> list= userRepository.findByRoleIds(role.getId()).orElseThrow
+    		(()->new RuntimeException("No user found with this role"+roles));
+	    	
+	        return userRepository.findByRoleIds(role.getId()).orElseThrow
+	        		(()->new RuntimeException("No user found with this role"+roles));
+	    }
+
 	
 }
