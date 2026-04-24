@@ -4,6 +4,8 @@ package edu.dei.examination.phd.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
 public class ScholarService {
 	
 	@Autowired
-	ScholarsRepository thescholarsRepository;
+	ScholarsRepository c;
 	
 	@Autowired
 	RoleRepository roleRepository;
@@ -99,7 +101,7 @@ public class ScholarService {
             
    
         	   String username = row.getEmail();
-        	   String password = row.getDob().toString();
+        	   String password = row.getDateOfBirth().toString();
         	   Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
         			    .orElseThrow(()->new RuntimeException("Scholar Role not found"));
 
@@ -129,10 +131,10 @@ public class ScholarService {
         	    em.createNativeQuery(insertSql)
                        .setParameter("appno", row.getAppno()) 
                        .setParameter("program_id", row.getProgramid())
-                       .setParameter("first_name", row.getFirstName())
+                       .setParameter("first_name", row.getFullName())
                        .setParameter("gender", row.getGender_id())
                        .setParameter("email", row.getEmail()) 
-                       .setParameter("dob", row.getDob())
+                       .setParameter("dob", row.getDateOfBirth())
                        .setParameter("phone", row.getPhone())
                        .setParameter("category", row.getCategory())
                        .setParameter("selection_date", row.getAdmissionDate())
@@ -170,12 +172,12 @@ public class ScholarService {
 
         ScholarDTO scholarDTO = new ScholarDTO();
         scholarDTO.setAppno((String) scholarRow[0]);
-        scholarDTO.setFirstName((String) scholarRow[1]);
+        scholarDTO.setFullName((String) scholarRow[1]);
         scholarDTO.setCategory((String) scholarRow[2]);
         scholarDTO.setEmail((String) scholarRow[3]);
         scholarDTO.setPhone((String) scholarRow[4]);
         scholarDTO.setGender_id(((Number) scholarRow[5]).intValue());
-        scholarDTO.setDob(((java.sql.Date) scholarRow[6]).toLocalDate());
+        scholarDTO.setDateOfBirth(((java.sql.Date) scholarRow[6]).toLocalDate());
         scholarDTO.setProgramid(((Number) scholarRow[7]).intValue());
         scholarDTO.setAdmissionDate(((java.sql.Date) scholarRow[8]).toLocalDate());
         scholarDTO.setProgramname((String)scholarRow[9]);
@@ -385,7 +387,7 @@ public class ScholarService {
     
     public Scholars getScholarByUserid(int userid) {
     	
-    	return thescholarsRepository.findByUserId(userid)
+    	return scholarRepo.findByUserId(userid)
     			.orElseThrow(() ->
                 new RuntimeException("Scholar not found"));
     	
@@ -408,7 +410,7 @@ public class ScholarService {
                          ScholarDTO dto = new ScholarDTO();
                          
                          dto.setScholarid(s.getScholarId());
-                         dto.setFirstName(s.getFullName());
+                         dto.setFullName(s.getFullName());
                          dto.setEmail(s.getEmail());
                          dto.setEnrolmentno(s.getEnrolmentno());
                          dto.setProgramname(s.getProgram().getProgramname());
@@ -428,13 +430,18 @@ public class ScholarService {
         // =========================
         // UPDATE
         // =========================
-        public Scholars update(Integer id, Scholars updated) {
+        public Scholars update(Integer id, ScholarDTO updated) {
 
             Scholars s = getById(id);
-
+            
             s.setFullName(updated.getFullName());
             s.setEmail(updated.getEmail());
             s.setPhone(updated.getPhone());
+          
+            s.setFathername(updated.getFathername());
+            s.setAddressForCorrespondence(updated.getAddress());
+            s.setAdmissionDate(updated.getAdmissionDate());
+            s.setDateOfBirth(updated.getDateOfBirth());
 
             return scholarRepo.save(s);
         }
@@ -467,7 +474,101 @@ public class ScholarService {
             //return programRoleRepo.findByProgram_IdAndRole(getProgramId(scholarId), "HOD");
            return  programRoleRepo.findByProgram_ProgramIdAndRole(getProgramId(scholarId), role);
         }
+        
+        
+      
+
+            @Transactional
+            public ScholarDTO updateAcademic(Integer id, ScholarDTO dto) {
+
+                Scholars s = scholarRepo.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Scholar not found with id: " + id));
+
+                // ✅ Safe updates
+                if (dto.getRegistrationdate() != null) {
+                    s.setRegistrationDate(dto.getRegistrationdate());
+                }
+
+                if (dto.getResearchtopiceng() != null) {
+                    s.setResearchTopicEng(dto.getResearchtopiceng());
+                }
+
+                if (dto.getResearchtopichnd() != null) {
+                    s.setResearchTopicHnd(dto.getResearchtopichnd());
+                }
+
+                if (dto.getDateextension() != null) {
+                    s.setDateExtension(dto.getDateextension());
+                }
+
+                if (dto.getDateJRF() != null) {
+                    s.setDateJrf(dto.getDateJRF());
+                }
+
+                if (dto.getDateJRFexp() != null) {
+                    s.setDateJrfExp(dto.getDateJRFexp());
+                }
+
+                Scholars updated = scholarRepo.save(s);
+
+                return map(updated); // your existing mapper
+            }
+            
+            private ScholarDTO map(Scholars s) {
+                ScholarDTO dto = new ScholarDTO();
+
+                dto.setScholarid(s.getScholarId());
+                dto.setRegistrationdate(s.getRegistrationDate());
+                dto.setResearchtopiceng(s.getResearchTopicEng());
+                dto.setResearchtopichnd(s.getResearchTopicHnd());
+                dto.setDateextension(s.getDateExtension());
+                dto.setDateJRF(s.getDateJrf());
+                dto.setDateJRFexp(s.getDateJrfExp());
+
+                return dto;
+            }
+            
+            @Transactional
+            public Page<ScholarDTO> search(Pageable pageable) {
+
+                Page<Scholars> page = scholarRepo.findAll(pageable);
+
+                return page.map(this::mapToDTO);
+            }
+            @Transactional
+            public Page<ScholarDTO> search(Pageable pageable,String keyword, Integer deptId) {
+
+            	 Page<Scholars> page = scholarRepo.search(keyword, deptId,pageable);
+            	 return page.map(this::mapToDTO);
+                
+            }
+       
+           
+            
+            private ScholarDTO mapToDTO(Scholars s) {
+                return new ScholarDTO(
+                        s.getScholarId(),
+                        s.getFullName(),
+                        s.getEnrolmentno(),
+                        s.getDepartment().getDepartmentName(),
+                        s.getProgram().getProgramname(),
+                        s.getEmail(),
+                        s.getPhone(),
+                        s.getFathername(),
+                        s.getAddressForCorrespondence(),
+                        s.getAdmissionDate(),
+                        s.getDateOfBirth(),
+                        s.getResearchTopicEng(),
+                        s.getResearchTopicHnd(),
+                        s.getNameInHindi(),
+                        s.getDateJrf(),
+                        s.getDateJrfExp(),
+                        s.getDateExtension(),
+                        s.getRegistrationDate()
+                );
+            }
+        } 
 
         
-    }
+    
 

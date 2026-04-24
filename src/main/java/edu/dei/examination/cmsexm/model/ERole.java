@@ -10,7 +10,8 @@ public enum ERole {
     ROLE_COSUPERVISOR,
     ROLE_HOD,
     ROLE_DEAN,
-    ROLE_REVIEWER
+    ROLE_REVIEWER,
+    ROLE_EXAMADMIN
     
 
 }

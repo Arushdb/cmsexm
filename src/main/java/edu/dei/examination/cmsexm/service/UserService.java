@@ -36,7 +36,11 @@ public class UserService {
 
 	@Autowired
 	private UserIdentifierRepository userIdentifierRepository;
-
+	
+	@Autowired private PasswordService passwordService;
+	
+	
+    @Transactional
 	public User createUser(UserDTO dto) {
 			//String username, String password, List<Integer> roleIds) {
         
@@ -45,6 +49,11 @@ public class UserService {
 
 		// 🔐 BCrypt encoding
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		
+		String password = PasswordUtil.generatePassword(10);
+		System.out.println(password);
+		user.setPassword(passwordEncoder.encode(password));
+		
 		user.setEmail(dto.getEmail());
 		user.setName(dto.getName());
 		user.setPhone(dto.getPhone());
@@ -53,8 +62,14 @@ public class UserService {
 		Set<Role> roles = new HashSet<>(roleRepository.findAllById(dto.getRoleIds()));
 		
 		user.setRoles(roles);
+		
 
-		return userRepository.save(user);
+		 userRepository.save(user);
+		 passwordService.sendResetLink(user.getEmail());
+		 
+		 return user;
+		 
+		 
 
 	}
 

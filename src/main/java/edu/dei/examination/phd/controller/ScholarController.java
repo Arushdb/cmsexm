@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.dei.examination.cmsexm.exception.ResourceNotFoundException;
@@ -55,6 +60,17 @@ public class ScholarController {
 			return ResponseEntity.ok(ApiResponse.success("No scholars created", count));
 		}
 	}
+	
+	@PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
+	@PutMapping("/academics/{id}")
+    public ResponseEntity<ScholarDTO> updateAcademic(
+            @PathVariable Integer id,
+            @RequestBody ScholarDTO dto) {
+
+        ScholarDTO updated = scholarService.updateAcademic(id, dto);
+
+        return ResponseEntity.ok(updated);
+    }
 
 	@GetMapping("/scholardashboard")
 
@@ -125,13 +141,14 @@ public class ScholarController {
 	// UPDATE
 	// =========================
 	@PutMapping("/{id}")
-	public Scholars update(@PathVariable Integer id, @RequestBody Scholars s) {
+	public Scholars update(@PathVariable Integer id, @RequestBody ScholarDTO s) {
 		return scholarService.update(id, s);
 	}
 
 	// =========================
 	// DELETE
 	// =========================
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> delete(@PathVariable Integer id) {
 		scholarService.delete(id);
@@ -152,6 +169,22 @@ public class ScholarController {
 	@GetMapping("/{id}/hod")
 	public List<ProgramRoleAssignment> getHod(@PathVariable Integer id, @PathVariable String role) {
 		return scholarService.getProgramByRole(id, role);
+	}
+	
+	@GetMapping("/search")
+	public ResponseEntity<Page<ScholarDTO>> searchScholars(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(required = false) String keyword,
+	        @RequestParam(required = false) Integer deptId
+	        
+	) {
+
+	    Pageable pageable = PageRequest.of(page, size);
+
+	    Page<ScholarDTO> result = scholarService.search(pageable,keyword,deptId);
+
+	    return ResponseEntity.ok(result);
 	}
 
 }

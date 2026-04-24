@@ -88,19 +88,20 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     		" sc.fullName, p.programname, r.progressReportId, r.status, r.submittedOn," +
     		" ssm.totalsessions, ssm.attendedsessions, ssm.attendancePercentage, ssm.attendanceremarks) " +
 
-    		"FROM Report r " +
-    		"JOIN r.scholarSemester ssm " +
-    		"JOIN ssm.scholar sc " +
-    		"JOIN sc.program p " +
+    		" FROM Report r " +
+    		" JOIN r.scholarSemester ssm " +
+    		" JOIN ssm.scholar sc " +
+    		" JOIN sc.program p " +
     		" JOIN sc.department d " +
-    		" JOIN d.roleAssignments dra "+
+    		" JOIN d.faculty f "+
+    		" JOIN f.roleAssignments fra" +
     		
-    		"JOIN ssm.semester sem " +
+    		" JOIN ssm.semester sem " +
 
-    		"WHERE dra.user.id = :userId " +
-    		"AND dra.role = 'ROLE_DEAN' " +
-    		"AND dra.isActive = true " +
-    		"AND r.currentSequenceNo = 4"
+    		" WHERE fra.user.id = :userId " +
+    		" AND fra.role = 'ROLE_DEAN' " +
+    		
+    		" AND r.currentSequenceNo = 4"
     		)
     		List<ReviewerDashboardDTO> getDeanDashboard(@Param("userId") Integer userId);
 }

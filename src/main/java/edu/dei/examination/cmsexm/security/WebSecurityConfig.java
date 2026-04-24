@@ -55,6 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new AuthTokenFilter();
 	}
 	
+	
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -122,12 +123,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests()
+			.antMatchers("/api/auth/**").permitAll()
 			 .antMatchers("/cmsexam/api/remarks/**").permitAll()
 	         .antMatchers("/cmsexam/api/reviewer/**").permitAll()
 	         .antMatchers("/cmsexam/api/users/**").hasAuthority("ADMIN")
 	         .antMatchers("/cmsexam/api/assign/**").hasAuthority("ADMIN")
 	          
-				.antMatchers("/api/auth/**").permitAll()
+				
 				.antMatchers("/cmsexam/api/scholars/generate/**").hasAuthority("ADMIN")
 				.antMatchers("/cmsexam/api/scholars/**").hasAuthority("SCHOLAR")
 			  // ✅ IMPORTANT: MUST COME BEFORE /scholars/**

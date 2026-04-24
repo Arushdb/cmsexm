@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.dei.examination.cmsexm.model.Login;
@@ -31,10 +32,12 @@ import edu.dei.examination.cmsexm.model.RefreshToken;
 import edu.dei.examination.cmsexm.model.User;
 import edu.dei.examination.cmsexm.model.UserRoles;
 import edu.dei.examination.cmsexm.payload.request.LoginRequest;
+import edu.dei.examination.cmsexm.payload.request.ResetPasswordRequest;
 import edu.dei.examination.cmsexm.payload.response.JwtResponse;
 import edu.dei.examination.cmsexm.repository.RoleRepository;
 import edu.dei.examination.cmsexm.repository.UserRepository;
 import edu.dei.examination.cmsexm.security.jwt.JwtUtils;
+import edu.dei.examination.cmsexm.service.PasswordService;
 import edu.dei.examination.cmsexm.service.RefreshTokenService;
 import edu.dei.examination.cmsexm.service.UserDetailsImpl;
 import edu.dei.examination.cmsexm.service.UserDetailsServiceImpl;
@@ -69,6 +72,9 @@ public class AuthController {
 	
 	@Autowired
     UserDetailsServiceImpl userDetailsServiceImpl;	
+	
+	 @Autowired
+	    private PasswordService passwordService;
 
 
 	@PostMapping("/signin")	
@@ -165,4 +171,30 @@ public class AuthController {
 	    );
 	}
 
+	
+	 // =========================
+    // 📧 FORGOT PASSWORD
+    // =========================
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgot(@RequestParam String email) {
+
+        passwordService.sendResetLink(email);
+
+        return ResponseEntity.ok(Map.of("message", "Reset link sent"));
+    }
+
+    // =========================
+    // 🔐 RESET PASSWORD
+    // =========================
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> reset(@RequestBody ResetPasswordRequest req) {
+
+        passwordService.resetPassword(
+                req.getToken(),
+                req.getPassword()
+        );
+
+        return ResponseEntity.ok(Map.of("message", "Password updated"));
+        
+    }
 }

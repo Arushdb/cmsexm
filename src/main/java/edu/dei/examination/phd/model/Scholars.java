@@ -4,6 +4,9 @@ package edu.dei.examination.phd.model;
 
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -124,6 +127,7 @@ public class Scholars {
     private String mode;
     
     @OneToMany(mappedBy = "scholar")
+    @JsonIgnore
     private List<ScholarSupervisor> supervisors;
     
     @ManyToOne
@@ -131,9 +135,17 @@ public class Scholars {
     private Program program;
     
  // 🔥 Relationship to Department
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
+    
+   
+  
+   
+  
+    
+    
+  
 
     /* ---------- AUTO TIMESTAMP ---------- */
     @PrePersist
@@ -316,7 +328,20 @@ public class Scholars {
 	public Program getProgram() { return program; }
 
 	public void setProgram(Program program) { this.program = program; }
-    
+
+	public List<ScholarSupervisor> getSupervisors() { return supervisors; }
+
+	public void setSupervisors(List<ScholarSupervisor> supervisors) { this.supervisors = supervisors; }
+
+	public Department getDepartment() { return department; }
+
+	public void setDepartment(Department department) { this.department = department; }
+
+	
+
+	
+
+	
     
 }
 
