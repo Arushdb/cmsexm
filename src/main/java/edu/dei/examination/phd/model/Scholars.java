@@ -5,6 +5,11 @@ package edu.dei.examination.phd.model;
 
 import javax.persistence.*;
 
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
@@ -12,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
 @Table(
     name = "scholars",
     uniqueConstraints = {
@@ -63,8 +69,7 @@ public class Scholars {
     @Column(name = "primary_supervisor_id")
     private Integer primarySupervisorId;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+   
 
     @Column(name = "application_number")
     private String applicationNumber;
@@ -89,9 +94,9 @@ public class Scholars {
     @Column(name = "addressforcorespondence")
     private String addressForCorrespondence;
 
-    @Lob
+    
     @Column(name = "nameinhindi")
-    private byte[] nameInHindi;
+    private String nameInHindi;
 
     @Column(name = "registrationdate")
     private LocalDate registrationDate;
@@ -122,9 +127,22 @@ public class Scholars {
 
     @Column(name = "admission_session")
     private String admissionSession;
+    
+    
+    private String thesisTitle;
 
     @Column(name = "mode")
     private String mode;
+    
+    
+    private String status;
+    private String state;
+    private String minority;
+    @Column(name="physical_handicapped")  
+    private String physicalhandicapped;
+    
+    
+    
     
     @OneToMany(mappedBy = "scholar")
     @JsonIgnore
@@ -141,17 +159,36 @@ public class Scholars {
     
    
   
+    // Auditing Fields
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime modifiedAt;
+
+    @CreatedBy
+    @Column(updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    private String modifiedBy;
    
   
     
     
   
 
-    /* ---------- AUTO TIMESTAMP ---------- */
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+//    /* ---------- AUTO TIMESTAMP ---------- */
+//    @PrePersist
+//    protected void onCreate() {
+//        this.createdAt = LocalDateTime.now();
+//    }
+//    @PreUpdate
+//    public void onUpdate() {
+//        this.modifiedAt = LocalDateTime.now();
+//    }
+    
 
     /* ---------- GETTERS & SETTERS ---------- */
 
@@ -277,9 +314,10 @@ public class Scholars {
 		this.addressForCorrespondence = addressForCorrespondence;
 	}
 
-	public byte[] getNameInHindi() { return nameInHindi; }
 
-	public void setNameInHindi(byte[] nameInHindi) { this.nameInHindi = nameInHindi; }
+	public String getNameInHindi() { return nameInHindi; }
+
+	public void setNameInHindi(String nameInHindi) { this.nameInHindi = nameInHindi; }
 
 	public LocalDate getRegistrationDate() { return registrationDate; }
 
@@ -336,6 +374,42 @@ public class Scholars {
 	public Department getDepartment() { return department; }
 
 	public void setDepartment(Department department) { this.department = department; }
+//	public String getModifiedby() { return modifiedby; }
+//	public void setModifiedby(String modifiedby) { this.modifiedby = modifiedby; }
+	public LocalDateTime getModifiedAt() { return modifiedAt; }
+	public void setModifiedAt(LocalDateTime modifiedAt) { this.modifiedAt = modifiedAt; }
+
+	public String getCreatedBy() { return createdBy; }
+
+	public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+	public String getModifiedBy() { return modifiedBy; }
+
+	public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
+
+	public String getThesisTitle() { return thesisTitle; }
+
+	public void setThesisTitle(String thesisTitle) { this.thesisTitle = thesisTitle; }
+
+	public String getStatus() { return status; }
+
+	public void setStatus(String status) { this.status = status; }
+
+	public String getState() { return state; }
+
+	public void setState(String state) { this.state = state; }
+
+	public String getMinority() { return minority; }
+
+	public void setMinority(String minority) { this.minority = minority; }
+
+	public String getPhysicalhandicapped() { return physicalhandicapped; }
+
+	public void setPhysicalhandicapped(String physicalhandicapped) { this.physicalhandicapped = physicalhandicapped; }
+	
+	
+	
+	
 
 	
 

@@ -41,4 +41,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
     
     @Query("SELECT d FROM Department d WHERE d.faculty.id = :facultyId AND LOWER(d.departmentName) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Department> searchByNameAndFaculty(Integer facultyId, String name);
+    
+   Optional<Department> findByDepartmentCode(String code); 
 }

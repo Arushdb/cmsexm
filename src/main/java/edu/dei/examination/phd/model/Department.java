@@ -34,7 +34,7 @@ public class Department {
     private String departmentName;
 
     // 🔑 Short Code (e.g., CSE, ECE)
-    @Column(name = "code", nullable = false, length = 20)
+    @Column(name = "code", nullable = false, length = 20,unique = true )
     private String departmentCode;
 
 //    // 🏫 Faculty / School Name (optional)

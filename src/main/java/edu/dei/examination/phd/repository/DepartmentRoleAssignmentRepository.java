@@ -18,6 +18,9 @@ public interface DepartmentRoleAssignmentRepository extends JpaRepository<Depart
 // =========================
 	Optional<DepartmentRoleAssignment> findByDepartment_DepartmentIdAndRole(Integer departmentId, String role);
 
+	Optional<DepartmentRoleAssignment> findByDepartment_DepartmentIdAndUser_IdAndRole(Integer departmentId,Integer id, String role);
+	
+	
 // =========================
 // ✅ GET ALL HODs
 // =========================

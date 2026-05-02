@@ -96,16 +96,20 @@ public class AssignmentService {
         		departmentRoleRepo.findByDepartment_DepartmentIdAndRole(departmentId, "ROLE_HOD");
 
         DepartmentRoleAssignment assignment;
+        
 
         if (existing.isPresent()) {
             // update existing HOD
             assignment = existing.get();
             assignment.setUser(user);
+            assignment.setIsActive(true);
         } else {
             assignment = new DepartmentRoleAssignment();
             assignment.setDepartment(dept);
             assignment.setUser(user);
             assignment.setRole("ROLE_HOD");
+            assignment.setIsActive(true);
+            
         }
 
         departmentRoleRepo.save(assignment);
@@ -142,6 +146,7 @@ public class AssignmentService {
     // =========================
     // ASSIGN SUPERVISOR (SCHOLAR LEVEL)
     // =========================
+    @Transactional
     public void assignSupervisor(Integer scholarId, Integer uesrId) {
 
         Scholars scholar = scholarRepo.findById(scholarId)
@@ -170,6 +175,18 @@ public class AssignmentService {
         s.setRole(SupervisorRole.PRIMARY);
 
         scholarsupervisorRepo.save(s);
+        DepartmentRoleAssignment assignment;
+        departmentRoleRepo.findByDepartment_DepartmentIdAndUser_IdAndRole
+        (scholar.getDepartment().getDepartmentId(), user.getId(), "ROLE_SUPERVISOR");
+        assignment = new DepartmentRoleAssignment();
+        assignment.setDepartment(scholar.getDepartment());
+        assignment.setUser(user);
+        assignment.setRole("ROLE_SUPERVISOR");
+        assignment.setIsActive(true);
+        departmentRoleRepo.save(assignment);
+        
+        
+        
     }
 
     // =========================

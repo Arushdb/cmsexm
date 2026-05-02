@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import edu.dei.examination.cmsexm.exception.ResourceNotFoundException;
 import edu.dei.examination.cmsexm.security.jwt.JwtUtils;
@@ -187,4 +188,14 @@ public class ScholarController {
 	    return ResponseEntity.ok(result);
 	}
 
+	@PostMapping("/upload")
+	public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
+	    try {
+	        scholarService.importScholars(file);
+	        return ResponseEntity.ok("Uploaded successfully");
+	    } catch (Exception e) {
+	        return ResponseEntity.badRequest().body(e.getMessage());
+	    }
+	}
+	
 }

@@ -24,13 +24,13 @@ public interface ProgramRepository extends JpaRepository<Program, Integer> {
     // =========================
     // FILTER BY DEPARTMENT
     // =========================
-    List<Program> findByDepartmentid(Integer departmentId);
+    Optional<List<Program>> findByDepartmentid(Integer departmentId);
 
     // =========================
     // FILTER BY MODE
     // =========================
-    List<Program> findByMode(String mode);
+    Optional <List<Program>> findByMode(String mode);
     
-    Optional< Program> findByProgramId(Integer id); 
+    Optional<Program> findByProgramId(Integer id); 
 
 }

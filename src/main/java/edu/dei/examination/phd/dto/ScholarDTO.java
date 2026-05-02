@@ -36,7 +36,7 @@ public class ScholarDTO {
 
 	private String researchtopiceng;
 	private String researchtopichnd;
-	private byte[] nameinhindi;
+	private String nameinhindi;
 
 	public ScholarDTO(String appno, String fullName, String category, String email, String phone, int gender_id,
 			LocalDate dateOfBirth, int programid, LocalDate admissionDate, Integer department_id, Integer scholarid,
@@ -66,7 +66,7 @@ public class ScholarDTO {
 
 	public ScholarDTO(Integer id, String fullName, String enrolmentno, String departmentName, String programName,
 			String email, String phone, String fathername, String address, LocalDate admissionDate, LocalDate dateOfBirth,
-			String researchtopiceng, String researchtopichnd, byte[] nameinhindi, LocalDate dateJRF,
+			String researchtopiceng, String researchtopichnd, String nameinhindi, LocalDate dateJRF,
 			LocalDate dateJRFexp, LocalDate dateextension, LocalDate registrationdate) {
 		this.id = id;
 		this.fullName = fullName;
@@ -99,9 +99,11 @@ public class ScholarDTO {
 
 	public void setFullName(String fullName) { this.fullName = fullName; }
 
-	public byte[] getNameinhindi() { return nameinhindi; }
+	
 
-	public void setNameinhindi(byte[] nameinhindi) { this.nameinhindi = nameinhindi; }
+	public String getNameinhindi() { return nameinhindi; }
+
+	public void setNameinhindi(String nameinhindi) { this.nameinhindi = nameinhindi; }
 
 	public void setEmail(String email) { this.email = email; }
 
