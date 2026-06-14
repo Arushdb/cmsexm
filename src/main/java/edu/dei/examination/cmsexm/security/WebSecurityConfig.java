@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -118,11 +119,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable()
+		
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())) 
+		//http.cors().and().csrf().disable()
+		.csrf().disable()
 		//http.cors().and()
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests()
+			 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+			
 			.antMatchers("/api/auth/**").permitAll()
 			 .antMatchers("/cmsexam/api/remarks/**").permitAll()
 	         .antMatchers("/cmsexam/api/reviewer/**").permitAll()
@@ -137,6 +143,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             
             // 🔒 ROLE-BASED ENDPOINTS
             .antMatchers("/cmsexam/api/progress/**").hasAuthority("SCHOLAR")
+            .antMatchers("/cmsexam/api/progress-work/**").hasAuthority("SCHOLAR")
             .antMatchers("/cmsexam/api/documents/**").hasAuthority("SCHOLAR")
             .antMatchers("/cmsexam/api/register/**").hasAuthority("SCHOLAR")
             .antMatchers("/cmsexam/api/reports/**").hasAnyAuthority("ADMIN", "SCHOLAR")
