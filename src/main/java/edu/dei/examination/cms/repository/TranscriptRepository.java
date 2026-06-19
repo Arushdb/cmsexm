@@ -116,8 +116,9 @@ public class TranscriptRepository {
                      "    ) AS t1 " +
                      "    JOIN ( " +
                      "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, " +
-                     "   sm.student_first_name,CONCAT(if(srsh.session_start_date between pme.start_date and end_date,pme.program_name,pm.program_name), ' ',IF(stt1.component_description = 'NONE','', " +
-                     "   CONCAT('(', stt1.component_description, ') ')),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
+                     "   sm.student_first_name,CONCAT(if(srsh.session_start_date between pme.start_date and end_date,pme.program_name,pm.program_name), ' '," + 
+                     "   if( pm.program_type = 'M','',(IF(stt1.component_description = 'NONE','',  " + 
+                     "   CONCAT('(', stt1.component_description, ') ')))),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
                      "    FROM student_registration_semester_header srsh " +
                      "    JOIN program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                      "    JOIN student_program sp ON srsh.roll_number = sp.roll_number " +
