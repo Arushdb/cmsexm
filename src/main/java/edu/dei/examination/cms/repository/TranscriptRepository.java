@@ -49,8 +49,9 @@ public class TranscriptRepository {
             "AND cmps.session_start_date = pr.session_start_date " +
             "AND cmps.session_end_date = pr.session_end_date " +
             "JOIN student_program sp ON sp.roll_number = srsh.roll_number " +
-            "AND sp.program_id = pch.program_id " +
-            "WHERE srsh.roll_number = ? AND sp.program_status in ('PAS','SWT') AND srsh.status = 'PAS' " +
+            "AND sp.program_id = pch.program_id join program_master pm on pm.program_id = sp.program_id\n" + //
+            " left join student_cgpa sg on sg.roll_number = srsh.roll_number " +
+            "WHERE srsh.roll_number = ? AND if(pm.isNep = 'Y' and sg.third_year_cgpa is not null ,sp.program_status = 'ACT',sp.program_status in ('PAS','SWT')) AND srsh.status = 'PAS' " +
             "GROUP BY sc.semester_start_date, sc.course_code ORDER BY sc.semester_start_date, sc.course_code";
    
     public List<Transcript> getTranscript(String rollNumber) {
@@ -112,7 +113,8 @@ public class TranscriptRepository {
                      "    AND pch.specialization_id = sp.specialization_id AND pch.branch_id = sp.branch_id " +
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number " +
-                     "    WHERE sp.program_status IN ('PAS', 'SWT') AND srsh.roll_number = ? " +
+                     "     left join student_cgpa sg on sg.roll_number = srsh.roll_number "+
+                     "    WHERE if(pm.isNep = 'Y' and sg.third_year_cgpa is not null ,sp.program_status = 'ACT',sp.program_status in ('PAS','SWT')) AND srsh.roll_number = ? " +
                      "    ) AS t1 " +
                      "    JOIN ( " +
                      "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, " +
@@ -127,8 +129,8 @@ public class TranscriptRepository {
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number" +
                      "    JOIN system_table_two stt1 on pch.branch_id = stt1.component_code  and stt1.group_code = 'BRNCOD'" +
-                     "    JOIN system_table_two stt2 on pch.specialization_id = stt2.component_code  and stt2.group_code = 'SPCLCD' " +
-                     "    left join program_master_extension pme on sp.program_id=pme.program_id WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
+                     "    JOIN system_table_two stt2 on pch.specialization_id = stt2.component_code  and stt2.group_code = 'SPCLCD' left join student_cgpa sg on sg.roll_number = srsh.roll_number " +
+                     "    left join program_master_extension pme on sp.program_id=pme.program_id WHERE if(pm.isNep = 'Y' and sg.third_year_cgpa is not null ,sp.program_status = 'ACT',sp.program_status in ('PAS'))  AND srsh.roll_number = ? " +
                      "    ORDER BY sp.program_completion_date DESC LIMIT 1 " +
                      ") AS t2 ON t1.roll_number = t2.roll_number";
 
