@@ -97,7 +97,23 @@ public class TranscriptRepository {
     }
 
     public String getProgramStatus(String rollNumber) {
-        String query = "SELECT program_status FROM student_program WHERE roll_number = ? ORDER BY program_completion_date DESC LIMIT 1";
+        String query = "SELECT "
+        		+ "    IF(isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL, "
+        		+ "       'PAS', "
+        		+ "       program_status) AS program_status "
+        		+ "FROM student_program sp "
+        		+ "JOIN program_master pm "
+        		+ "    ON sp.program_id = pm.program_id "
+        		+ "LEFT JOIN student_cgpa sc "
+        		+ "    ON sc.roll_number = sp.roll_number "
+        		+ "WHERE sp.roll_number = ? "
+        		+ "  AND ("
+        		+ "        (isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL AND sp.current_semester = 'SM6') "
+        		+ "        OR "
+        		+ "        NOT (isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL) "
+        		+ "      ) "
+        		+ " ORDER BY current_semester DESC  "
+        		+ " LIMIT 1" ;
         return cmsJdbcTemplate.queryForObject(query, new Object[]{rollNumber}, String.class);
     }
 
