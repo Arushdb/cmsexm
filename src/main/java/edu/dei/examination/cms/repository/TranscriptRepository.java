@@ -23,7 +23,23 @@ public class TranscriptRepository {
     
 
     // Method to get transcript data
-    private final String transcriptQuery = "SELECT srsh.sgpa Sgpa,srsh.roll_number, " +
+    private final String transcriptQuery = "SELECT IF( " +
+    		"    pm.print_aggregate = 'TAP', " +
+    		"    CONCAT( " +
+    		"        IF( " +
+    		"            sa.theory_sgpa IS NULL, " +
+    		"            '', " +
+    		"            CONCAT('THEORY: ', sa.theory_sgpa) " +
+    		 "        ), " +
+    		 "        '  ', " +
+    		 "        IF( " +
+    		 "            sa.practical_sgpa IS NULL, " +
+    		 "            '', " +
+    		 "            CONCAT('PRACTICAL: ', sa.practical_sgpa) " +
+    		 "        ) " +
+    		 "    ), " +
+    		 "    srsh.sgpa " +
+    		 ") AS Sgpa,srsh.roll_number,  " +
             "substring(pch.semester_code,3,2) as sem, " +
             "concat(substring(pr.session_start_date,1,4), '-', substring(pr.session_end_date,1,4)) as session, " +
             "concat(sc.course_code, ':', cmps.course_name) as course_code_name, " +
@@ -106,7 +122,7 @@ public class TranscriptRepository {
         		+ "    ON sp.program_id = pm.program_id "
         		+ "LEFT JOIN student_cgpa sc "
         		+ "    ON sc.roll_number = sp.roll_number "
-        		+ "WHERE sp.roll_number = ? "
+        		+ "WHERE sp.roll_number = ? AND sp.program_status != 'INC' "
         		+ "  AND ("
         		+ "        (isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL AND sp.current_semester = 'SM6') "
         		+ "        OR "
@@ -136,7 +152,8 @@ public class TranscriptRepository {
                      "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, " +
                      "   sm.student_first_name,CONCAT(if(srsh.session_start_date between pme.start_date and end_date,pme.program_name,pm.program_name), ' '," + 
                      "   if( pm.program_type = 'M','',(IF(stt1.component_description = 'NONE','',  " + 
-                     "   CONCAT('(', stt1.component_description, ') ')))),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
+                     "   CONCAT('(', stt1.component_description, ') ')))),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, if(pm.print_aggregate = 'TAP',concat('THEORY: ',sp.theory_cgpa,'   ','PRACTICAL: ',"
+                     + "                        sp.practical_cgpa,'             ','       Combined CGPA (Theory+Practical) :',sp.cgpa),sp.cgpa) as cgpa " +
                      "    FROM student_registration_semester_header srsh " +
                      "    JOIN program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                      "    JOIN student_program sp ON srsh.roll_number = sp.roll_number " +
