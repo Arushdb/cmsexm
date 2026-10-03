@@ -8,6 +8,8 @@ import edu.dei.examination.phd.enums.ProgressStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "progress_report")
@@ -61,6 +63,14 @@ public class ProgressReport {
     
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
+    
+//    @OneToMany(
+//    	    mappedBy = "progressReport",
+//    	    cascade = CascadeType.ALL,
+//    	    orphanRemoval = true,
+//    	    fetch = FetchType.LAZY
+//    	)
+//    	private List<Publication> publications = new ArrayList<>();
     
     // 🔁 Inverse side
     @JsonIgnore
