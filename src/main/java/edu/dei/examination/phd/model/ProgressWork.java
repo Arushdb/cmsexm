@@ -17,78 +17,61 @@ public class ProgressWork {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer progressWorkId;
+    private Integer id;
 
-    @Column(name = "report_id")
+    @Column(name = "report_id", nullable = false)
     private Integer reportId;
 
-    @Column(name = "stage")
-    private String stageOfResearch;
+    private String stage;
 
     @Column(name = "objective_no")
     private String objectiveNo;
 
     @Column(name = "completion_percentage")
-    private Double completionPercentage;
-
-    @Column(name = "created_by")
-    private String createdBy;
+    private Integer completionPercentage;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "created_by")
+    private String createdBy;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
-        
-    }
+	public Integer getId() { return id; }
 
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-	public Integer getProgressWorkId() { return progressWorkId; }
-
-	public void setProgressWorkId(Integer progressWorkId) { this.progressWorkId = progressWorkId; }
+	public void setId(Integer id) { this.id = id; }
 
 	public Integer getReportId() { return reportId; }
 
 	public void setReportId(Integer reportId) { this.reportId = reportId; }
 
-	public String getStageOfResearch() { return stageOfResearch; }
+	public String getStage() { return stage; }
 
-	public void setStageOfResearch(String stageOfResearch) { this.stageOfResearch = stageOfResearch; }
+	public void setStage(String stage) { this.stage = stage; }
 
 	public String getObjectiveNo() { return objectiveNo; }
 
 	public void setObjectiveNo(String objectiveNo) { this.objectiveNo = objectiveNo; }
 
-	public Double getCompletionPercentage() { return completionPercentage; }
+	public Integer getCompletionPercentage() { return completionPercentage; }
 
-	public void setCompletionPercentage(Double completionPercentage) { this.completionPercentage = completionPercentage; }
-
-	
+	public void setCompletionPercentage(Integer completionPercentage) { this.completionPercentage = completionPercentage; }
 
 	public LocalDateTime getCreatedAt() { return createdAt; }
 
 	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+	public String getCreatedBy() { return createdBy; }
+
+	public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
 	public LocalDateTime getUpdatedAt() { return updatedAt; }
 
 	public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-	public String getCreatedBy() { return createdBy; }
-
-	public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-	
-	
-
-    // getters setters
     
+    // Getters and setters
     
 }

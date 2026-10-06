@@ -21,7 +21,7 @@ import edu.dei.examination.phd.model.Program;
 import edu.dei.examination.phd.model.ProgramRoleAssignment;
 import edu.dei.examination.phd.model.ScholarSupervisor;
 import edu.dei.examination.phd.model.Scholars;
-import edu.dei.examination.phd.model.Supervisor;
+
 import edu.dei.examination.phd.repository.DepartmentRepository;
 import edu.dei.examination.phd.repository.DepartmentRoleAssignmentRepository;
 import edu.dei.examination.phd.repository.FacultyRepository;
@@ -51,6 +51,7 @@ public class AssignmentService {
     @Autowired private DepartmentRoleAssignmentRepository departmentRoleRepo;
     @Autowired private FacultyRepository facultyRepo;
     @Autowired private FacultyRoleRepository facultyroleRepo;
+    @Autowired private RoleRepository roleRepo;
     
 
     // =========================
@@ -147,7 +148,7 @@ public class AssignmentService {
     // ASSIGN SUPERVISOR (SCHOLAR LEVEL)
     // =========================
     @Transactional
-    public void assignSupervisor(Integer scholarId, Integer uesrId) {
+    public void assignSupervisor(Integer scholarId, Integer uesrId,SupervisorRole role) {
 
         Scholars scholar = scholarRepo.findById(scholarId)
                 .orElseThrow(() -> new RuntimeException("Scholar not found"));
@@ -159,6 +160,14 @@ public class AssignmentService {
 //        		 .orElseThrow(() -> new RuntimeException("Supervisor  not found"));;
 //        		
         		;
+        	String rolestring = "";
+        		
+        if (role.name().equalsIgnoreCase("PRIMARY")){
+        	rolestring="ROLE_SUPERVISOR";
+        	
+        }else {
+        	rolestring="ROLE_CO_SUPERVISOR";
+        }
 
         // prevent duplicate
         boolean exists = scholarsupervisorRepo.findByScholar_ScholarIdAndIsActiveTrue(scholarId)
@@ -172,24 +181,89 @@ public class AssignmentService {
         ScholarSupervisor s = new ScholarSupervisor();
         s.setScholar(scholar);
         s.setSupervisor(user);
-        s.setRole(SupervisorRole.PRIMARY);
+        s.setRole(role);
 
         scholarsupervisorRepo.save(s);
-        DepartmentRoleAssignment assignment;
-        departmentRoleRepo.findByDepartment_DepartmentIdAndUser_IdAndRole
-        (scholar.getDepartment().getDepartmentId(), user.getId(), "ROLE_SUPERVISOR");
-        assignment = new DepartmentRoleAssignment();
-        assignment.setDepartment(scholar.getDepartment());
-        assignment.setUser(user);
-        assignment.setRole("ROLE_SUPERVISOR");
-        assignment.setIsActive(true);
-        departmentRoleRepo.save(assignment);
         
+        Optional<DepartmentRoleAssignment> existingAssignment=departmentRoleRepo.findByDepartment_DepartmentIdAndUser_IdAndRole
+        //(scholar.getDepartment().getDepartmentId(), user.getId(), "ROLE_SUPERVISOR");
+        (scholar.getDepartment().getDepartmentId(), user.getId(), rolestring);
+        
+        DepartmentRoleAssignment assignment;
+
+        if (existingAssignment.isPresent()) {
+            assignment = existingAssignment.get();
+            assignment.setIsActive(true);
+        } else {
+            assignment = new DepartmentRoleAssignment();
+
+            assignment.setDepartment(scholar.getDepartment());
+            assignment.setUser(user);
+            assignment.setRole(rolestring);
+            assignment.setIsActive(true);
+        }
+
+        departmentRoleRepo.save(assignment);
+                
         
         
     }
+    
+    @Transactional
+    public void assignPgDean(Integer userId) {
 
-    // =========================
+        // --------------------------------------------------
+        // 1. Find user
+        // --------------------------------------------------
+        User user = userRepo.findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        // --------------------------------------------------
+        // 2. Find PG Dean role
+        // --------------------------------------------------
+        Role pgDeanRole = roleRepo
+                .findByName(ERole.ROLE_PG_DEAN)
+                .orElseThrow(() ->
+                        new RuntimeException("ROLE_PG_DEAN not found"));
+
+        // --------------------------------------------------
+        // 3. Check whether this user is already PG Dean
+        // --------------------------------------------------
+        boolean alreadyPgDean = user.getRoles()
+                .stream()
+                .anyMatch(r ->
+                        r.getName() == ERole.ROLE_PG_DEAN
+                );
+
+        if (alreadyPgDean) {
+            throw new RuntimeException(
+                    "User is already assigned as PG Dean"
+            );
+        }
+
+        // --------------------------------------------------
+        // 4. Check whether another PG Dean already exists
+        // --------------------------------------------------
+        List<User> existingDeans =
+                userRepo.findUsersByRole(ERole.ROLE_PG_DEAN);
+
+        if (!existingDeans.isEmpty()) {
+            throw new RuntimeException(
+                    "A PG Dean is already assigned"
+            );
+        }
+
+        // --------------------------------------------------
+        // 5. Add PG Dean role to user
+        // --------------------------------------------------
+        user.getRoles().add(pgDeanRole);
+
+        userRepo.save(user);
+    }
+    
+    @Transactional
+        // =========================
     // GET PROGRAM ROLE ASSIGNMENTS
     // =========================
     public List<ProgramRoleAssignment> getByProgramAndRole(Integer programId, String role) {

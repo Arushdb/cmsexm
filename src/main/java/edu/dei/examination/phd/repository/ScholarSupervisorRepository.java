@@ -1,5 +1,6 @@
 package edu.dei.examination.phd.repository;
 
+
 import edu.dei.examination.phd.enums.SupervisorRole;
 import edu.dei.examination.phd.model.ScholarSupervisor;
 import edu.dei.examination.phd.model.Scholars;
@@ -51,5 +52,14 @@ public interface ScholarSupervisorRepository
         		 "  OR LOWER(sup.name) LIKE LOWER(CONCAT('%', :keyword, '%')) "
         		)
         		List<ScholarSupervisor> searchAssignments(@Param("keyword") String keyword);
+
+       
+        boolean existsByScholar_ScholarIdAndRoleAndIsActiveTrue(
+                Integer scholarId,
+                SupervisorRole role);
+        
+        
+        
+       
 
 }

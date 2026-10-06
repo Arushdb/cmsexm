@@ -1,9 +1,12 @@
 package edu.dei.examination.phd.service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,64 +18,48 @@ import edu.dei.examination.phd.model.ProgressWork;
 import edu.dei.examination.phd.repository.ProgressWorkRepository;
 
 @Service
+
 public class ProgressWorkService {
 
-    private final ProgressWorkRepository repository;
-    
+    @Autowired
+    private ProgressWorkRepository repository;
 
-    public ProgressWorkService(ProgressWorkRepository repository) {
-        this.repository = repository;
+    public ProgressWork saveProgressWork(
+            Integer reportId, ProgressWork work) {
+
+        work.setReportId(reportId);
+        work.setCreatedAt(LocalDateTime.now());
+
+        return repository.save(work);
     }
 
-    @Transactional(transactionManager = "phdTransactionManager")
-    public void saveProgressWork(
-            Integer reportId,
-            List<ProgressWork> rows) {
-    	
-    	 Authentication auth =
-                 SecurityContextHolder.getContext().getAuthentication();
-
-         UserDetailsImpl user =
-                 (UserDetailsImpl) auth.getPrincipal();
-         String username=user.getUsername();
-
-        //repository.deleteByReportId(reportId);
-
-        List<ProgressWork> entities = new ArrayList<>();
-
-        for (ProgressWork dto : rows) {
-
-            ProgressWork work = new ProgressWork();
-
-            work.setReportId(reportId);
-            work.setProgressWorkId(dto.getProgressWorkId());
-            work.setCreatedBy(username);
-            work.setStageOfResearch(dto.getStageOfResearch());
-            work.setObjectiveNo(dto.getObjectiveNo());
-            work.setCompletionPercentage(
-                    dto.getCompletionPercentage());
-
-            entities.add(work);
-        }
-
-        repository.saveAll(entities);
-    }
-
-    public List<ProgressWork> getByReportId(
-            Integer reportId) {
-
+    public List<ProgressWork> getProgressWork(Integer reportId) {
         return repository.findByReportId(reportId);
     }
-    
-    @Transactional
-    public void deleteProgressWork(int id) {
 
-        if (!repository.existsById(id)) {
-            throw new RuntimeException(
-                "Progress Work not found. Id = " + id
-            );
-        }
+    public Optional<ProgressWork> updateProgressWork(
+            Integer id, Integer reportId, ProgressWork work) {
 
-        repository.deleteById(id);
+        return repository.findByIdAndReportId(id, reportId)
+                .map(existing -> {
+                    existing.setStage(work.getStage());
+                    existing.setObjectiveNo(work.getObjectiveNo());
+                    existing.setCompletionPercentage(
+                            work.getCompletionPercentage());
+                    existing.setUpdatedAt(LocalDateTime.now());
+
+                    return repository.save(existing);
+                });
+    }
+
+    public boolean deleteProgressWork(
+            Integer id, Integer reportId) {
+
+        return repository.findByIdAndReportId(id, reportId)
+                .map(existing -> {
+                    repository.delete(existing);
+                    return true;
+                })
+                .orElse(false);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import edu.dei.examination.cmsexm.model.ERole;
 import edu.dei.examination.cmsexm.model.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -29,4 +30,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 		       "LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
 		       "LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%'))")
 		List<User> searchUsers(@Param("q") String q);
+	
+	
+	@Query("""
+		    SELECT DISTINCT u
+		    FROM User u
+		    JOIN u.roles r
+		    WHERE r.name = :role
+		""")
+		List<User> findUsersByRole(@Param("role") ERole role);
 }

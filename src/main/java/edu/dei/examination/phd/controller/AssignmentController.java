@@ -11,6 +11,7 @@ import edu.dei.examination.phd.dto.DocumentResponse;
 import edu.dei.examination.phd.dto.ProgramRoleDTO;
 import edu.dei.examination.phd.dto.ScholarDTO;
 import edu.dei.examination.phd.dto.ScholarDashboardDTO;
+import edu.dei.examination.phd.enums.SupervisorRole;
 import edu.dei.examination.phd.model.DepartmentRoleAssignment;
 import edu.dei.examination.phd.model.ProgramRoleAssignment;
 import edu.dei.examination.phd.service.AssignmentService;
@@ -50,12 +51,14 @@ public class AssignmentController {
     // ✅ ASSIGN SUPERVISOR (SCHOLAR LEVEL)
     // =========================
     @PostMapping("/supervisor")
-    public ResponseEntity<?> assignSupervisor(@RequestBody Map<String, Integer> req) {
+    public ResponseEntity<?> assignSupervisor(@RequestBody Map<String, Object> req) {
 
-        Integer scholarId = req.get("scholarId");
-        Integer userId = req.get("userId");
+        Integer scholarId = (Integer) req.get("scholarId");
+        Integer userId = (Integer) req.get("userId");
+        String roleString = (String) req.get("role"); 
+        SupervisorRole role = SupervisorRole.valueOf(roleString);
 
-        assignmentService.assignSupervisor(scholarId, userId);
+        assignmentService.assignSupervisor(scholarId, userId,role);
 //        public static <T> ApiResponse<T> success(String msg, T data) {
 //            return new ApiResponse<>(true, msg, data, null);
 //        }
@@ -64,9 +67,18 @@ public class AssignmentController {
 				
         
         //return ResponseEntity.ok("Supervisor assigned successfully");
+//        return ResponseEntity.ok(
+//                new ApiResponse<>(true, "Supervisor assigned successfully", null, null)
+//            );
+        
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "Supervisor assigned successfully", null, null)
-            );
+                Map.of(
+                        "message",
+                        role == SupervisorRole.PRIMARY
+                                ? "Primary Supervisor assigned successfully"
+                                : "Co-Supervisor assigned successfully"
+                )
+        );
     }
     
     @GetMapping("/allsupervisors")

@@ -39,6 +39,10 @@ public class Program {
     @OneToMany(mappedBy = "program", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ProgramRoleAssignment> roleAssignments;
+    
+    
+    @Column(name = "reviewer_required", nullable = false)
+    private Boolean reviewerRequired;
 
     // ===== Constructors =====
 
@@ -79,6 +83,14 @@ public class Program {
 	public Integer getProgramId() { return programId; }
 
 	public void setProgramId(Integer programId) { this.programId = programId; }
+	
+	public Boolean getReviewerRequired() {
+	    return reviewerRequired;
+	}
+
+	public void setReviewerRequired(Boolean reviewerRequired) {
+	    this.reviewerRequired = reviewerRequired;
+	}
 
   
 	

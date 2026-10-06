@@ -2,11 +2,13 @@ package edu.dei.examination.phd.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,36 +23,48 @@ import edu.dei.examination.phd.service.ProgressWorkService;
 
 public class ProgressWorkController {
 
-    private final ProgressWorkService service;
-    public ProgressWorkController(ProgressWorkService service) {
-        this.service = service;
-    }
-
-    
+    @Autowired
+    private ProgressWorkService service;
 
     @PostMapping("/{reportId}")
-    public ResponseEntity<?> saveProgressWork(
+    public ResponseEntity<ProgressWork> save(
             @PathVariable Integer reportId,
-            @RequestBody List<ProgressWork> rows) {
+            @RequestBody ProgressWork work) {
 
-        service.saveProgressWork(reportId, rows);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+                service.saveProgressWork(reportId, work));
     }
 
-    @GetMapping("/{reportId}")
-    public List<ProgressWork> getProgressWork(
+    @GetMapping("/report/{reportId}")
+    public ResponseEntity<List<ProgressWork>> getByReportId(
             @PathVariable Integer reportId) {
 
-        return service.getByReportId(reportId);
+        return ResponseEntity.ok(
+                service.getProgressWork(reportId));
     }
-    
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProgressWork(
-            @PathVariable int id) {
 
-        service.deleteProgressWork(id);
+    @PutMapping("/{reportId}/{id}")
+    public ResponseEntity<ProgressWork> update(
+            @PathVariable Integer reportId,
+            @PathVariable Integer id,
+            @RequestBody ProgressWork work) {
 
-        return ResponseEntity.ok("Record deleted successfully");
+        return service.updateProgressWork(id, reportId, work)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{reportId}/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Integer reportId,
+            @PathVariable Integer id) {
+
+        boolean deleted = service.deleteProgressWork(id, reportId);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
