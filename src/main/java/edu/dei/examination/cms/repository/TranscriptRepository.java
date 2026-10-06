@@ -23,7 +23,23 @@ public class TranscriptRepository {
     
 
     // Method to get transcript data
-    private final String transcriptQuery = "SELECT srsh.sgpa Sgpa,srsh.roll_number, " +
+    private final String transcriptQuery = "SELECT  IF( " +
+    		"    pm.print_aggregate = 'TAP', " +
+    		"    CONCAT( " +
+    		"        IF( " +
+    		"            sa.theory_sgpa IS NULL, " +
+    		"            '', " +
+    		"            CONCAT('THEORY: ', sa.theory_sgpa) " +
+    		 "        ), " +
+    		 "        '  ', " +
+    		 "        IF( " +
+    		 "            sa.practical_sgpa IS NULL, " +
+    		 "            '', " +
+    		 "            CONCAT('PRACTICAL: ', sa.practical_sgpa) " +
+    		 "        ) " +
+    		 "    ), " +
+    		 "    srsh.sgpa " +
+    		 ") AS Sgpa,srsh.roll_number,  " +
             "substring(pch.semester_code,3,2) as sem, " +
             "concat(substring(pr.session_start_date,1,4), '-', substring(pr.session_end_date,1,4)) as session, " +
             "concat(sc.course_code, ':', cmps.course_name) as course_code_name, " +
@@ -49,9 +65,14 @@ public class TranscriptRepository {
             "AND cmps.session_start_date = pr.session_start_date " +
             "AND cmps.session_end_date = pr.session_end_date " +
             "JOIN student_program sp ON sp.roll_number = srsh.roll_number " +
-            "AND sp.program_id = pch.program_id " +
-            "WHERE srsh.roll_number = ? AND sp.program_status in ('PAS','SWT') AND srsh.status = 'PAS' " +
+            "AND sp.program_id = pch.program_id join program_master pm on pm.program_id = sp.program_id " + 
+            " JOIN student_aggregate sa ON sa.roll_number = srsh.roll_number and sa.program_course_key = srsh.program_course_key " +
+            " and sa.entity_id = srsh.entity_id and sa.semester_start_date = srsh.session_start_date and sa.semester_end_date = srsh.session_end_date " +
+            " left join student_cgpa sg on sg.roll_number = srsh.roll_number " +
+            "WHERE srsh.roll_number = ? AND if(pm.isNep = 'Y' and sg.fourth_year_cgpa is not null ,sp.program_status = 'PAS',"
+            + "            IF(pm.isNep = 'Y' and sg.third_year_cgpa is not null and sg.fourth_year_cgpa is null ,sp.program_status = 'ACT',sp.program_status in ('PAS','SWT'))) AND srsh.status = 'PAS' " +
             "GROUP BY sc.semester_start_date, sc.course_code ORDER BY sc.semester_start_date, sc.course_code";
+    
    
     public List<Transcript> getTranscript(String rollNumber) {
         return cmsJdbcTemplate.query(transcriptQuery, new Object[]{rollNumber}, new RowMapper<Transcript>() {
@@ -96,12 +117,28 @@ public class TranscriptRepository {
     }
 
     public String getProgramStatus(String rollNumber) {
-        String query = "SELECT program_status FROM student_program WHERE roll_number = ? ORDER BY program_completion_date DESC LIMIT 1";
+        String query = "SELECT "
+        		+ "    IF(isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL, "
+        		+ "       'PAS', "
+        		+ "       program_status) AS program_status "
+        		+ "FROM student_program sp "
+        		+ "JOIN program_master pm "
+        		+ "    ON sp.program_id = pm.program_id "
+        		+ "LEFT JOIN student_cgpa sc "
+        		+ "    ON sc.roll_number = sp.roll_number "
+        		+ "WHERE sp.roll_number = ? AND sp.program_status != 'INC' "
+        		+ "  AND ("
+        		+ "        (isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL AND sp.current_semester = 'SM6') "
+        		+ "        OR "
+        		+ "        NOT (isNep = 'Y' AND sc.third_year_cgpa IS NOT NULL) "
+        		+ "      ) "
+        		+ " ORDER BY current_semester DESC  "
+        		+ " LIMIT 1" ;
         return cmsJdbcTemplate.queryForObject(query, new Object[]{rollNumber}, String.class);
     }
 
     public Transcript getTranscriptByRollNumber(String rollNumber) {
-        String sql = "SELECT t1.FromDate, t1.ToDate, t2.duration, t2.medium, t2.roll_number, t2.student_first_name, t2.program_name, t2.enrollment_number, t2.date_of_birth, t2.cgpa " +
+        String sql ="SELECT t1.FromDate, t1.ToDate, t2.duration, t2.medium, t2.roll_number, t2.student_first_name, t2.program_name, t2.enrollment_number, t2.date_of_birth, t2.cgpa " +
                      "FROM ( " +
                      "    SELECT srsh.roll_number, MIN(SUBSTRING(sp.registered_from_session, 1, 4)) AS FromDate, " +
                      "           MAX(SUBSTRING(sp.passed_to_session, 1, 4)) AS ToDate " +
@@ -112,12 +149,16 @@ public class TranscriptRepository {
                      "    AND pch.specialization_id = sp.specialization_id AND pch.branch_id = sp.branch_id " +
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number " +
-                     "    WHERE sp.program_status IN ('PAS', 'SWT') AND srsh.roll_number = ? " +
+                     "     left join student_cgpa sg on sg.roll_number = srsh.roll_number "+
+                     "    WHERE if(pm.isNep = 'Y' and sg.fourth_year_cgpa is not null ,sp.program_status = 'PAS',"
+                     + "            IF(pm.isNep = 'Y' and sg.third_year_cgpa is not null and sg.fourth_year_cgpa is null ,sp.program_status = 'ACT',sp.program_status in ('PAS','SWT'))) AND srsh.roll_number = ? " +
                      "    ) AS t1 " +
                      "    JOIN ( " +
                      "    SELECT pm.months_duration_in_english AS duration, 'ENGLISH' AS medium, srsh.roll_number, " +
-                     "   sm.student_first_name,CONCAT(pm.program_name, ' ',IF(stt1.component_description = 'NONE','', " +
-                     "   CONCAT('(', stt1.component_description, ') ')),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, sp.cgpa " +
+                     "   sm.student_first_name,CONCAT(if(srsh.session_start_date between pme.start_date and end_date,pme.program_name,pm.program_name), ' '," + 
+                     "   if( pm.program_type = 'M','',(IF(stt1.component_description = 'NONE','',  " + 
+                     "   CONCAT('(', stt1.component_description, ') ')))),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description))) as program_name, sp.enrollment_number, sm.date_of_birth, if(pm.print_aggregate = 'TAP',concat('THEORY: ',sp.theory_cgpa,'   ','PRACTICAL: ',"
+                     + "                        sp.practical_cgpa,'             ','       Combined CGPA (Theory+Practical) :',sp.cgpa),sp.cgpa) as cgpa " +
                      "    FROM student_registration_semester_header srsh " +
                      "    JOIN program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                      "    JOIN student_program sp ON srsh.roll_number = sp.roll_number " +
@@ -126,8 +167,9 @@ public class TranscriptRepository {
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number" +
                      "    JOIN system_table_two stt1 on pch.branch_id = stt1.component_code  and stt1.group_code = 'BRNCOD'" +
-                     "    JOIN system_table_two stt2 on pch.specialization_id = stt2.component_code  and stt2.group_code = 'SPCLCD' " +
-                     "    WHERE sp.program_status = 'PAS' AND srsh.roll_number = ? " +
+                     "    JOIN system_table_two stt2 on pch.specialization_id = stt2.component_code  and stt2.group_code = 'SPCLCD' left join student_cgpa sg on sg.roll_number = srsh.roll_number " +
+                     "    left join program_master_extension pme on sp.program_id=pme.program_id WHERE if(pm.isNep = 'Y' and sg.fourth_year_cgpa is not null ,sp.program_status = 'PAS', " + 
+                     "    IF(pm.isNep = 'Y' and sg.third_year_cgpa is not null and sg.fourth_year_cgpa is null ,sp.program_status = 'ACT',sp.program_status in ('PAS')))  AND srsh.roll_number = ? " +
                      "    ORDER BY sp.program_completion_date DESC LIMIT 1 " +
                      ") AS t2 ON t1.roll_number = t2.roll_number";
 
