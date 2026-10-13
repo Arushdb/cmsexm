@@ -68,6 +68,9 @@ public class ReportService {
     private ProgressReviewPolicyRepository policyRepo;
 	@Autowired
     private ReviewHistoryRepository  historyRepo;
+	
+	@Autowired
+	private ProgressReportPdfService progressReportPdfService;
 
 	// 🔥 Main method
 	public List<ReviewerDashboardDTO> getDashboardForUser(String username) {
@@ -731,9 +734,15 @@ public class ReportService {
 	        throw new RuntimeException(
 	                "Invalid action");
 	    }
+	    
+	    // =====================================================
+	    // 10. SAVE REPORT
+	    // =====================================================
+
+	    reportRepository.save(report);
 
 	    // =====================================================
-	    // 10. SAVE REVIEW HISTORY
+	    // 11. SAVE REVIEW HISTORY
 	    // =====================================================
 
 	    ReviewHistory h = new ReviewHistory();
@@ -750,13 +759,35 @@ public class ReportService {
 	    h.setActedAt(LocalDateTime.now());
 	    h.setRemarks(Remarks);
 
-	    historyRepo.save(h);
+	    
+	 // IMPORTANT:
+	 // save() returns the entity with its generated database ID
+	 ReviewHistory savedHistory = historyRepo.save(h);
+	    
+	 // =====================================================
+	 // GENERATE IMMUTABLE PDF
+	 // =====================================================
 
-	    // =====================================================
-	    // 11. SAVE REPORT
-	    // =====================================================
+	 try {
 
-	    reportRepository.save(report);
+	     progressReportPdfService.generatePdf(
+	             report.getProgressReportId(),
+	             savedHistory.getId(),
+	             action,
+	             user.getId().intValue());
+
+	 } catch (Exception e) {
+		 
+		 e.printStackTrace();
+
+	     throw new RuntimeException(
+	             "Workflow action completed but PDF generation failed",
+	             e);
+	 }
+
+	    
+
+	 
 	}
 
 

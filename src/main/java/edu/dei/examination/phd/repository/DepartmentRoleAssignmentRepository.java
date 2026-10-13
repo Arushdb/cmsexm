@@ -11,7 +11,7 @@ import edu.dei.examination.phd.model.DepartmentRoleAssignment;
 
 public interface DepartmentRoleAssignmentRepository extends JpaRepository<DepartmentRoleAssignment, Integer> {
 
-	List<DepartmentRoleAssignment> findByDepartment_DepartmentId(Integer departmentId);
+	
 
 //=========================
 // ✅ FIND HOD BY DEPARTMENT
@@ -20,6 +20,8 @@ public interface DepartmentRoleAssignmentRepository extends JpaRepository<Depart
 
 	Optional<DepartmentRoleAssignment> findByDepartment_DepartmentIdAndUser_IdAndRole(Integer departmentId,Integer id, String role);
 	
+	Optional<DepartmentRoleAssignment>
+    findByDepartment_DepartmentId(Integer departmentId);
 	
 // =========================
 // ✅ GET ALL HODs

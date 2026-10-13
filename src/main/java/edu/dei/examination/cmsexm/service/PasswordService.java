@@ -3,6 +3,7 @@ package edu.dei.examination.cmsexm.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,8 @@ import edu.dei.examination.cmsexm.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+
 
 @Service
 public class PasswordService {
@@ -30,6 +33,9 @@ public class PasswordService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     // =========================
     // 📧 SEND RESET LINK
@@ -48,7 +54,10 @@ public class PasswordService {
 
         tokenRepo.save(prt);
 
-        String link = "http://localhost:4200/auth/reset-password?token=" + token;
+        //String link = "http://localhost:4200/auth/reset-password?token=" + token;
+        String link = frontendUrl + "/auth/reset-password?token=" + token;
+
+        sendEmail(email, link);
 
         sendEmail(email, link);
     }

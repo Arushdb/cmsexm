@@ -31,10 +31,7 @@ public class ProgressReport {
 
     @Column(name="research_work")
     private String researchWork;
-    private String conference;
-    @Column(name = "research_paper")
-    private String researchPaper;
-    private String tours;
+    
 
     @Column(name = "insert_time")
     private LocalDateTime insertTime;
@@ -111,18 +108,7 @@ public class ProgressReport {
 
 	public void setResearchWork(String researchWork) { this.researchWork = researchWork; }
 
-	public String getConference() { return conference; }
-
-	public void setConference(String conference) { this.conference = conference; }
-
-	public String getResearchPaper() { return researchPaper; }
-
-	public void setResearchPaper(String researchPaper) { this.researchPaper = researchPaper; }
-
-	public String getTours() { return tours; }
-
-	public void setTours(String tours) { this.tours = tours; }
-
+	
 	public LocalDateTime getInsertTime() { return insertTime; }
 
 	public void setInsertTime(LocalDateTime insertTime) { this.insertTime = insertTime; }

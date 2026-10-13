@@ -92,10 +92,7 @@ public class ProgressReportService {
         );
        
         report.setResearchWork(request.getResearchWork());
-        report.setConference(request.getConference());
-        report.setResearchPaper(request.getResearchPaper());
-        report.setTours(request.getTours());
-        
+                
         report.setSummary(request.getSummary());
        // report.setNextActions(request.getNextActions());
 
@@ -223,9 +220,7 @@ public class ProgressReportService {
         dto.setSemesterRegistrationId(report.getScholarSemester().getSemester().getSemesterId());
        
         dto.setResearchWork(report.getResearchWork());
-        dto.setConference(report.getConference());
-        dto.setResearchPaper(report.getResearchPaper());
-        dto.setTours(report.getTours());
+       
         dto.setPeriodStart(report.getPeriodStart());
         dto.setPeriodEnd(report.getPeriodEnd());
         dto.setSummary(report.getSummary());

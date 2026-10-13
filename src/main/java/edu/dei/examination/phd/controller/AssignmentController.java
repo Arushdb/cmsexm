@@ -74,7 +74,7 @@ public class AssignmentController {
         return ResponseEntity.ok(
                 Map.of(
                         "message",
-                        role == SupervisorRole.PRIMARY
+                        role == SupervisorRole.SUPERVISOR
                                 ? "Primary Supervisor assigned successfully"
                                 : "Co-Supervisor assigned successfully"
                 )
