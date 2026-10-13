@@ -150,7 +150,8 @@ public class DocumentService {
     
     private void validateModule(String module) {
 
-        List<String> allowed = List.of(
+        
+        List<String> allowed = Arrays.asList(
                 "progress",
                 "thesis",
                 "admission"

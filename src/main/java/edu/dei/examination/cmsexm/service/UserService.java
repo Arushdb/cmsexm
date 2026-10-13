@@ -168,8 +168,12 @@ public class UserService {
 	    // =========================
 	    // GET USER BY ID
 	    // =========================
+	    
 	    public User getUser(Integer id) {
-	        return userRepository.findById(id).orElseThrow();
+	        return userRepository.findById(id)
+	                .orElseThrow(() ->
+	                    new RuntimeException("User not found with ID: " + id)
+	                );
 	    }
 
 	    // =========================

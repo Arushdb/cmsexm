@@ -51,7 +51,8 @@ public class ConferenceAttendedController {
         Optional<ConferenceAttended> conference =
                 service.getByIdAndReportId(id, reportId);
 
-        if (conference.isEmpty()) {
+       
+        if (!conference.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -92,10 +93,11 @@ public class ConferenceAttendedController {
         Optional<ConferenceAttended> updated =
                 service.update(id, reportId, conference);
 
-        if (updated.isEmpty()) {
+        
+
+        if (!updated.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(updated.get());
     }
 

@@ -17,11 +17,9 @@ public interface ProgressReportPdfRepository
     Optional<ProgressReportPdf>
     findByReportIdAndVersionNo(Integer reportId, Integer versionNo);
 
-    @Query("""
-           SELECT COALESCE(MAX(p.versionNo), 0)
-           FROM ProgressReportPdf p
-           WHERE p.reportId = :reportId
-           """)
+    @Query("SELECT COALESCE(MAX(p.versionNo), 0) FROM ProgressReportPdf p " +
+           " WHERE p.reportId = :reportId ")
+           
     Integer findMaxVersionByReportId(
             @Param("reportId") Integer reportId);
 }

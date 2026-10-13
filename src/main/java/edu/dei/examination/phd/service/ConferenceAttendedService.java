@@ -82,7 +82,8 @@ public class ConferenceAttendedService {
         Optional<ConferenceAttended> existing =
                 repository.findByIdAndReportId(id, reportId);
 
-        if (existing.isEmpty()) {
+        
+        if (!existing.isPresent()) {
             return Optional.empty();
         }
 
@@ -118,9 +119,10 @@ public class ConferenceAttendedService {
         Optional<ConferenceAttended> conference =
                 repository.findByIdAndReportId(id, reportId);
 
-        if (conference.isEmpty()) {
+        if (!conference.isPresent()) {
             return false;
         }
+        
 
         repository.delete(conference.get());
 

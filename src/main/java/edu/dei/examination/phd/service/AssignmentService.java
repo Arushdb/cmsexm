@@ -334,7 +334,7 @@ public class AssignmentService {
 
                          return dto;
                      })
-                     .toList();// fallback
+            		 .collect(Collectors.toList());
         }
         List<ScholarSupervisor> list =scholarsupervisorRepo.searchAssignments(keyword.trim());
         return scholarsupervisorRepo.searchAssignments(keyword.trim())
@@ -357,7 +357,7 @@ public class AssignmentService {
 
                      return dto;
                  })
-                 .toList();
+        		 .collect(Collectors.toList());
     }
     
     
@@ -384,7 +384,7 @@ public class AssignmentService {
 
                     return dto;
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
     
     

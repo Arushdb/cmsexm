@@ -88,9 +88,10 @@ public class VisitService {
                            reportId
                    );
 
-           if (existing.isEmpty()) {
+           if (!existing.isPresent() ) {
                return Optional.empty();
            }
+           
 
            Visit visit = existing.get();
 
@@ -143,7 +144,7 @@ public class VisitService {
                            reportId
                    );
 
-           if (visit.isEmpty()) {
+           if (!visit.isPresent()) {
                return false;
            }
 

@@ -1,6 +1,7 @@
 package edu.dei.examination.cmsexm.controller;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ import edu.dei.examination.cmsexm.service.UserDetailsServiceImpl;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200") 
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:4300"}) 
 public class AuthController {
 	
 	@Autowired
@@ -166,9 +167,11 @@ public class AuthController {
 
 	    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
+	   
+	    
 	    return ResponseEntity.ok(
-	        Map.of("accessToken", newAccessToken)
-	    );
+	    	    Collections.singletonMap("accessToken", newAccessToken)
+	    	);
 	}
 
 	
@@ -180,7 +183,10 @@ public class AuthController {
 
         passwordService.sendResetLink(email);
 
-        return ResponseEntity.ok(Map.of("message", "Reset link sent"));
+        
+        return ResponseEntity.ok(
+        	    Collections.singletonMap("message", "Reset link sent")
+        	);
     }
 
     // =========================
@@ -194,7 +200,10 @@ public class AuthController {
                 req.getPassword()
         );
 
-        return ResponseEntity.ok(Map.of("message", "Password updated"));
+        
+        return ResponseEntity.ok(
+        	    Collections.singletonMap("message", "Password updated")
+        	);
         
     }
 }

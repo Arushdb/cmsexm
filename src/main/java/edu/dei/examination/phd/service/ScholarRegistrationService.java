@@ -55,7 +55,11 @@ public class ScholarRegistrationService {
 
 		ScholarSemester sreg = new ScholarSemester();
 		
-		Semesters sems=semesterRepo.findById(semesterId).orElseThrow();
+		
+		Semesters sems = semesterRepo.findById(semesterId)
+		        .orElseThrow(() ->
+		            new RuntimeException("Semester not found with ID: " + semesterId)
+		        );
 		;
 //        sreg.setScholar(sch);
         sreg.setSemester(sems);

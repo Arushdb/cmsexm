@@ -66,12 +66,9 @@ public interface ScholarsRepository extends JpaRepository<Scholars, Integer> {
 //            "FROM Scholar s JOIN Department d ON s.departmentId = d.id GROUP BY d.departmentName")
 //     List<CountDTO> deptStats();
      
-     @Query("""
-    		    SELECT DISTINCT s
-    		    FROM Scholars s
-    		    LEFT JOIN FETCH s.supervisors
-    		    WHERE s.scholarId = :scholarId
-    		    """)
+     @Query("SELECT DISTINCT s FROM Scholars s LEFT JOIN FETCH s.supervisors "
+    		+" WHERE s.scholarId = :scholarId"
+    		    )
     		Optional<Scholars> findByIdWithSupervisors(
     		        @Param("scholarId") Integer scholarId);
     

@@ -637,9 +637,16 @@ public class ReportService {
 	        report.setStatus(ProgressStatus.REJECTED);
 	        report.setCurrentSequenceNo(null);
 
+	        
+	        
 	        ProgressReport pr = progressReportRepo
 	                .findById(report.getProgressReportId())
-	                .orElseThrow();
+	                .orElseThrow(() ->
+	                    new RuntimeException(
+	                        "Progress report not found with ID: "
+	                        + report.getProgressReportId()
+	                    )
+	                );
 
 	        pr.setProgressStatus(
 	                ProgressStatus.REJECTED);
@@ -689,9 +696,15 @@ public class ReportService {
 
 	            report.setCurrentSequenceNo(null);
 
+	            
 	            ProgressReport pr = progressReportRepo
 	                    .findById(report.getProgressReportId())
-	                    .orElseThrow();
+	                    .orElseThrow(() ->
+	                        new RuntimeException(
+	                            "Progress report not found with ID: "
+	                            + report.getProgressReportId()
+	                        )
+	                    );
 
 	            pr.setProgressStatus(
 	                    ProgressStatus.APPROVED);
@@ -713,9 +726,13 @@ public class ReportService {
 
 	    else if ("REVISION_REQUIRED".equalsIgnoreCase(action)) {
 
+	        
+	        
 	        ProgressReport pr = progressReportRepo
 	                .findById(report.getProgressReportId())
-	                .orElseThrow();
+	                .orElseThrow(() ->
+	                    new RuntimeException("Progress report not found")
+	                );
 
 	        pr.setProgressStatus(
 	                ProgressStatus.REVISION_REQUIRED);

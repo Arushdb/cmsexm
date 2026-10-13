@@ -72,7 +72,8 @@ public class VisitController {
                         reportId
                 );
 
-        if (visit.isEmpty()) {
+        
+        if (!visit.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -99,10 +100,11 @@ public class VisitController {
                         visit
                 );
 
-        if (updated.isEmpty()) {
+        
+
+        if (!updated.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(updated.get());
     }
 

@@ -16,6 +16,7 @@ import edu.dei.examination.phd.model.DepartmentRoleAssignment;
 import edu.dei.examination.phd.model.ProgramRoleAssignment;
 import edu.dei.examination.phd.service.AssignmentService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,8 +72,17 @@ public class AssignmentController {
 //                new ApiResponse<>(true, "Supervisor assigned successfully", null, null)
 //            );
         
+//        return ResponseEntity.ok(
+//                Map.of(
+//                        "message",
+//                        role == SupervisorRole.SUPERVISOR
+//                                ? "Primary Supervisor assigned successfully"
+//                                : "Co-Supervisor assigned successfully"
+//                )
+//        );
+        
         return ResponseEntity.ok(
-                Map.of(
+                Collections.singletonMap(
                         "message",
                         role == SupervisorRole.SUPERVISOR
                                 ? "Primary Supervisor assigned successfully"

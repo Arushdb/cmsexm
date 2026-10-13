@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -156,9 +157,16 @@ public class ReviewerController {
         reviewerService.saveAttendance(scholarSemesterId,scholarid ,totalsessions, attendedsessions,
         		attendancePercentage,attendanceremarks);
         
-        return ResponseEntity.ok(Map.of(
-                "message", "Review submitted successfully"
-            ));
+//        return ResponseEntity.ok(Map.of(
+//                "message", "Review submitted successfully"
+//            ));
+        
+        return ResponseEntity.ok(
+        	    Collections.singletonMap(
+        	        "message",
+        	        "Review submitted successfully"
+        	    )
+        	);
 
        // return ResponseEntity.ok("Review submitted successfully");
     }
