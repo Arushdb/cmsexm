@@ -106,8 +106,27 @@ public class ScholarService {
     		    .createNativeQuery("SELECT DATABASE()")
     		    .getSingleResult();
     		System.out.println("Connected DB = " + dbName);
+    	
     		
-        String year = request.getAcademicYear().substring(0, 4);          
+        String year = request.getAcademicYear().substring(0, 4);  
+        System.out.println(request.getAcademicYear());
+        
+        
+        Integer month = request.getAdmissionMonth();
+
+        if (month == null || month < 1 || month > 12) {
+            throw new IllegalArgumentException(
+                "Admission month must be between 1 and 12"
+            );
+        }
+
+        String[] months = {
+            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+        };
+
+        String monthName = months[month - 1];
+        
         List<ScholarDTO> list=em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
         		.setParameter("year", request.getAcademicYear())
         		.setParameter("month", request.getAdmissionMonth())
@@ -119,8 +138,8 @@ public class ScholarService {
 
         String insertSql =
                 "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
-                + " created_at,application_number,department_id,user_id) " +
-                "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id)";
+                + " created_at,application_number,department_id,user_id,subject,mode) " +
+                "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id,:subject,:mode)";
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -141,6 +160,10 @@ public class ScholarService {
         	   userdto.setUsername(username);
         	   userdto.setPassword(password);
         	   userdto.setRoleIds(listroleid);
+        	   userdto.setEmail(row.getEmail());
+        	   userdto.setName(row.getFullName());
+        	   userdto.setPhone(row.getPhone());
+        	   
         	  // User user=userservice.createUser(username, password,listroleid);
         	   
         	   User user=userservice.createUser(userdto);
@@ -163,10 +186,11 @@ public class ScholarService {
         			    UserIdentifier.IdentifierType.APPLICATION_NO,
         			    idvalue
         			);
+        	     appno =appno+monthName+year.substring(2);
         	   
         	    em.createNativeQuery(insertSql)
-                       .setParameter("appno", row.getAppno()) 
-                       .setParameter("program_id", row.getProgramid())
+                       .setParameter("appno", appno) 
+                       
                        .setParameter("first_name", row.getFullName())
                        .setParameter("gender", row.getGender_id())
                        .setParameter("email", row.getEmail()) 
@@ -176,8 +200,9 @@ public class ScholarService {
                        .setParameter("selection_date", row.getAdmissionDate())
                        .setParameter("department_id", row.getDepartment_id())
                        .setParameter("user_id", user.getId())
-                       		
-                                 
+                       .setParameter("subject", row.getSubject())
+                       .setParameter("mode", row.getMode())
+                                                       
                        .executeUpdate();
            
         }
@@ -186,91 +211,91 @@ public class ScholarService {
     }
 
 
-    @Transactional("phdTransactionManager")
-    public int createScholarsFromCMS(CreateScholarsRequest request) {
-    	Object dbName = em
-    		    .createNativeQuery("SELECT DATABASE()")
-    		    .getSingleResult();
-    		System.out.println("Connected DB = " + dbName);
-    		
-        String year = request.getAcademicYear().substring(0, 4);          
-        List<ScholarDTO> list=em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
-        		.setParameter("year", request.getAcademicYear())
-        		.setParameter("month", request.getAdmissionMonth())
-        		.getResultList();
-
-        if (list.isEmpty()) {
-            return 0;
-        }
-
-        String insertSql =
-                "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
-                + " created_at,application_number,department_id,user_id) " +
-                "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id)";
-
-        LocalDateTime now = LocalDateTime.now();
-
-        for (ScholarDTO row : list) {
-            String appno =  row.getAppno();
-            
-   
-        	   String username = row.getEmail();
-        	   String password = row.getDateOfBirth().toString();
-        	   Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
-        			    .orElseThrow(()->new RuntimeException("Scholar Role not found"));
-
-        	   Integer roleId = scholarRole.getId();
-        	   List <Integer>  listroleid= new ArrayList<>();
-        	   listroleid.add(roleId);
-        	   
-        	   UserDTO userdto = new UserDTO();
-        	   userdto.setUsername(username);
-        	   userdto.setPassword(password);
-        	   userdto.setRoleIds(listroleid);
-        	  // User user=userservice.createUser(username, password,listroleid);
-        	   
-        	   User user=userservice.createUser(userdto);
-        	   
-        	    username = "SCH" + user.getId();
-        	   user.setUsername(username);
-
-        	   userRepo.save(user);  
-        	   
-        	  
-        	   
-        	   
-        	        	   
-        	   
-        	   String idvalue = "APP"+year+row.getAppno();
-        	   
-        	   userservice.addUserIdentifier(
-        			    user.getId().intValue(),
-        			   //user.getUsername(),
-        			    UserIdentifier.IdentifierType.APPLICATION_NO,
-        			    idvalue
-        			);
-        	   
-        	    em.createNativeQuery(insertSql)
-                       .setParameter("appno", row.getAppno()) 
-                       .setParameter("program_id", row.getProgramid())
-                       .setParameter("first_name", row.getFullName())
-                       .setParameter("gender", row.getGender_id())
-                       .setParameter("email", row.getEmail()) 
-                       .setParameter("dob", row.getDateOfBirth())
-                       .setParameter("phone", row.getPhone())
-                       .setParameter("category", row.getCategory())
-                       .setParameter("selection_date", row.getAdmissionDate())
-                       .setParameter("department_id", row.getDepartment_id())
-                       .setParameter("user_id", user.getId())
-                       		
-                                 
-                       .executeUpdate();
-           
-        }
-
-        return list.size();
-    }
-
+ //   @Transactional("phdTransactionManager")
+//    public int createScholarsFromCMS(CreateScholarsRequest request) {
+//    	Object dbName = em
+//    		    .createNativeQuery("SELECT DATABASE()")
+//    		    .getSingleResult();
+//    		System.out.println("Connected DB = " + dbName);
+//    		
+//        String year = request.getAcademicYear().substring(0, 4);          
+//        List<ScholarDTO> list=em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
+//        		.setParameter("year", request.getAcademicYear())
+//        		.setParameter("month", request.getAdmissionMonth())
+//        		.getResultList();
+//
+//        if (list.isEmpty()) {
+//            return 0;
+//        }
+//
+//        String insertSql =
+//                "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
+//                + " created_at,application_number,department_id,user_id) " +
+//                "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id)";
+//
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        for (ScholarDTO row : list) {
+//            String appno =  row.getAppno();
+//            
+//   
+//        	   String username = row.getEmail();
+//        	   String password = row.getDateOfBirth().toString();
+//        	   Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
+//        			    .orElseThrow(()->new RuntimeException("Scholar Role not found"));
+//
+//        	   Integer roleId = scholarRole.getId();
+//        	   List <Integer>  listroleid= new ArrayList<>();
+//        	   listroleid.add(roleId);
+//        	   
+//        	   UserDTO userdto = new UserDTO();
+//        	   userdto.setUsername(username);
+//        	   userdto.setPassword(password);
+//        	   userdto.setRoleIds(listroleid);
+//        	  // User user=userservice.createUser(username, password,listroleid);
+//        	   
+//        	   User user=userservice.createUser(userdto);
+//        	   
+//        	    username = "SCH" + user.getId();
+//        	   user.setUsername(username);
+//
+//        	   userRepo.save(user);  
+//        	   
+//        	  
+//        	   
+//        	   
+//        	        	   
+//        	   
+//        	   String idvalue = "APP"+year+row.getAppno();
+//        	   
+//        	   userservice.addUserIdentifier(
+//        			    user.getId().intValue(),
+//        			   //user.getUsername(),
+//        			    UserIdentifier.IdentifierType.APPLICATION_NO,
+//        			    idvalue
+//        			);
+//        	   
+//        	    em.createNativeQuery(insertSql)
+//                       .setParameter("appno", row.getAppno()) 
+//                       .setParameter("program_id", row.getProgramid())
+//                       .setParameter("first_name", row.getFullName())
+//                       .setParameter("gender", row.getGender_id())
+//                       .setParameter("email", row.getEmail()) 
+//                       .setParameter("dob", row.getDateOfBirth())
+//                       .setParameter("phone", row.getPhone())
+//                       .setParameter("category", row.getCategory())
+//                       .setParameter("selection_date", row.getAdmissionDate())
+//                       .setParameter("department_id", row.getDepartment_id())
+//                       .setParameter("user_id", user.getId())
+//                       		
+//                                 
+//                       .executeUpdate();
+//           
+//        }
+//
+//        return list.size();
+//    }
+//
 
 
 	private String generateScholarNumber(Object[] row) {
@@ -300,7 +325,7 @@ public class ScholarService {
         scholarDTO.setPhone((String) scholarRow[4]);
         scholarDTO.setGender_id(((Number) scholarRow[5]).intValue());
         scholarDTO.setDateOfBirth(((java.sql.Date) scholarRow[6]).toLocalDate());
-        scholarDTO.setProgramid(((Number) scholarRow[7]).intValue());
+        
         scholarDTO.setAdmissionDate(((java.sql.Date) scholarRow[8]).toLocalDate());
         scholarDTO.setProgramname((String)scholarRow[9]);
 
@@ -969,7 +994,106 @@ public class ScholarService {
 //     			    123
 //     			);
 //            }
-//        
+//      
+            
+            
+            @Transactional
+            public int createScholarsFromCMS() {
+                
+
+                List<ScholarDTO> applicants =
+                        em.createNamedQuery("Applicant.getCMSScholars", ScholarDTO.class)
+                                            .getResultList();
+
+                if (applicants.isEmpty()) {
+                    return 0;
+                }
+
+                Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
+                        .orElseThrow(() -> new IllegalStateException("Scholar role not found"));
+
+                String insertSql = 
+                    "INSERT INTO scholars (" +
+                       " program_id, full_name, gender_id, email, date_of_birth, phone, " +
+                       " category, admission_date, status_id, created_at, " +
+                       " application_number, department_id, user_id )" +
+                    
+                    " VALUES ( " +
+                    "    :program_id, :full_name, :gender_id, :email, :dob, :phone, "+
+                    "    :category, :admission_date, 1, NOW(), "+
+                    "    :application_number, :department_id, :user_id "
+                    
+                     ;
+
+                int importedCount = 0;
+
+                for (ScholarDTO row : applicants) {
+                    // Skip incomplete source records.
+                    if (row == null
+                            || row.getAppno() == null
+                            || row.getAppno().isEmpty()
+                            || row.getEmail() == null
+                            || row.getEmail().isEmpty()
+                            || row.getDateOfBirth() == null
+                            
+                            || row.getDepartment_id() == null) {
+                        continue;
+                    }
+
+                    String applicationNumber = row.getAppno().trim();
+
+                    // Prevent importing the same CMS application more than once.
+                    boolean alreadyImported = !em.createNativeQuery(
+                            " SELECT 1 FROM scholars WHERE application_number = :applicationNumber")
+                           
+                            .setParameter("applicationNumber", applicationNumber)
+                            .getResultList()
+                            .isEmpty();
+
+                    if (alreadyImported) {
+                        continue;
+                    }
+
+                    UserDTO userDto = new UserDTO();
+                    userDto.setUsername(row.getEmail().trim());
+                    userDto.setPassword(row.getDateOfBirth().toString());
+                    List<Integer> roleIds = new ArrayList<>();
+                    roleIds.add(scholarRole.getId());
+                    userDto.setRoleIds(roleIds);
+                    //userDto.setRoleIds(List.of(scholarRole.getId()));
+
+                    User user = userservice.createUser(userDto);
+
+                    user.setUsername("SCH" + user.getId());
+                    userRepo.save(user);
+
+                    String identifier = "APP" + "2026" + applicationNumber;
+
+                    userservice.addUserIdentifier(
+                            user.getId().intValue(),
+                            UserIdentifier.IdentifierType.APPLICATION_NO,
+                            identifier
+                    );
+
+                    em.createNativeQuery(insertSql)
+                            
+                            .setParameter("full_name", row.getFullName())
+                            .setParameter("gender_id", row.getGender_id())
+                            .setParameter("email", row.getEmail())
+                            .setParameter("dob", row.getDateOfBirth())
+                            .setParameter("phone", row.getPhone())
+                            .setParameter("category", row.getCategory())
+                            .setParameter("admission_date", row.getAdmissionDate())
+                            .setParameter("application_number", applicationNumber)
+                            .setParameter("department_id", row.getDepartment_id())
+                            .setParameter("user_id", user.getId())
+                            .executeUpdate();
+
+                    importedCount++;
+                }
+
+                return importedCount;
+            }
 } 
 
         

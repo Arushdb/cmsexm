@@ -100,7 +100,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	 @Bean
 	    public CorsConfigurationSource corsConfigurationSource() {
 	        CorsConfiguration config = new CorsConfiguration();
-	        config.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Angular
+	        config.setAllowedOrigins(Arrays.asList("http://localhost:4200","http://localhost:4300")); // Angular
 	        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 	        config.setAllowedHeaders(Arrays.asList("*"));
 	        config.setAllowCredentials(true); // if using cookies / Authorization header
@@ -137,6 +137,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	          
 				
 				.antMatchers("/cmsexam/api/scholars/generate/**").hasAuthority("ADMIN")
+				.antMatchers("/cmsexam/api/scholars/create-from-cms/**").hasAuthority("ADMIN")
 				.antMatchers("/cmsexam/api/scholars/**").hasAuthority("SCHOLAR")
 			  // ✅ IMPORTANT: MUST COME BEFORE /scholars/**
             

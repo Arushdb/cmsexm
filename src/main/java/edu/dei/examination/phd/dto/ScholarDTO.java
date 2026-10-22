@@ -17,7 +17,7 @@ public class ScholarDTO {
 
 	private int gender_id;
 	private LocalDate dateOfBirth;
-	private int programid;
+	
 	private String programname;
 	private Integer department_id;
 	private Integer userid;
@@ -27,6 +27,8 @@ public class ScholarDTO {
 	private String programName;
 	private String fathername;
 	private String address;
+	private String subject;
+	private String mode ;
 
 	private LocalDate admissionDate;
 	private LocalDate registrationdate;
@@ -39,8 +41,8 @@ public class ScholarDTO {
 	private String nameinhindi;
 
 	public ScholarDTO(String appno, String fullName, String category, String email, String phone, int gender_id,
-			LocalDate dateOfBirth, int programid, LocalDate admissionDate, Integer department_id, Integer scholarid,
-			String enrolmentno) {
+			LocalDate dateOfBirth,  LocalDate admissionDate, String mode ,String subject
+			) {
 
 		this.appno = appno;
 		this.fullName = fullName;
@@ -49,11 +51,11 @@ public class ScholarDTO {
 		this.phone = phone;
 		this.gender_id = gender_id;
 		this.dateOfBirth = dateOfBirth;
-		this.programid = programid;
+		
 		this.admissionDate = admissionDate;
-		this.department_id = department_id;
-		this.scholarid = scholarid;
-		this.enrolmentno = enrolmentno;
+		this.mode = mode;
+		this.subject = subject;
+		
 
 	}
 
@@ -133,10 +135,7 @@ public class ScholarDTO {
 
 	public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-	public int getProgramid() { return programid; }
-
-	public void setProgramid(int programid) { this.programid = programid; }
-
+	
 	public String getProgramname() { return programname; }
 
 	public void setProgramname(String programname) { this.programname = programname; }
@@ -201,4 +200,13 @@ public class ScholarDTO {
 
 	public void setAddress(String address) { this.address = address; }
 
+	public String getSubject() { return subject; }
+
+	public void setSubject(String subject) { this.subject = subject; }
+
+	public String getMode() { return mode; }
+
+	public void setMode(String mode) { this.mode = mode; }
+
+	
 }
