@@ -139,25 +139,64 @@ public class TranscriptServiceImpl {
 			// SGPA and CGPA Calculation Formulas
 			Paragraph desc2 = new Paragraph();
 			desc2.add(new Chunk("The procedure for calculation of SGPA is as follows:\n", font));
-			desc2.add(new Chunk("                                                       SGPA (Si)=", font));
+			//	desc2.add(new Chunk("                                                       SGPA (Si)=", font));
+		//	desc2.add(summationSymbol);
+		//	desc2.add(createSummationSubscript(font));
+		//	desc2.add(new Chunk("(Ci x Gi) /", font));
+			
+			desc2.add(new Chunk("                                                       SGPA (", font));
+			desc2.add(new Chunk("S", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk(") = ", font));
+
 			desc2.add(summationSymbol);
-			desc2.add(new Chunk("(Ci x Gi) /", font));
+			desc2.add(createSummationSubscript(font));
+
+			desc2.add(new Chunk("(C", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk(" x G", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk(") / ", font));
 			desc2.add(summationSymbol);
-			desc2.add(new Chunk("Ci\n(where Ci is the number of credits of the i", font));
+			desc2.add(createSummationSubscript(font));
+			//desc2.add(new Chunk("Ci\n(where Ci is the number of credits of the i", font));
+			desc2.add(new Chunk("C", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk("\n(where C", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk(" is the number of credits of the i", font));
+			
 			desc2.add(superscriptTh);
-			desc2.add(new Chunk(" course and Gi", font));
+			//desc2.add(new Chunk(" course and Gi", font));
+			desc2.add(new Chunk(" course and G", font));
+			desc2.add(createSubscript("i", font));
 			desc2.add(new Chunk(" is the grade point scored by the student in the i", font));
 			desc2.add(superscriptTh);
 			desc2.add(new Chunk(
 					" course)\n On the other hand,CGPA is also calculated in the same manner considering the overall performance of students in terms of all the courses undergone by a student across all the semesters of an academic programme, i.e.,\n                                                      CGPA = ",
 					font));
 			desc2.add(summationSymbol);
-			desc2.add(new Chunk("(Ci x Si)/", font));
+			desc2.add(createSummationSubscript(font)); // added by pragya on 23 oct 2026
+			//desc2.add(new Chunk("(Ci x Si)/", font)); commented by pragya on 23 oct 2026
+			
+
+			desc2.add(new Chunk("(C", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk(" x S", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk(") / ", font));
 			desc2.add(summationSymbol);
-			desc2.add(new Chunk("Ci\n(where Si", font));
+			desc2.add(createSummationSubscript(font)); //added by pragya on 23 oct 2026
+			//desc2.add(new Chunk("Ci\n(where Si", font)); commented by pragya on 23 oct 2026
+			desc2.add(new Chunk("C", font));
+			desc2.add(createSubscript("i", font));
+			desc2.add(new Chunk("\n(where S", font));
+			desc2.add(createSubscript("i", font));
 			desc2.add(new Chunk(" is the SGPA of the i", font));
 			desc2.add(superscriptTh);
-			desc2.add(new Chunk(" Semester/Module and Ci", font));
+			//desc2.add(new Chunk(" Semester/Module and Ci", font)); commentted by pragya on 23 oct 2026
+			desc2.add(new Chunk(" Semester/Module and C", font));
+			desc2.add(createSubscript("i", font));
 			desc2.add(new Chunk(
 					" is the total number of credits earned by the student in that Semester as the case may be)\n",
 					font));
@@ -293,6 +332,20 @@ public class TranscriptServiceImpl {
 	// Method to create the summation symbol
 	private static Chunk createSummationSymbol(Font font) {
 		return new Chunk("\u2211", font); // Unicode for summation symbol (âˆ‘)
+	}
+
+	private static Chunk createSubscript(String text, Font font) {
+	    Chunk chunk = new Chunk(text, font);
+	    chunk.setFont(new Font(font.getBaseFont(), font.getSize() - 2));
+	    chunk.setTextRise(-2.5f);
+	    return chunk;
+	}
+	
+	// Method to create the summation symbol with subscript i
+	private static Chunk createSummationSubscript(Font font) {
+	    Chunk subscript = new Chunk("\u1D62", font); // Unicode subscript i
+	    subscript.setFont(new Font(font.getBaseFont(), font.getSize() - 2));
+	    return subscript;
 	}
 
 	// Method to create superscript
