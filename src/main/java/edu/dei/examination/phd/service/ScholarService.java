@@ -21,7 +21,9 @@ import edu.dei.examination.cmsexm.model.User;
 import edu.dei.examination.cmsexm.model.UserIdentifier;
 import edu.dei.examination.cmsexm.payload.request.UserDTO;
 import edu.dei.examination.cmsexm.repository.RoleRepository;
+import edu.dei.examination.cmsexm.repository.UserIdentifierRepository;
 import edu.dei.examination.cmsexm.repository.UserRepository;
+import edu.dei.examination.cmsexm.service.PasswordService;
 import edu.dei.examination.cmsexm.service.UserService;
 import edu.dei.examination.phd.dto.CreateScholarsRequest;
 import edu.dei.examination.phd.dto.ScholarDTO;
@@ -61,275 +63,189 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.io.ByteArrayOutputStream;
+import java.security.SecureRandom;
+import java.util.HashSet;
+
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class ScholarService {
-	
+
 	@Autowired
 	ScholarsRepository c;
-	
+
 	@Autowired
 	RoleRepository roleRepository;
-	
+
 	@Autowired
 	ScholarSemesterRepository theScholarSemesterRepository;
 	@Autowired
 	SemesterRepository theSemesterRepository;
-	
+
 	@Autowired
 	UserService userservice;
-	
+
 	@Autowired
 	UserRepository userRepo;
+	
+	@Autowired
+	UserIdentifierRepository userIdentifierRepo ;
 
 	@Autowired
 	DepartmentRepository depRepo;
+	@Autowired
+	PasswordService passwordService ;
+	
+	
 
 	@Autowired
 	ProgramRepository pgmRepo;
 
+	@Autowired
+	private ScholarsRepository scholarRepo;
+	@Autowired
+	private ScholarSupervisorRepository supervisorRepo;
+	@Autowired
+	private ProgramRoleAssignmentRepository programRoleRepo;
 
-	
-	
-	
+	@PersistenceContext(unitName = "phd")
+	private EntityManager em;
 
-    @Autowired private ScholarsRepository scholarRepo;
-    @Autowired private ScholarSupervisorRepository supervisorRepo;
-    @Autowired private ProgramRoleAssignmentRepository programRoleRepo;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-	 @PersistenceContext(unitName = "phd") 
-    private EntityManager em;
+	@Transactional("phdTransactionManager")
+	public int createScholarsForAcademicYearAndMonth(CreateScholarsRequest request) {
+		Object dbName = em.createNativeQuery("SELECT DATABASE()").getSingleResult();
+		System.out.println("Connected DB = " + dbName);
 
-    @Transactional("phdTransactionManager")
-    public int createScholarsForAcademicYearAndMonth(CreateScholarsRequest request) {
-    	Object dbName = em
-    		    .createNativeQuery("SELECT DATABASE()")
-    		    .getSingleResult();
-    		System.out.println("Connected DB = " + dbName);
-    	
-    		
-        String year = request.getAcademicYear().substring(0, 4);  
-        System.out.println(request.getAcademicYear());
-        
-        
-        Integer month = request.getAdmissionMonth();
+		String year = request.getAcademicYear().substring(0, 4);
+		System.out.println(request.getAcademicYear());
 
-        if (month == null || month < 1 || month > 12) {
-            throw new IllegalArgumentException(
-                "Admission month must be between 1 and 12"
-            );
-        }
+		Integer month = request.getAdmissionMonth();
 
-        String[] months = {
-            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
-        };
+		if (month == null || month < 1 || month > 12) {
+			throw new IllegalArgumentException("Admission month must be between 1 and 12");
+		}
 
-        String monthName = months[month - 1];
-        
-        List<ScholarDTO> list=em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
-        		.setParameter("year", request.getAcademicYear())
-        		.setParameter("month", request.getAdmissionMonth())
-        		.getResultList();
+		String[] months = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
-        if (list.isEmpty()) {
-            return 0;
-        }
+		String monthName = months[month - 1];
 
-        String insertSql =
-                "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
-                + " created_at,application_number,department_id,user_id,subject,mode) " +
-                "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id,:subject,:mode)";
+		List<ScholarDTO> list = em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
+				.setParameter("year", request.getAcademicYear()).setParameter("month", request.getAdmissionMonth())
+				.getResultList();
 
-        LocalDateTime now = LocalDateTime.now();
+		if (list.isEmpty()) {
+			return 0;
+		}
 
-        for (ScholarDTO row : list) {
-            String appno =  row.getAppno();
-            
-   
-        	   String username = row.getEmail();
-        	   String password = row.getDateOfBirth().toString();
-        	   Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
-        			    .orElseThrow(()->new RuntimeException("Scholar Role not found"));
+		String insertSql = "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
+				+ " created_at,application_number,department_id,user_id,subject,mode) "
+				+ "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id,:subject,:mode)";
 
-        	   Integer roleId = scholarRole.getId();
-        	   List <Integer>  listroleid= new ArrayList<>();
-        	   listroleid.add(roleId);
-        	   
-        	   UserDTO userdto = new UserDTO();
-        	   userdto.setUsername(username);
-        	   userdto.setPassword(password);
-        	   userdto.setRoleIds(listroleid);
-        	   userdto.setEmail(row.getEmail());
-        	   userdto.setName(row.getFullName());
-        	   userdto.setPhone(row.getPhone());
-        	   
-        	  // User user=userservice.createUser(username, password,listroleid);
-        	   
-        	   User user=userservice.createUser(userdto);
-        	   
-        	    username = "SCH" + user.getId();
-        	   user.setUsername(username);
+		LocalDateTime now = LocalDateTime.now();
 
-        	   userRepo.save(user);  
-        	   
-        	  
-        	   
-        	   
-        	        	   
-        	   
-        	   String idvalue = "APP"+year+row.getAppno();
-        	   
-        	   userservice.addUserIdentifier(
-        			    user.getId().intValue(),
-        			   //user.getUsername(),
-        			    UserIdentifier.IdentifierType.APPLICATION_NO,
-        			    idvalue
-        			);
-        	     appno =appno+monthName+year.substring(2);
-        	   
-        	    em.createNativeQuery(insertSql)
-                       .setParameter("appno", appno) 
-                       
-                       .setParameter("first_name", row.getFullName())
-                       .setParameter("gender", row.getGender_id())
-                       .setParameter("email", row.getEmail()) 
-                       .setParameter("dob", row.getDateOfBirth())
-                       .setParameter("phone", row.getPhone())
-                       .setParameter("category", row.getCategory())
-                       .setParameter("selection_date", row.getAdmissionDate())
-                       .setParameter("department_id", row.getDepartment_id())
-                       .setParameter("user_id", user.getId())
-                       .setParameter("subject", row.getSubject())
-                       .setParameter("mode", row.getMode())
-                                                       
-                       .executeUpdate();
-           
-        }
+		for (ScholarDTO row : list) {
+			
+			// Skip if email already exists
+//		    if (userRepo.existsByEmail(row.getEmail())) {
+//		        System.out.println(
+//		            "Skipping scholar: Email already exists - " + row.getEmail()
+//		        );
+//		        continue;
+//		    }
+			if (scholarRepo.findByEmail(row.getEmail()).isPresent())
+				continue;
+			
+			String appno = row.getAppno();
 
-        return list.size();
-    }
-
-
- //   @Transactional("phdTransactionManager")
-//    public int createScholarsFromCMS(CreateScholarsRequest request) {
-//    	Object dbName = em
-//    		    .createNativeQuery("SELECT DATABASE()")
-//    		    .getSingleResult();
-//    		System.out.println("Connected DB = " + dbName);
-//    		
-//        String year = request.getAcademicYear().substring(0, 4);          
-//        List<ScholarDTO> list=em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
-//        		.setParameter("year", request.getAcademicYear())
-//        		.setParameter("month", request.getAdmissionMonth())
-//        		.getResultList();
+			//String username = row.getEmail();
+			
+			
+//			String password = row.getDateOfBirth().toString();
+//			Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
+//					.orElseThrow(() -> new RuntimeException("Scholar Role not found"));
 //
-//        if (list.isEmpty()) {
-//            return 0;
-//        }
+//			Integer roleId = scholarRole.getId();
+//			List<Integer> listroleid = new ArrayList<>();
+//			listroleid.add(roleId);
 //
-//        String insertSql =
-//                "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
-//                + " created_at,application_number,department_id,user_id) " +
-//                "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id)";
+//			UserDTO userdto = new UserDTO();
+//			  // Temporary unique username
+//		    userdto.setUsername("TEMP_" + java.util.UUID.randomUUID());
+//			//userdto.setUsername(username);
+//			userdto.setPassword(password);
+//			userdto.setRoleIds(listroleid);
+//			userdto.setEmail(row.getEmail());
+//			userdto.setName(row.getFullName());
+//			userdto.setPhone(row.getPhone());
 //
-//        LocalDateTime now = LocalDateTime.now();
+//			// User user=userservice.createUser(username, password,listroleid);
 //
-//        for (ScholarDTO row : list) {
-//            String appno =  row.getAppno();
-//            
-//   
-//        	   String username = row.getEmail();
-//        	   String password = row.getDateOfBirth().toString();
-//        	   Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
-//        			    .orElseThrow(()->new RuntimeException("Scholar Role not found"));
+//			User user = userservice.createUser(userdto);
+//			
+//			 user.setUsername("SCH" + user.getId());
+//			    user = userRepo.saveAndFlush(user);
+//		
 //
-//        	   Integer roleId = scholarRole.getId();
-//        	   List <Integer>  listroleid= new ArrayList<>();
-//        	   listroleid.add(roleId);
-//        	   
-//        	   UserDTO userdto = new UserDTO();
-//        	   userdto.setUsername(username);
-//        	   userdto.setPassword(password);
-//        	   userdto.setRoleIds(listroleid);
-//        	  // User user=userservice.createUser(username, password,listroleid);
-//        	   
-//        	   User user=userservice.createUser(userdto);
-//        	   
-//        	    username = "SCH" + user.getId();
-//        	   user.setUsername(username);
+//			userRepo.save(user);
 //
-//        	   userRepo.save(user);  
-//        	   
-//        	  
-//        	   
-//        	   
-//        	        	   
-//        	   
-//        	   String idvalue = "APP"+year+row.getAppno();
-//        	   
-//        	   userservice.addUserIdentifier(
-//        			    user.getId().intValue(),
-//        			   //user.getUsername(),
-//        			    UserIdentifier.IdentifierType.APPLICATION_NO,
-//        			    idvalue
-//        			);
-//        	   
-//        	    em.createNativeQuery(insertSql)
-//                       .setParameter("appno", row.getAppno()) 
-//                       .setParameter("program_id", row.getProgramid())
-//                       .setParameter("first_name", row.getFullName())
-//                       .setParameter("gender", row.getGender_id())
-//                       .setParameter("email", row.getEmail()) 
-//                       .setParameter("dob", row.getDateOfBirth())
-//                       .setParameter("phone", row.getPhone())
-//                       .setParameter("category", row.getCategory())
-//                       .setParameter("selection_date", row.getAdmissionDate())
-//                       .setParameter("department_id", row.getDepartment_id())
-//                       .setParameter("user_id", user.getId())
-//                       		
-//                                 
-//                       .executeUpdate();
-//           
-//        }
+//			String idvalue = "APP" + year + row.getAppno();
 //
-//        return list.size();
-//    }
-//
+//			userservice.addUserIdentifier(user.getId().intValue(),
+//					// user.getUsername(),
+//					UserIdentifier.IdentifierType.APPLICATION_NO, idvalue);
+//			appno = appno + monthName + year.substring(2);
 
+			em.createNativeQuery(insertSql).setParameter("appno", appno)
+
+					.setParameter("first_name", row.getFullName()).setParameter("gender", row.getGender_id())
+					.setParameter("email", row.getEmail()).setParameter("dob", row.getDateOfBirth())
+					.setParameter("phone", row.getPhone()).setParameter("category", row.getCategory())
+					.setParameter("selection_date", row.getAdmissionDate())
+					.setParameter("department_id", row.getDepartment_id())
+					
+					.setParameter("subject", row.getSubject()).setParameter("mode", row.getMode())
+
+					.executeUpdate();
+
+		}
+
+		return list.size();
+	}
 
 	private String generateScholarNumber(Object[] row) {
-        // row[2] = academic_year , row[0] = id  (index based on SELECT order)
-        return "SCH-" + row[2] + "-" + row[0];
-    }
-    
-    @Transactional(transactionManager = "phdTransactionManager")
-    public ScholarDashboardDTO getScholarDashboard(int scholarId) {
+		// row[2] = academic_year , row[0] = id (index based on SELECT order)
+		return "SCH-" + row[2] + "-" + row[0];
+	}
 
-        // ---------- 1. Fetch Scholar Info ----------
-        Object[] scholarRow = (Object[]) em.createNativeQuery(
-                "SELECT s.application_number, s.full_name, s.category, " +
-                "       s.email, s.phone, s.gender_id, s.date_of_birth, " +
-                "       s.program_id, s.admission_date ,p.name as programname" +
-               
-                " FROM scholars s  join programs p on p.program_id=s.program_id" +
-                " WHERE s.scholar_id = :scholarId")
-            .setParameter("scholarId", scholarId)
-            .getSingleResult();
+	@Transactional(transactionManager = "phdTransactionManager")
+	public ScholarDashboardDTO getScholarDashboard(int scholarId) {
 
-        ScholarDTO scholarDTO = new ScholarDTO();
-        scholarDTO.setAppno((String) scholarRow[0]);
-        scholarDTO.setFullName((String) scholarRow[1]);
-        scholarDTO.setCategory((String) scholarRow[2]);
-        scholarDTO.setEmail((String) scholarRow[3]);
-        scholarDTO.setPhone((String) scholarRow[4]);
-        scholarDTO.setGender_id(((Number) scholarRow[5]).intValue());
-        scholarDTO.setDateOfBirth(((java.sql.Date) scholarRow[6]).toLocalDate());
-        
-        scholarDTO.setAdmissionDate(((java.sql.Date) scholarRow[8]).toLocalDate());
-        scholarDTO.setProgramname((String)scholarRow[9]);
+		// ---------- 1. Fetch Scholar Info ----------
+		Object[] scholarRow = (Object[]) em.createNativeQuery("SELECT s.application_number, s.full_name, s.category, "
+				+ "       s.email, s.phone, s.gender_id, s.date_of_birth, "
+				+ "       s.program_id, s.admission_date ,p.name as programname" +
 
-        // ---------- 2. Fetch Latest Progress Report ----------
+				" FROM scholars s  join programs p on p.program_id=s.program_id" + " WHERE s.scholar_id = :scholarId")
+				.setParameter("scholarId", scholarId).getSingleResult();
+
+		ScholarDTO scholarDTO = new ScholarDTO();
+		scholarDTO.setAppno((String) scholarRow[0]);
+		scholarDTO.setFullName((String) scholarRow[1]);
+		scholarDTO.setCategory((String) scholarRow[2]);
+		scholarDTO.setEmail((String) scholarRow[3]);
+		scholarDTO.setPhone((String) scholarRow[4]);
+		scholarDTO.setGender_id(((Number) scholarRow[5]).intValue());
+		scholarDTO.setDateOfBirth(((java.sql.Date) scholarRow[6]).toLocalDate());
+
+		scholarDTO.setAdmissionDate(((java.sql.Date) scholarRow[8]).toLocalDate());
+		scholarDTO.setProgramname((String) scholarRow[9]);
+
+		// ---------- 2. Fetch Latest Progress Report ----------
 //        List<Object[]> reportList =  em.createNativeQuery(
 //                " SELECT pr.id, pr.scholar_semester_id , pr.progress_status  , " +
 //                " pr.next_actions, pr.submitted_at ,s.semester_name ,s.start_date startdate,s.end_date enddate, " +
@@ -339,100 +255,86 @@ public class ScholarService {
 //            .setParameter("scholarId", scholarId)
 //            .setMaxResults(1)
 //            .getResultList();
-        
-        
-        List<Object[]> reportList = em.createNativeQuery(
-        	    " SELECT pr.id, pr.scholar_semester_id, pr.progress_status, " +
-        	    " pr.next_actions, pr.submitted_at, s.semester_name, " +
-        	    " s.start_date AS startdate, s.end_date AS enddate, " +
-        	    " s.submission_deadline " +
-        	    " FROM progress_report pr " +
 
-        	    " JOIN scholar_semesters ss ON ss.id = pr.scholar_semester_id " +   // ✅ FIX
-        	    " JOIN semesters s ON s.semester_id = ss.semester_id " +           // ✅ FIX
+		List<Object[]> reportList = em.createNativeQuery(" SELECT pr.id, pr.scholar_semester_id, pr.progress_status, "
+				+ " pr.next_actions, pr.submitted_at, s.semester_name, "
+				+ " s.start_date AS startdate, s.end_date AS enddate, " + " s.submission_deadline "
+				+ " FROM progress_report pr " +
 
-        	    " WHERE ss.scholar_id = :scholarId " +                             // ✅ BETTER
-        	    " AND s.is_active = 1 " +                                         // ✅ FIX CASE
+				" JOIN scholar_semesters ss ON ss.id = pr.scholar_semester_id " + // ✅ FIX
+				" JOIN semesters s ON s.semester_id = ss.semester_id " + // ✅ FIX
 
-        	    " ORDER BY pr.insert_time DESC"
-        	)
-        	.setParameter("scholarId", scholarId)
-        	.setMaxResults(1)
-        	.getResultList(); 
+				" WHERE ss.scholar_id = :scholarId " + // ✅ BETTER
+				" AND s.is_active = 1 " + // ✅ FIX CASE
 
-        ScholarDashboardDTO dashboard = new ScholarDashboardDTO();
-        dashboard.setScholar(scholarDTO);
+				" ORDER BY pr.insert_time DESC").setParameter("scholarId", scholarId).setMaxResults(1).getResultList();
 
-        if (!reportList.isEmpty()) {
-            Object[] r = reportList.get(0);
+		ScholarDashboardDTO dashboard = new ScholarDashboardDTO();
+		dashboard.setScholar(scholarDTO);
 
-            dashboard.setReportId(((Number) r[0]).intValue());
-            Integer scholarsemesterid = ((Number)r[1]).intValue();
-            ScholarSemester ssm =theScholarSemesterRepository.findById(scholarsemesterid)
-            		.orElseThrow(()->new RuntimeException("Scholar Semester record not found"));
-            //dashboard.setSemesterRegistrationId(((Number) r[1]).intValue());
-           dashboard.setSemesterRegistrationId(ssm.getSemester().getSemesterId());
-            dashboard.setProgressStatus((String) r[2]);
-            dashboard.setNextActions((String) r[3]);
-                      
-            java.sql.Timestamp submittime = (Timestamp)r[4];
-            String sumittime="";
-            if(submittime!=null)
-            	sumittime=Convert_timestamp_tohuman(submittime) ;
-            dashboard.setSubmittedOn(sumittime);
-            
-            dashboard.setSemestername((String )r[5]);
-            
-            java.sql.Date sqlDate = (java.sql.Date) r[6];
-            LocalDate startDate = sqlDate.toLocalDate();
-             sqlDate = (java.sql.Date) r[7];
-            LocalDate enddate = sqlDate.toLocalDate();
-            
-            sqlDate = (java.sql.Date) r[8];
-            LocalDate deadline = sqlDate.toLocalDate();
-            
-            if (deadline != null) {
-                dashboard.setDeadline(deadline);
-            }
-            LocalDate today = LocalDate.now();
-            
-            boolean allowed = !today.isAfter(deadline);
-         // check scholar extension
-            if (!allowed) {
+		if (!reportList.isEmpty()) {
+			Object[] r = reportList.get(0);
 
-                List<Object> extension = em.createNativeQuery(
-                        "SELECT extended_until " +
-                        "FROM progress_report_extension " +
-                        "WHERE scholar_id = :scholarId " +
-                        "AND semester_id = :semesterId " +
-                        "AND CURDATE() <= extended_until")
-                    .setParameter("scholarId", scholarId)
-                    .setParameter("semesterId", dashboard.getSemesterRegistrationId())
-                    .setMaxResults(1)
-                    .getResultList();
+			dashboard.setReportId(((Number) r[0]).intValue());
+			Integer scholarsemesterid = ((Number) r[1]).intValue();
+			ScholarSemester ssm = theScholarSemesterRepository.findById(scholarsemesterid)
+					.orElseThrow(() -> new RuntimeException("Scholar Semester record not found"));
+			// dashboard.setSemesterRegistrationId(((Number) r[1]).intValue());
+			dashboard.setSemesterRegistrationId(ssm.getSemester().getSemesterId());
+			dashboard.setProgressStatus((String) r[2]);
+			dashboard.setNextActions((String) r[3]);
 
-                if (!extension.isEmpty()) {
-                    allowed = true;
+			java.sql.Timestamp submittime = (Timestamp) r[4];
+			String sumittime = "";
+			if (submittime != null)
+				sumittime = Convert_timestamp_tohuman(submittime);
+			dashboard.setSubmittedOn(sumittime);
 
-                    java.sql.Date extDate = (java.sql.Date) extension.get(0);
-                    dashboard.setExtensionDeadline(extDate.toLocalDate());
-                }
-            }
+			dashboard.setSemestername((String) r[5]);
 
-            dashboard.setSubmissionAllowed(allowed);
+			java.sql.Date sqlDate = (java.sql.Date) r[6];
+			LocalDate startDate = sqlDate.toLocalDate();
+			sqlDate = (java.sql.Date) r[7];
+			LocalDate enddate = sqlDate.toLocalDate();
+
+			sqlDate = (java.sql.Date) r[8];
+			LocalDate deadline = sqlDate.toLocalDate();
+
+			if (deadline != null) {
+				dashboard.setDeadline(deadline);
+			}
+			LocalDate today = LocalDate.now();
+
+			boolean allowed = !today.isAfter(deadline);
+			// check scholar extension
+			if (!allowed) {
+
+				List<Object> extension = em
+						.createNativeQuery("SELECT extended_until " + "FROM progress_report_extension "
+								+ "WHERE scholar_id = :scholarId " + "AND semester_id = :semesterId "
+								+ "AND CURDATE() <= extended_until")
+						.setParameter("scholarId", scholarId)
+						.setParameter("semesterId", dashboard.getSemesterRegistrationId()).setMaxResults(1)
+						.getResultList();
+
+				if (!extension.isEmpty()) {
+					allowed = true;
+
+					java.sql.Date extDate = (java.sql.Date) extension.get(0);
+					dashboard.setExtensionDeadline(extDate.toLocalDate());
+				}
+			}
+
+			dashboard.setSubmissionAllowed(allowed);
 
 //            if (today.isAfter(deadline)) {
 //                dashboard.setSubmissionAllowed(false);
 //            } else {
 //                dashboard.setSubmissionAllowed(true);
 //            }
-           
-            dashboard.setStartdate(startDate);
-            dashboard.setEnddate(enddate);
-            
-        
-            
-           
+
+			dashboard.setStartdate(startDate);
+			dashboard.setEnddate(enddate);
 
 //            if (r[4] != null) {
 //                dashboard.setSubmittedOn(
@@ -440,525 +342,481 @@ public class ScholarService {
 //                        .format((java.sql.Timestamp) r[4])
 //                );
 //            }
-        }
-        // if first time entry
-        if (reportList.isEmpty()) {
-        	
-        	
+		}
+		// if first time entry
+		if (reportList.isEmpty()) {
 
-            ProgressReport pr = new ProgressReport();
-            //pr.setScholarId(scholarId);
+			ProgressReport pr = new ProgressReport();
+			// pr.setScholarId(scholarId);
 //            ScholarSemester ssm=theScholarSemesterRepository
 //            		.findTopByScholarScholarIdOrderBySemesterSemesterIdDesc(scholarId)
 //            		.orElseThrow(()->new RuntimeException("Scholar semester not found")) ;
-            ScholarSemester ssm=theScholarSemesterRepository.
-            		findTopByScholarScholarIdAndReviewStatusNotOrderBySemesterSemesterIdDesc(scholarId, 
-            				ScholarSemester.ReviewStatus.Approved)
-            		.orElseThrow(()->new RuntimeException("Last semester  review is already approved .Valid Scholar semester not found")) ;
-            		
-            
-         
-            pr.setScholarSemester(ssm);
-            pr.setProgressStatus(ProgressStatus.DRAFT);
-            
-           
-//            ScholarSemester latestSemester = 
-//            		theScholarSemesterRepository.findTopByScholarScholarIdOrderBySemesterSemesterIdDesc
-//            		(scholarId).orElseThrow(()->new RuntimeException("Scholar semester not found"));
-////            		findTopByScholarIdOrderBySemesterIdDesc(
-//            		scholarId)
-//    				.orElse(null);
+			ScholarSemester ssm = theScholarSemesterRepository
+					.findTopByScholarScholarIdAndReviewStatusNotOrderBySemesterSemesterIdDesc(scholarId,
+							ScholarSemester.ReviewStatus.Approved)
+					.orElseThrow(() -> new RuntimeException(
+							"Last semester  review is already approved .Valid Scholar semester not found"));
 
-//    		if (latestSemester != null) {
-//    			if (latestSemester.getReviewStatus() != ScholarSemester.ReviewStatus.Approved) {
-//
-//    				pr.setSemesterRegistrationId(latestSemester.getSemester().getSemesterId());
-//    				pr.setScholarSemester(latestSemester);
-//
-//    			}else {
-//    				throw new ScholarValidationException("Last semester  review is already approved");
-//    			}
-//    		}
-            
-            
-            		
+			pr.setScholarSemester(ssm);
+			pr.setProgressStatus(ProgressStatus.DRAFT);
 
-            
+			dashboard.setReportId(pr.getId());
+			dashboard.setProgressStatus("DRAFT");
+			dashboard.setSemesterRegistrationId(pr.getScholarSemester().getSemester().getSemesterId());
 
-            dashboard.setReportId(pr.getId());
-            dashboard.setProgressStatus("DRAFT");
-            dashboard.setSemesterRegistrationId(pr.getScholarSemester().getSemester().getSemesterId());
-           
-            Semesters semester= theSemesterRepository.
-            		findById(pr.getScholarSemester().getSemester().getSemesterId()).orElse(null); 
-            if(semester==null) {
-            	throw new ScholarValidationException("Semester not available");
-            }
-            LocalDate today = LocalDate.now();
-            Boolean allowed = !today.isAfter(semester.getSubmissiondeadline());
-            dashboard.setSubmissionAllowed(allowed);
-            
-           
-            dashboard.setSemestername(semester.getSemesterName());
-            if (allowed)
-            	em.persist(pr);
-            
-        }
+			Semesters semester = theSemesterRepository.findById(pr.getScholarSemester().getSemester().getSemesterId())
+					.orElse(null);
+			if (semester == null) {
+				throw new ScholarValidationException("Semester not available");
+			}
+			LocalDate today = LocalDate.now();
+			Boolean allowed = !today.isAfter(semester.getSubmissiondeadline());
+			dashboard.setSubmissionAllowed(allowed);
 
-        return dashboard;
-    }
-    
+			dashboard.setSemestername(semester.getSemesterName());
+			if (allowed)
+				em.persist(pr);
+
+		}
+
+		return dashboard;
+	}
+
 //    public boolean isProgressEntryAllowed(Date) {
 //    	
 //    }
-    
-    public String  Convert_timestamp_tohuman(Timestamp timestamp) {
-    
 
-        // Convert to LocalDateTime
-        java.time.LocalDateTime dateTime = timestamp.toLocalDateTime();
+	public String Convert_timestamp_tohuman(Timestamp timestamp) {
 
-        // Format it
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern(
-                        "d MMMM yyyy, hh:mm:ss a");
+		// Convert to LocalDateTime
+		java.time.LocalDateTime dateTime = timestamp.toLocalDateTime();
 
-        String formattedDate = dateTime.format(formatter);
+		// Format it
+		java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+				.ofPattern("d MMMM yyyy, hh:mm:ss a");
 
-        System.out.println(formattedDate);
-        return formattedDate;
+		String formattedDate = dateTime.format(formatter);
 
-    	
-    }
-    
-    
-    public Scholars getScholarByUserid(int userid) {
-    	
-    	return scholarRepo.findByUserId(userid)
-    			.orElseThrow(() ->
-                new RuntimeException("Scholar not found"));
-    	
-    	
-    	
-    	
-    	
-    }
-    
-   
+		System.out.println(formattedDate);
+		return formattedDate;
 
+	}
 
-        // =========================
-        // GET ALL
-        // =========================
-        public List<ScholarDTO> getAll() {
-            return scholarRepo.findAll()
-            		 .stream()
-                     .map(s -> {
-                         ScholarDTO dto = new ScholarDTO();
-                         
-                         dto.setScholarid(s.getScholarId());
-                         dto.setFullName(s.getFullName());
-                         dto.setEmail(s.getEmail());
-                         dto.setEnrolmentno(s.getEnrolmentno());
-                         dto.setProgramname(s.getProgram().getProgramname());
-                         return dto;
-                     })
-                     .collect(Collectors.toList());
-        }
+	public Scholars getScholarByUserid(int userid) {
 
-        // =========================
-        // GET BY ID
-        // =========================
-        public Scholars getById(Integer id) {
-            return scholarRepo.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Scholar not found"));
-        }
+		return scholarRepo.findByUserId(userid).orElseThrow(() -> new RuntimeException("Scholar not found"));
 
-        // =========================
-        // UPDATE
-        // =========================
-        public Scholars update(Integer id, ScholarDTO updated) {
+	}
 
-            Scholars s = getById(id);
-            
-            s.setFullName(updated.getFullName());
-            s.setEmail(updated.getEmail());
-            s.setPhone(updated.getPhone());
-          
-            s.setFathername(updated.getFathername());
-            s.setAddressForCorrespondence(updated.getAddress());
-            s.setAdmissionDate(updated.getAdmissionDate());
-            s.setDateOfBirth(updated.getDateOfBirth());
+	// =========================
+	// GET ALL
+	// =========================
+	public List<ScholarDTO> getAll() {
+		return scholarRepo.findAll().stream().map(s -> {
+			ScholarDTO dto = new ScholarDTO();
 
-            return scholarRepo.save(s);
-        }
+			dto.setScholarid(s.getScholarId());
+			dto.setFullName(s.getFullName());
+			dto.setEmail(s.getEmail());
+			dto.setEnrolmentno(s.getEnrolmentno());
+			dto.setProgramname(s.getProgram().getProgramname());
+			return dto;
+		}).collect(Collectors.toList());
+	}
 
-        // =========================
-        // DELETE
-        // =========================
-        public void delete(Integer id) {
-            scholarRepo.deleteById(id);
-        }
+	// =========================
+	// GET BY ID
+	// =========================
+	public Scholars getById(Integer id) {
+		return scholarRepo.findById(id).orElseThrow(() -> new RuntimeException("Scholar not found"));
+	}
 
-        // =========================
-        // GET SUPERVISOR
-        // =========================
-        public List<ScholarSupervisor> getSupervisor(Integer scholarId) {
-            return supervisorRepo.findByScholar_ScholarIdAndIsActiveTrue(scholarId);
-        }
+	// =========================
+	// UPDATE
+	// =========================
+	public Scholars update(Integer id, ScholarDTO updated) {
 
-        // =========================
-        // GET PROGRAM ID
-        // =========================
-        private Integer getProgramId(Integer scholarId) {
-            return getById(scholarId).getProgramId();
-        }
+		Scholars s = getById(id);
 
-        // =========================
-        // GET HOD
-        // =========================
-        public List<ProgramRoleAssignment> getProgramByRole(Integer scholarId,String role) {
-            //return programRoleRepo.findByProgram_IdAndRole(getProgramId(scholarId), "HOD");
-           return  programRoleRepo.findByProgram_ProgramIdAndRole(getProgramId(scholarId), role);
-        }
-        
-        
-      
+		s.setFullName(updated.getFullName());
+		s.setEmail(updated.getEmail());
+		s.setPhone(updated.getPhone());
 
-            @Transactional
-            public ScholarDTO updateAcademic(Integer id, ScholarDTO dto) {
+		s.setFathername(updated.getFathername());
+		s.setAddressForCorrespondence(updated.getAddress());
+		s.setAdmissionDate(updated.getAdmissionDate());
+		s.setDateOfBirth(updated.getDateOfBirth());
 
-                Scholars s = scholarRepo.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Scholar not found with id: " + id));
+		return scholarRepo.save(s);
+	}
 
-                // ✅ Safe updates
-                if (dto.getRegistrationdate() != null) {
-                    s.setRegistrationDate(dto.getRegistrationdate());
-                }
+	// =========================
+	// DELETE
+	// =========================
+	public void delete(Integer id) {
+		scholarRepo.deleteById(id);
+	}
 
-                if (dto.getResearchtopiceng() != null) {
-                    s.setResearchTopicEng(dto.getResearchtopiceng());
-                }
+	// =========================
+	// GET SUPERVISOR
+	// =========================
+	public List<ScholarSupervisor> getSupervisor(Integer scholarId) {
+		return supervisorRepo.findByScholar_ScholarIdAndIsActiveTrue(scholarId);
+	}
 
-                if (dto.getResearchtopichnd() != null) {
-                    s.setResearchTopicHnd(dto.getResearchtopichnd());
-                }
+	// =========================
+	// GET PROGRAM ID
+	// =========================
+	private Integer getProgramId(Integer scholarId) {
+		return getById(scholarId).getProgramId();
+	}
 
-                if (dto.getDateextension() != null) {
-                    s.setDateExtension(dto.getDateextension());
-                }
+	// =========================
+	// GET HOD
+	// =========================
+	public List<ProgramRoleAssignment> getProgramByRole(Integer scholarId, String role) {
+		// return programRoleRepo.findByProgram_IdAndRole(getProgramId(scholarId),
+		// "HOD");
+		return programRoleRepo.findByProgram_ProgramIdAndRole(getProgramId(scholarId), role);
+	}
 
-                if (dto.getDateJRF() != null) {
-                    s.setDateJrf(dto.getDateJRF());
-                }
+	@Transactional
+	public ScholarDTO updateAcademic(Integer id, ScholarDTO dto) {
 
-                if (dto.getDateJRFexp() != null) {
-                    s.setDateJrfExp(dto.getDateJRFexp());
-                }
+		Scholars s = scholarRepo.findById(id)
+				.orElseThrow(() -> new RuntimeException("Scholar not found with id: " + id));
 
-                Scholars updated = scholarRepo.save(s);
+		// ✅ Safe updates
+		if (dto.getRegistrationdate() != null) {
+			s.setRegistrationDate(dto.getRegistrationdate());
+		}
 
-                return map(updated); // your existing mapper
-            }
-            
-            private ScholarDTO map(Scholars s) {
-                ScholarDTO dto = new ScholarDTO();
+		if (dto.getResearchtopiceng() != null) {
+			s.setResearchTopicEng(dto.getResearchtopiceng());
+		}
 
-                dto.setScholarid(s.getScholarId());
-                dto.setRegistrationdate(s.getRegistrationDate());
-                dto.setResearchtopiceng(s.getResearchTopicEng());
-                dto.setResearchtopichnd(s.getResearchTopicHnd());
-                dto.setDateextension(s.getDateExtension());
-                dto.setDateJRF(s.getDateJrf());
-                dto.setDateJRFexp(s.getDateJrfExp());
+		if (dto.getResearchtopichnd() != null) {
+			s.setResearchTopicHnd(dto.getResearchtopichnd());
+		}
 
-                return dto;
-            }
-            
-            @Transactional
-            public Page<ScholarDTO> search(Pageable pageable) {
+		if (dto.getDateextension() != null) {
+			s.setDateExtension(dto.getDateextension());
+		}
 
-                Page<Scholars> page = scholarRepo.findAll(pageable);
+		if (dto.getDateJRF() != null) {
+			s.setDateJrf(dto.getDateJRF());
+		}
 
-                return page.map(this::mapToDTO);
-            }
-            @Transactional
-            public Page<ScholarDTO> search(Pageable pageable,String keyword, Integer deptId) {
+		if (dto.getDateJRFexp() != null) {
+			s.setDateJrfExp(dto.getDateJRFexp());
+		}
 
-            	 Page<Scholars> page = scholarRepo.search(keyword, deptId,pageable);
-            	 return page.map(this::mapToDTO);
-                
-            }
-       
-           
-            
-            private ScholarDTO mapToDTO(Scholars s) {
-                return new ScholarDTO(
-                        s.getScholarId(),
-                        s.getFullName(),
-                        s.getEnrolmentno(),
-                        s.getDepartment().getDepartmentName(),
-                        s.getProgram().getProgramname(),
-                        s.getEmail(),
-                        s.getPhone(),
-                        s.getFathername(),
-                        s.getAddressForCorrespondence(),
-                        s.getAdmissionDate(),
-                        s.getDateOfBirth(),
-                        s.getResearchTopicEng(),
-                        s.getResearchTopicHnd(),
-                        s.getNameInHindi(),
-                        s.getDateJrf(),
-                        s.getDateJrfExp(),
-                        s.getDateExtension(),
-                        s.getRegistrationDate()
-                );
-            }
-            
-            
-            @Transactional
-            public void importScholars(MultipartFile file) throws Exception {
+		Scholars updated = scholarRepo.save(s);
 
-                Workbook workbook = new XSSFWorkbook(file.getInputStream());
-                Sheet sheet = workbook.getSheetAt(0);
+		return map(updated); // your existing mapper
+	}
 
-                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                	
-                	
+	private ScholarDTO map(Scholars s) {
+		ScholarDTO dto = new ScholarDTO();
 
-                    Row row = sheet.getRow(i);
-                    if (row == null) continue;
-                    
+		dto.setScholarid(s.getScholarId());
+		dto.setRegistrationdate(s.getRegistrationDate());
+		dto.setResearchtopiceng(s.getResearchTopicEng());
+		dto.setResearchtopichnd(s.getResearchTopicHnd());
+		dto.setDateextension(s.getDateExtension());
+		dto.setDateJRF(s.getDateJrf());
+		dto.setDateJRFexp(s.getDateJrfExp());
 
-                    // ❌ Skip garbage rows like "FACULTY OF EDUCATION"
-                    Cell firstCell = row.getCell(0);
-                    if (firstCell == null || firstCell.getCellType() == CellType.BLANK) continue;
+		return dto;
+	}
 
-                    String name = getString(row.getCell(1));
-                    if (name == null || name.trim().isEmpty()) continue;
+	@Transactional
+	public Page<ScholarDTO> search(Pageable pageable) {
 
-                    Scholars s = new Scholars();
-                    
-                    String email =getString(row.getCell(6));
-                    if (scholarRepo.findByEmail(email).isPresent())
-                    	continue;
+		Page<Scholars> page = scholarRepo.findAll(pageable);
 
-                    // ✔ Map only required columns (ignore rest)
-                    s.setFullName(name);
-                    s.setNameInHindi(getString(row.getCell(2)));
-                    
-                    s.setFathername(getString(row.getCell(3)));
-                    
-                    s.setMothername(getString(row.getCell(4)));
-                   
-                    
+		return page.map(this::mapToDTO);
+	}
 
-                    // ✔ Date handling
-                    s.setDateOfBirth(getDate(row.getCell(5)));
-                    s.setEmail(getString(row.getCell(6)));
-                    s.setPhone(getString(row.getCell(7)));
-                    
-                    
-                    String[] parts= getString(row.getCell(8)).split("\\r?\\n");
-                    String admission = parts.length > 0 ? parts[0].trim() : null;
-                    
-                   
-                     admission = clean(admission);
-                    
-                    
-                    
-                    admission=	extractDate(clean(admission));
-                    s.setAdmissionDate(parseMonthYear(admission));
-                    if (s.getAdmissionDate()==null)
-                    	s.setAdmissionDate(parseDayMonthYear(admission)); 
-                    
-                    admission=  extractDate(clean(getString(row.getCell(9))));
-                    
-                    s.setRegistrationDate(parseDayMonthYear(admission)); 
-                   
-                    
-                    //s.setSupervisor(getString(row.getCell(10)));
-                    //s.setCoSupervisor(getString(row.getCell(11)));
+	@Transactional
+	public Page<ScholarDTO> search(Pageable pageable, String keyword, Integer deptId) {
 
-                    s.setThesisTitle(getString(row.getCell(12)));
-                    String deptname =getString(row.getCell(13));
-                     parts= (deptname).split("\\r?\\n");
-                     deptname = parts.length > 0 ? parts[0].trim() : null;
-                     
-                    Department dept =depRepo.findByDepartmentName(deptname).orElseThrow(()->new Exception("Department not exists"));
-                    List<Program> pgm = pgmRepo.findByDepartmentid(dept.getDepartmentId())
-                    		.orElseThrow(()->new RuntimeException("Program not found")); 
-                    s.setProgram(pgm.get(0));
-                    s.setSubject(getString(row.getCell(13)));
-                    s.setDepartment(dept); 
-                     parts= getString(row.getCell(14)).split("\\r?\\n");
-                    String enrolmentNo = parts.length > 0 ? parts[0].trim() : null;
-                    	//	String[] parts = cellValue.split("\\r?\\n");
-                    
-                    if( isNumeric(enrolmentNo))
-                         s.setEnrolmentno(enrolmentNo);
-                    else
-                    	s.setEnrolmentno(null);
-              
-                    //s.setEnrolmentNumber(getString(row.getCell(14)));
-                    
-                    String gender =getString(row.getCell(15));
-                    if (gender.equalsIgnoreCase("M"))
-                    s.setGenderId(1);
-                    else
-                    	s.setGenderId(2);	
-                    	
-                    s.setCategory(getString(row.getCell(16)));
-                    s.setStatus(getString(row.getCell(17)));
-                    s.setState(getString(row.getCell(18)));
-                    
-                    s.setMinority(getString(row.getCell(19)));
-                   
-                    //(getString(row.getCell(17)));
+		Page<Scholars> page = scholarRepo.search(keyword, deptId, pageable);
+		return page.map(this::mapToDTO);
 
-                    scholarRepo.save(s);
-                }
+	}
 
-                workbook.close();
-            }  
-            
-            private boolean isNumeric(String value) {
-                if (value == null) return false;
+	private ScholarDTO mapToDTO(Scholars s) {
+		return new ScholarDTO(s.getScholarId(), s.getFullName(), s.getEnrolmentno(),
+				s.getDepartment().getDepartmentName(), s.getProgram().getProgramname(), s.getEmail(), s.getPhone(),
+				s.getFathername(), s.getAddressForCorrespondence(), s.getAdmissionDate(), s.getDateOfBirth(),
+				s.getResearchTopicEng(), s.getResearchTopicHnd(), s.getNameInHindi(), s.getDateJrf(), s.getDateJrfExp(),
+				s.getDateExtension(), s.getRegistrationDate());
+	}
 
-                value = value.trim();
+	@Transactional(rollbackFor = Exception.class)
+	public void importScholars(MultipartFile file) throws Exception {
 
-                return value.matches("\\d+");
-            }
-            
-            private String extractDate(String value) {
-                if (value == null) return null;
-                
-                String cleaned = value.trim()
-                        .replace("\u00A0", " ")
-                        .replaceAll("\\s+", " ")
-                        .toUpperCase();
+		try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+			Sheet sheet = workbook.getSheetAt(0);
 
-                Pattern pattern = Pattern.compile("\\d{2}-[A-Z]{3}-\\d{4}");
-                Matcher matcher = pattern.matcher(value.toUpperCase());
+			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 
-                if (matcher.find()) {
-                    return matcher.group(); // returns "14-DEC-2020"
-                }
-                
-                // 2️⃣ Month-year pattern: SEP-2023
-                Pattern monthYear = Pattern.compile("\\b[A-Z]{3}-\\d{4}\\b");
-                Matcher m2 = monthYear.matcher(cleaned);
-                if (m2.find()) {
-                    return m2.group();
-                }
+				try {
 
-                return null;
-            }
-            
-            private LocalDate parseMonthYear(String raw) {
-                if (raw == null || raw.isEmpty()) return null;
-                
+					Row row = sheet.getRow(i);
+					if (row == null)
+						continue;
+
+					// ❌ Skip garbage rows like "FACULTY OF EDUCATION"
+					Cell firstCell = row.getCell(0);
+					if (firstCell == null || firstCell.getCellType() == CellType.BLANK)
+						continue;
+
+					String name = getString(row.getCell(1));
+					if (name == null || name.trim().isEmpty())
+						continue;
+
+					Scholars s = new Scholars();
+
+					String email = getString(row.getCell(6));
+					if (scholarRepo.findByEmail(email).isPresent())
+						continue;
+					
+					System.out.println("Processing Excel row: " + (i + 1));
+
+					// ✔ Map only required columns (ignore rest)
+					s.setFullName(name);
+					s.setNameInHindi(getString(row.getCell(2)));
+
+					s.setFathername(getString(row.getCell(3)));
+
+					s.setMothername(getString(row.getCell(4)));
+
+					// ✔ Date handling
+					s.setDateOfBirth(getDate(row.getCell(5)));
+					s.setEmail(getString(row.getCell(6)));
+					s.setPhone(getString(row.getCell(7)));
+
+					String[] parts = getString(row.getCell(8)).split("\\r?\\n");
+					String admission = parts.length > 0 ? parts[0].trim() : null;
+
+					admission = clean(admission);
+
+					admission = extractDate(clean(admission));
+					s.setAdmissionDate(parseMonthYear(admission));
+					if (s.getAdmissionDate() == null)
+						s.setAdmissionDate(parseDayMonthYear(admission));
+
+					admission = extractDate(clean(getString(row.getCell(9))));
+
+					s.setRegistrationDate(parseDayMonthYear(admission));
+
+					// s.setSupervisor(getString(row.getCell(10)));
+					// s.setCoSupervisor(getString(row.getCell(11)));
+
+					s.setThesisTitle(getString(row.getCell(12)));
+					String deptname = getString(row.getCell(13));
+					parts = (deptname).split("\\r?\\n");
+					deptname = parts.length > 0 ? parts[0].trim() : null;
+
+					Department dept = depRepo.findByDepartmentName(deptname)
+							.orElseThrow(() -> new Exception("Department not exists"));
+					List<Program> pgm = pgmRepo.findByDepartmentid(dept.getDepartmentId())
+							.orElseThrow(() -> new RuntimeException("Program not found"));
+					s.setProgram(pgm.get(0));
+					s.setSubject(getString(row.getCell(13)));
+					s.setDepartment(dept);
+					parts = getString(row.getCell(14)).split("\\r?\\n");
+					String enrolmentNo = parts.length > 0 ? parts[0].trim() : null;
+					// String[] parts = cellValue.split("\\r?\\n");
+
+					if (isNumeric(enrolmentNo))
+						s.setEnrolmentno(enrolmentNo);
+					else
+						s.setEnrolmentno(null);
+
+					// s.setEnrolmentNumber(getString(row.getCell(14)));
+
+					String gender = getString(row.getCell(15));
+					if (gender.equalsIgnoreCase("M"))
+						s.setGenderId(1);
+					else
+						s.setGenderId(2);
+
+					s.setCategory(getString(row.getCell(16)));
+					s.setStatus(getString(row.getCell(17)));
+					s.setState(getString(row.getCell(18)));
+
+					s.setMinority(getString(row.getCell(19)));
+
+					// (getString(row.getCell(17)));
+
+//                    Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
+//            			    .orElseThrow(()->new RuntimeException("Scholar Role not found"));
+//
+//            	   Integer roleId = scholarRole.getId();
+//            	   List <Integer>  listroleid= new ArrayList<>();
+//            	   listroleid.add(roleId);
+//            	   
+//            	   UserDTO userdto = new UserDTO();
+//            	   userdto.setUsername(s.getEnrolmentno());
+//            	   userdto.setPassword(s.getDateOfBirth().toString());
+//            	   userdto.setRoleIds(listroleid);
+//            	   userdto.setEmail(s.getEmail());
+//            	   userdto.setName(s.getFullName());
+//            	   userdto.setPhone(s.getPhone());
+
+					// User user=userservice.createUser(username, password,listroleid);
+
+					scholarRepo.save(s);
+					System.out.println("Saved Excel row: " + (i + 1));
+//            	   User user=userservice.createUser(userdto);
+//            	   Scholars sch=scholarRepo.findByEmail(email).orElseThrow(()->
+//            			   new RuntimeException("Scholar does not exists")
+//            			   );
+//            			   
+
+//            	   sch.setUserId(user.getId());
+//            	   scholarRepo.save(sch);
+
+				} catch (Exception ex) {
+					System.err.println("Error at Excel row: " + (i + 1));
+					ex.printStackTrace();
+					throw ex;
+				}
+			}
+		}
+
+	}
+
+	private boolean isNumeric(String value) {
+		if (value == null)
+			return false;
+
+		value = value.trim();
+
+		return value.matches("\\d+");
+	}
+
+	private String extractDate(String value) {
+		if (value == null)
+			return null;
+
+		String cleaned = value.trim().replace("\u00A0", " ").replaceAll("\\s+", " ").toUpperCase();
+
+		Pattern pattern = Pattern.compile("\\d{2}-[A-Z]{3}-\\d{4}");
+		Matcher matcher = pattern.matcher(value.toUpperCase());
+
+		if (matcher.find()) {
+			return matcher.group(); // returns "14-DEC-2020"
+		}
+
+		// 2️⃣ Month-year pattern: SEP-2023
+		Pattern monthYear = Pattern.compile("\\b[A-Z]{3}-\\d{4}\\b");
+		Matcher m2 = monthYear.matcher(cleaned);
+		if (m2.find()) {
+			return m2.group();
+		}
+
+		return null;
+	}
+
+	private LocalDate parseMonthYear(String raw) {
+		if (raw == null || raw.isEmpty())
+			return null;
+
 //                System.out.println("RAW = [" + raw + "]");
 //                for (char c : raw.toCharArray()) {
 //                    System.out.println("CHAR: [" + c + "] ASCII: " + (int) c);
 //                }
-                
-                String value = normalize(raw).trim();
 
-                DateTimeFormatter format1 = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-                
-                DateTimeFormatter formatter =
-                        new DateTimeFormatterBuilder()
-                                .parseCaseInsensitive()   // ⭐ CRITICAL FIX
-                                .appendPattern("dd-MMM-yyyy")
-                                .toFormatter(Locale.ENGLISH);
-                LocalDate  dt=null;
-                try {
-                	if (value.length()<10)
-                	   dt = LocalDate.parse("01-" + value, formatter);
-                	else
-                		 dt = LocalDate.parse(value,format1);
-                	 return dt;
+		String value = normalize(raw).trim();
+
+		DateTimeFormatter format1 = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+
+		DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive() // ⭐ CRITICAL FIX
+				.appendPattern("dd-MMM-yyyy").toFormatter(Locale.ENGLISH);
+		LocalDate dt = null;
+		try {
+			if (value.length() < 10)
+				dt = LocalDate.parse("01-" + value, formatter);
+			else
+				dt = LocalDate.parse(value, format1);
+			return dt;
 //                YearMonth yearMonth = YearMonth.parse(value, formatter);
 //                return yearMonth.atDay(1); // default day = 1
-                }
-                catch(Exception e) {
-                	e.printStackTrace();
-                	return null;
-                }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 
-               
-            }
-            
-            private LocalDate parseDayMonthYear(String raw) {
-                if (raw == null || raw.isEmpty()) return null;
-                
+	}
+
+	private LocalDate parseDayMonthYear(String raw) {
+		if (raw == null || raw.isEmpty())
+			return null;
+
 //                System.out.println("RAW = [" + raw + "]");
 //                for (char c : raw.toCharArray()) {
 //                    System.out.println("CHAR: [" + c + "] ASCII: " + (int) c);
 //                }
-                
-                String value = normalize(raw).trim();
 
-               //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-                
-                DateTimeFormatter formatter =
-                        new DateTimeFormatterBuilder()
-                                .parseCaseInsensitive()   // ⭐ CRITICAL FIX
-                                .appendPattern("dd-MMM-yyyy")
-                                .toFormatter(Locale.ENGLISH);
-                try {
-                	
-                	 return LocalDate.parse( value, formatter);
+		String value = normalize(raw).trim();
+
+		// DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy",
+		// Locale.ENGLISH);
+
+		DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive() // ⭐ CRITICAL FIX
+				.appendPattern("dd-MMM-yyyy").toFormatter(Locale.ENGLISH);
+		try {
+
+			return LocalDate.parse(value, formatter);
 //                YearMonth yearMonth = YearMonth.parse(value, formatter);
 //                return yearMonth.atDay(1); // default day = 1
-                }
-                catch(Exception e) {
-                	e.printStackTrace();
-                	return null;
-                }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 
-               
-            }
-            
-            private String normalize(String value) {
-                if (value == null) return null;
+	}
 
-                return value.trim()
-                        .replace('\u00A0', ' ')   // non-breaking space
-                        .replace('–', '-')   
-                        .replaceAll("[^\\x00-\\x7F]", "")// special dash → normal dash
-                        .replace("\n", "")
-                        .replace("\r", "")
-                        .toUpperCase();
-            }
-            
-            private String clean(String value) {
-                if (value == null) return null;
+	private String normalize(String value) {
+		if (value == null)
+			return null;
 
-                return value.trim()
-                        .replace("'", "")        // remove leading quote
-                        .replace("\"", "")       // remove double quote
-                        .replace("\u00A0", "");  // remove hidden space
-            }
-            
-            
-            private String getString(Cell cell) {
-                if (cell == null) return null;
-                cell.setCellType(CellType.STRING);
-                return cell.getStringCellValue().trim();
-            }
+		return value.trim().replace('\u00A0', ' ') // non-breaking space
+				.replace('–', '-').replaceAll("[^\\x00-\\x7F]", "")// special dash → normal dash
+				.replace("\n", "").replace("\r", "").toUpperCase();
+	}
 
-            private LocalDate getDate(Cell cell) {
-                if (cell == null) return null;
+	private String clean(String value) {
+		if (value == null)
+			return null;
 
-                if (cell.getCellType() == CellType.NUMERIC) {
-                    return cell.getLocalDateTimeCellValue().toLocalDate();
-                }
+		return value.trim().replace("'", "") // remove leading quote
+				.replace("\"", "") // remove double quote
+				.replace("\u00A0", ""); // remove hidden space
+	}
 
-                return null;
-            }
-            
+	private String getString(Cell cell) {
+		if (cell == null)
+			return null;
+		cell.setCellType(CellType.STRING);
+		return cell.getStringCellValue().trim();
+	}
+
+	private LocalDate getDate(Cell cell) {
+		if (cell == null)
+			return null;
+
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getLocalDateTimeCellValue().toLocalDate();
+		}
+
+		return null;
+	}
+
 //            private void  createuser(Scholars sch) {
 //            	
 //            
@@ -995,107 +853,331 @@ public class ScholarService {
 //     			);
 //            }
 //      
-            
-            
-            @Transactional
-            public int createScholarsFromCMS() {
-                
 
-                List<ScholarDTO> applicants =
-                        em.createNamedQuery("Applicant.getCMSScholars", ScholarDTO.class)
-                                            .getResultList();
+	@Transactional
+	public int createScholarsFromCMS() {
 
-                if (applicants.isEmpty()) {
-                    return 0;
-                }
+		List<ScholarDTO> applicants = em.createNamedQuery("Applicant.getCMSScholars", ScholarDTO.class).getResultList();
 
-                Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
-                        .orElseThrow(() -> new IllegalStateException("Scholar role not found"));
+		if (applicants.isEmpty()) {
+			return 0;
+		}
 
-                String insertSql = 
-                    "INSERT INTO scholars (" +
-                       " program_id, full_name, gender_id, email, date_of_birth, phone, " +
-                       " category, admission_date, status_id, created_at, " +
-                       " application_number, department_id, user_id )" +
-                    
-                    " VALUES ( " +
-                    "    :program_id, :full_name, :gender_id, :email, :dob, :phone, "+
-                    "    :category, :admission_date, 1, NOW(), "+
-                    "    :application_number, :department_id, :user_id "
-                    
-                     ;
+		Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
+				.orElseThrow(() -> new IllegalStateException("Scholar role not found"));
 
-                int importedCount = 0;
+		String insertSql = "INSERT INTO scholars (" + " program_id, full_name, gender_id, email, date_of_birth, phone, "
+				+ " category, admission_date, status_id, created_at, " + " application_number, department_id, user_id )"
+				+
 
-                for (ScholarDTO row : applicants) {
-                    // Skip incomplete source records.
-                    if (row == null
-                            || row.getAppno() == null
-                            || row.getAppno().isEmpty()
-                            || row.getEmail() == null
-                            || row.getEmail().isEmpty()
-                            || row.getDateOfBirth() == null
-                            
-                            || row.getDepartment_id() == null) {
-                        continue;
-                    }
+				" VALUES ( " + "    :program_id, :full_name, :gender_id, :email, :dob, :phone, "
+				+ "    :category, :admission_date, 1, NOW(), " + "    :application_number, :department_id, :user_id "
 
-                    String applicationNumber = row.getAppno().trim();
+		;
 
-                    // Prevent importing the same CMS application more than once.
-                    boolean alreadyImported = !em.createNativeQuery(
-                            " SELECT 1 FROM scholars WHERE application_number = :applicationNumber")
-                           
-                            .setParameter("applicationNumber", applicationNumber)
-                            .getResultList()
-                            .isEmpty();
+		int importedCount = 0;
 
-                    if (alreadyImported) {
-                        continue;
-                    }
+		for (ScholarDTO row : applicants) {
+			// Skip incomplete source records.
+			if (row == null || row.getAppno() == null || row.getAppno().isEmpty() || row.getEmail() == null
+					|| row.getEmail().isEmpty() || row.getDateOfBirth() == null
 
-                    UserDTO userDto = new UserDTO();
-                    userDto.setUsername(row.getEmail().trim());
-                    userDto.setPassword(row.getDateOfBirth().toString());
-                    List<Integer> roleIds = new ArrayList<>();
-                    roleIds.add(scholarRole.getId());
-                    userDto.setRoleIds(roleIds);
-                    //userDto.setRoleIds(List.of(scholarRole.getId()));
+					|| row.getDepartment_id() == null) {
+				continue;
+			}
 
-                    User user = userservice.createUser(userDto);
+			String applicationNumber = row.getAppno().trim();
 
-                    user.setUsername("SCH" + user.getId());
-                    userRepo.save(user);
+			// Prevent importing the same CMS application more than once.
+			boolean alreadyImported = !em
+					.createNativeQuery(" SELECT 1 FROM scholars WHERE application_number = :applicationNumber")
 
-                    String identifier = "APP" + "2026" + applicationNumber;
+					.setParameter("applicationNumber", applicationNumber).getResultList().isEmpty();
 
-                    userservice.addUserIdentifier(
-                            user.getId().intValue(),
-                            UserIdentifier.IdentifierType.APPLICATION_NO,
-                            identifier
-                    );
+			if (alreadyImported) {
+				continue;
+			}
 
-                    em.createNativeQuery(insertSql)
-                            
-                            .setParameter("full_name", row.getFullName())
-                            .setParameter("gender_id", row.getGender_id())
-                            .setParameter("email", row.getEmail())
-                            .setParameter("dob", row.getDateOfBirth())
-                            .setParameter("phone", row.getPhone())
-                            .setParameter("category", row.getCategory())
-                            .setParameter("admission_date", row.getAdmissionDate())
-                            .setParameter("application_number", applicationNumber)
-                            .setParameter("department_id", row.getDepartment_id())
-                            .setParameter("user_id", user.getId())
-                            .executeUpdate();
+			UserDTO userDto = new UserDTO();
+			userDto.setUsername(row.getEmail().trim());
+			userDto.setPassword(row.getDateOfBirth().toString());
+			List<Integer> roleIds = new ArrayList<>();
+			roleIds.add(scholarRole.getId());
+			userDto.setRoleIds(roleIds);
+			// userDto.setRoleIds(List.of(scholarRole.getId()));
 
-                    importedCount++;
-                }
+			User user = userservice.createUser(userDto);
 
-                return importedCount;
-            }
-} 
+			user.setUsername("SCH" + user.getId());
+			userRepo.save(user);
 
-        
-    
+			String identifier = "APP" + "2026" + applicationNumber;
 
+			userservice.addUserIdentifier(user.getId().intValue(), UserIdentifier.IdentifierType.APPLICATION_NO,
+					identifier);
+
+			em.createNativeQuery(insertSql)
+
+					.setParameter("full_name", row.getFullName()).setParameter("gender_id", row.getGender_id())
+					.setParameter("email", row.getEmail()).setParameter("dob", row.getDateOfBirth())
+					.setParameter("phone", row.getPhone()).setParameter("category", row.getCategory())
+					.setParameter("admission_date", row.getAdmissionDate())
+					.setParameter("application_number", applicationNumber)
+					.setParameter("department_id", row.getDepartment_id()).setParameter("user_id", user.getId())
+					.executeUpdate();
+
+			importedCount++;
+		}
+
+		return importedCount;
+	}
+
+	private final SecureRandom random = new SecureRandom();
+
+//	@Transactional(propagation = Propagation.REQUIRES_NEW)
+//	public CreatedAccount createUserForScholar(Integer scholarId) {
+//
+//		Scholars scholar = scholarRepo.findById(scholarId)
+//				.orElseThrow(() -> new RuntimeException("Scholar not found: " + scholarId));
+//
+//		if (scholar.getUserId() != null) {
+//			throw new RuntimeException("Scholar already has a user account: " + scholarId);
+//		}
+//
+//		String username = scholar.getEnrolmentno();
+//
+//		if (username == null || username.trim().isEmpty()) {
+//			throw new RuntimeException("Enrolment number is missing for scholar " + scholarId);
+//		}
+//
+//		if (userRepo.existsByUsername(username)) {
+//			throw new RuntimeException("Username already exists: " + username);
+//		}
+//
+//		if (scholar.getEmail() == null || scholar.getEmail().trim().isEmpty()) {
+//			throw new RuntimeException("Email is missing for scholar " + scholarId);
+//		}
+//
+//		String temporaryPassword = generateTemporaryPassword();
+//
+//		User user = new User();
+//		user.setUsername(username);
+//		user.setPassword(passwordEncoder.encode(temporaryPassword));
+//		user.setEmail(scholar.getEmail());
+//		user.setName(scholar.getFullName());
+//		user.setPhone(scholar.getPhone());
+//
+//		// Replace this with the actual ID of your SCHOLAR role.
+//		Integer scholarRoleId = 4;
+//
+////                List<Role> rolesFound =
+////                    roleRepository.findAllById(List.of(scholarRoleId));
+//
+//		List<Role> rolesFound = roleRepository.findAllById(java.util.Collections.singletonList(scholarRoleId));
+//
+//		if (rolesFound.isEmpty()) {
+//			throw new RuntimeException("Scholar role not found");
+//		}
+//
+//		user.setRoles(new HashSet<>(rolesFound));
+//
+//		User savedUser = userRepo.save(user);
+//
+//		scholar.setUserId(savedUser.getId());
+//		scholarRepo.save(scholar);
+//
+//		CreatedAccount result = new CreatedAccount();
+//		result.scholarId = scholar.getScholarId();
+//		result.scholarName = scholar.getFullName();
+//		result.username = username;
+//		result.email = scholar.getEmail();
+//		result.temporaryPassword = temporaryPassword;
+//		result.status = "CREATED";
+//
+//		return result;
+//	}
+//
+	private String generateTemporaryPassword() {
+		String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$!";
+
+		StringBuilder password = new StringBuilder();
+
+		for (int i = 0; i < 12; i++) {
+			password.append(chars.charAt(random.nextInt(chars.length())));
+		}
+
+		return password.toString();
+	}
+
+	public static class CreatedAccount {
+		public Integer scholarId;
+		public String scholarName;
+		public String username;
+		public String email;
+		public String temporaryPassword;
+		public String status;
+	}
+
+	public byte[] createScholarAccountsExcel() throws Exception {
+
+		List<Scholars> scholars = scholarRepo.findByUserIdIsNull();
+
+		List<CreatedAccount> results = new ArrayList<>();
+
+		for (Scholars scholar : scholars) {
+			try {
+				CreatedAccount account = createUserForScholar(scholar.getScholarId());
+
+				results.add(account);
+
+			} catch (Exception ex) {
+				CreatedAccount failed = new CreatedAccount();
+				failed.scholarId = scholar.getScholarId();
+				failed.scholarName = scholar.getFullName();
+				failed.username = scholar.getEnrolmentno();
+				failed.email = scholar.getEmail();
+				failed.temporaryPassword = "";
+				failed.status = "FAILED: " + ex.getMessage();
+
+				results.add(failed);
+			}
+		}
+
+		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+
+			Sheet sheet = workbook.createSheet("Scholar Credentials");
+
+			String[] columns = { "Scholar ID", "Scholar Name", "Username", "Email", "Temporary Password", "Status" };
+
+			Row header = sheet.createRow(0);
+
+			for (int i = 0; i < columns.length; i++) {
+				header.createCell(i).setCellValue(columns[i]);
+			}
+
+			int rowNum = 1;
+
+			for (CreatedAccount account : results) {
+				Row row = sheet.createRow(rowNum++);
+
+				row.createCell(0).setCellValue(account.scholarId == null ? 0 : account.scholarId);
+				row.createCell(1).setCellValue(safe(account.scholarName));
+				row.createCell(2).setCellValue(safe(account.username));
+				row.createCell(3).setCellValue(safe(account.email));
+				row.createCell(4).setCellValue(safe(account.temporaryPassword));
+				row.createCell(5).setCellValue(safe(account.status));
+			}
+
+			for (int i = 0; i < columns.length; i++) {
+				sheet.autoSizeColumn(i);
+			}
+
+			workbook.write(output);
+			return output.toByteArray();
+		}
+	}
+
+	
+	
+
+@Transactional
+public CreatedAccount createUserForScholar(Integer scholarId) {
+
+    Scholars scholar = scholarRepo.findById(scholarId)
+            .orElseThrow(() ->
+                new RuntimeException("Scholar not found: " + scholarId));
+
+    if (scholar.getUserId() != null) {
+        throw new RuntimeException(
+                "User account already exists for this scholar");
+    }
+
+    if (scholar.getEmail() == null
+            || scholar.getEmail().trim().isEmpty()) {
+        throw new RuntimeException("Scholar email is missing");
+    }
+
+    // Select the login identifier
+    String loginIdentifier;
+    UserIdentifier.IdentifierType identifierType;
+
+    if (scholar.getEnrolmentno() != null
+            && !scholar.getEnrolmentno().trim().isEmpty()) {
+
+        loginIdentifier = scholar.getEnrolmentno().trim();
+        identifierType =
+                UserIdentifier.IdentifierType.ENROLLMENT_NO ;
+
+    } else {
+        // Replace getApplicationNumber() with your actual getter
+        loginIdentifier = scholar.getApplicationNumber();
+
+        if (loginIdentifier == null
+                || loginIdentifier.trim().isEmpty()) {
+            throw new RuntimeException(
+                    "Application number is missing");
+        }
+
+        loginIdentifier = loginIdentifier.trim();
+        identifierType =
+                UserIdentifier.IdentifierType.APPLICATION_NO;
+    }
+
+    // Prevent duplicate login identifiers
+    if (userIdentifierRepo
+            .existsByIdentifierTypeAndIdentifierValue(
+                    identifierType, loginIdentifier)) {
+        throw new RuntimeException(
+                "Login identifier already exists: " + loginIdentifier);
+    }
+
+    // Find the scholar role
+    Role scholarRole = roleRepository
+            .findByName(ERole.ROLE_SCHOLAR)
+            .orElseThrow(() ->
+                new RuntimeException("Scholar role not found"));
+
+    // Create the user account
+    UserDTO dto = new UserDTO();
+    dto.setUsername("TEMP_" + java.util.UUID.randomUUID());
+    dto.setPassword(java.util.UUID.randomUUID().toString());
+    dto.setEmail(scholar.getEmail().trim());
+    dto.setName(scholar.getFullName());
+    dto.setRoleIds(
+            java.util.Collections.singletonList(scholarRole.getId()));
+
+    User user = userservice.createUser(dto);
+
+    // Set the internal username
+    user.setUsername("SCH" + user.getId());
+    user = userRepo.saveAndFlush(user);
+
+    // Store application or enrolment number as login identifier
+    userservice.addUserIdentifier(
+            user.getId().intValue(),
+            identifierType,
+            loginIdentifier);
+
+    // Link the account to the scholar
+    scholar.setUserId(user.getId());
+    scholarRepo.save(scholar);
+
+    // Send the password setup link
+    passwordService.sendResetLink(user.getEmail());;
+
+    // Return account creation result
+    CreatedAccount result = new CreatedAccount();
+    result.scholarId = scholar.getScholarId();
+    result.scholarName = scholar.getFullName();
+    result.username = loginIdentifier;
+    result.email = scholar.getEmail();
+    result.temporaryPassword = "";
+    result.status = "ACCOUNT CREATED; RESET LINK REQUESTED";
+
+    return result;
+}
+
+	private String safe(String value) {
+		return value == null ? "" : value;
+	}
+}

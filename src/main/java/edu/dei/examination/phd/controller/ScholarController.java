@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +34,7 @@ import edu.dei.examination.phd.model.ProgramRoleAssignment;
 import edu.dei.examination.phd.model.ScholarSupervisor;
 import edu.dei.examination.phd.model.Scholars;
 import edu.dei.examination.phd.service.ScholarService;
+import edu.dei.examination.phd.service.ScholarService.CreatedAccount;
 import io.jsonwebtoken.Claims;
 
 @RestController
@@ -46,7 +49,7 @@ public class ScholarController {
 	public ScholarController(ScholarService scholarService) {
 		this.scholarService = scholarService;
 	}
-
+	@PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
 	@PostMapping("/generate")
 	public ResponseEntity<ApiResponse<Integer>> generateScholars(@RequestBody CreateScholarsRequest request) {
 		int count = scholarService.createScholarsForAcademicYearAndMonth(request);
@@ -63,6 +66,7 @@ public class ScholarController {
 		}
 	}
 	
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("/create-from-cms")
 	public ResponseEntity<?> createScholarsFromCMS() {
 	    try {
@@ -166,7 +170,8 @@ public class ScholarController {
 	// =========================
 	// DELETE
 	// =========================
-	@PreAuthorize("hasRole('ADMIN')")
+	
+	@PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> delete(@PathVariable Integer id) {
 		scholarService.delete(id);
@@ -204,7 +209,7 @@ public class ScholarController {
 
 	    return ResponseEntity.ok(result);
 	}
-
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	@PostMapping("/upload")
 	public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
 	    try {
@@ -214,5 +219,32 @@ public class ScholarController {
 	        return ResponseEntity.badRequest().body(e.getMessage());
 	    }
 	}
+	
+	
+	@PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
+	@GetMapping("/create-scholar-accounts")
+	public ResponseEntity<byte[]> createScholarAccounts() throws Exception {
+
+	    byte[] excel = scholarService.createScholarAccountsExcel();
+
+	    return ResponseEntity.ok()
+	        .header(
+	            HttpHeaders.CONTENT_DISPOSITION,
+	            "attachment; filename=scholar_user_credentials.xlsx")
+	        .contentType(MediaType.parseMediaType(
+	            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+	        .body(excel);
+	}
+	
+//	@PostMapping("/admin/scholars/{scholarId}/create-account")
+//	@PreAuthorize("hasRole('ADMIN')")
+//	public ResponseEntity<CreatedAccount> createScholarAccount(
+//	        @PathVariable Integer scholarId) {
+//
+//	    CreatedAccount result =
+//	            scholarService.createUserForScholar(scholarId);
+//
+//	    return ResponseEntity.ok(result);
+//	}
 	
 }

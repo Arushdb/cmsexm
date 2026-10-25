@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface ScholarsRepository extends JpaRepository<Scholars, Integer> {
 
     /* ---------- BASIC FINDS ---------- */
+	
+	List<Scholars> findByUserIdIsNull();
 
     Optional<Scholars> findByScholarId(Integer scholarId);
 

@@ -43,7 +43,12 @@ public class PasswordService {
     public void sendResetLink(String email) {
 
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        // Remove previous reset token for this user
+        tokenRepo.deleteByUser_Id(user.getId());
+        tokenRepo.flush();
 
         String token = UUID.randomUUID().toString();
 
@@ -52,17 +57,13 @@ public class PasswordService {
         prt.setUser(user);
         prt.setExpiryDate(LocalDateTime.now().plusMinutes(30));
 
-        tokenRepo.save(prt);
+        tokenRepo.saveAndFlush(prt);
 
-        //String link = "http://localhost:4200/auth/reset-password?token=" + token;
-        String link = frontendUrl + "/auth/reset-password?token=" + token;
-
-        sendEmail(email, link);
+        String link = frontendUrl
+                + "/auth/reset-password?token=" + token;
 
         sendEmail(email, link);
-    }
-
-    // =========================
+    }    // =========================
     // 🔐 RESET PASSWORD
     // =========================
     public void resetPassword(String token, String newPassword) {

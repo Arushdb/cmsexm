@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.dei.examination.cmsexm.model.Role;
 import edu.dei.examination.cmsexm.model.User;
 import edu.dei.examination.cmsexm.payload.request.UserDTO;
+import edu.dei.examination.cmsexm.repository.UserRepository;
+import edu.dei.examination.cmsexm.service.PasswordService;
 import edu.dei.examination.cmsexm.service.UserService;
 
 @RestController
@@ -27,6 +30,10 @@ public class UserController {
 
     @Autowired
     private UserService service;
+    @Autowired
+    private UserRepository userRepo; 
+    @Autowired
+    private PasswordService passwordService;
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserDTO dto) {
@@ -35,7 +42,10 @@ public class UserController {
 
     @GetMapping
     public List<User> getAll() {
-        return service.getAllUsers();
+    	
+    	List<User> users= service.getAllUsers();
+    	return users;
+        //return service.getAllUsers();
     }
 
     @GetMapping("/{id}")
@@ -68,6 +78,22 @@ public class UserController {
     public List<User> getByroles(@PathVariable String rolename) {
         return service.getUserswithroles(rolename);
     }
+    
+    @PostMapping("/password/admin/reset-link/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> sendResetLink(
+            @PathVariable Integer userId) {
+
+        User user = userRepo.findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        passwordService.sendResetLink(user.getEmail());
+
+        return ResponseEntity.ok(
+                "Password reset link sent successfully");
+    }
+    
     
     
     

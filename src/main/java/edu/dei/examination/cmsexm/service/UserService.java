@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,44 @@ public class UserService {
     @Transactional
 	public User createUser(UserDTO dto) {
 			//String username, String password, List<Integer> roleIds) {
+    	
+    	 if (userRepository.existsByUsername(dto.getUsername())) {
+    	        throw new RuntimeException(
+    	            "Username already exists: " + dto.getUsername()
+    	        );
+    	    }
+
+    	    if (userRepository.existsByEmail(dto.getEmail())) {
+    	        throw new RuntimeException(
+    	            "Email already exists: " + dto.getEmail()
+    	        );
+    	    }
+    	    
+    	    
+    	 // Get the currently authenticated user's authorities
+    	    Authentication authentication =
+    	        SecurityContextHolder.getContext().getAuthentication();
+
+    	    boolean isAdmin = authentication != null
+    	        && authentication.getAuthorities().stream()
+    	            .anyMatch(authority ->
+    	                authority.getAuthority().equals("ROLE_ADMIN"));
+
+    	    // Load requested roles from the database
+    	    Set<Role> roles = new HashSet<>(
+    	        roleRepository.findAllById(dto.getRoleIds()));
+
+    	    // Check whether ROLE_ADMIN has been requested
+    	    boolean requestingAdminRole = roles.stream()
+    	        .anyMatch(role ->
+    	            "ROLE_ADMIN".equals(role.getName().toString()));
+
+    	    // Only an existing Admin can assign the Admin role
+    	    if (requestingAdminRole && !isAdmin) {
+    	        throw new AccessDeniedException(
+    	            "Only an Admin can create a user with the Admin role.");
+    	    }
+
         
 		User user = new User();
 		user.setUsername(dto.getUsername());
@@ -50,9 +91,9 @@ public class UserService {
 		// 🔐 BCrypt encoding
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
 		
-		String password = PasswordUtil.generatePassword(10);
-		System.out.println(password);
-		user.setPassword(passwordEncoder.encode(password));
+		//String password = PasswordUtil.generatePassword(10);
+		//System.out.println(password);
+		//user.setPassword(passwordEncoder.encode(password));
 		
 		user.setEmail(dto.getEmail());
 		user.setName(dto.getName());

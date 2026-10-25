@@ -43,4 +43,9 @@ public interface UserIdentifierRepository
     )
     Optional<UserIdentifier> findActiveByLoginId(
             @Param("loginId") String loginId);
+    
+    boolean existsByIdentifierTypeAndIdentifierValue(
+            UserIdentifier.IdentifierType identifierType,
+            String identifierValue
+    );
 }

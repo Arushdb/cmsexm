@@ -15,9 +15,11 @@ public class PasswordResetToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "token", nullable = false, unique = true, length = 255)
     private String token;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
    
     
