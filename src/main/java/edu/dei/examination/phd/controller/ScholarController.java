@@ -1,6 +1,8 @@
 package edu.dei.examination.phd.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.dei.examination.cmsexm.exception.ResourceNotFoundException;
+import edu.dei.examination.cmsexm.model.User;
 import edu.dei.examination.cmsexm.security.jwt.JwtUtils;
+import edu.dei.examination.cmsexm.service.PasswordService;
 import edu.dei.examination.phd.dto.ApiResponse;
 import edu.dei.examination.phd.dto.CreateScholarsRequest;
 import edu.dei.examination.phd.dto.ScholarDTO;
@@ -45,9 +49,11 @@ public class ScholarController {
 	JwtUtils jwtUtils;
 
 	private final ScholarService scholarService;
+	private final PasswordService passwordService;
 
-	public ScholarController(ScholarService scholarService) {
+	public ScholarController(ScholarService scholarService,PasswordService passwordService) {
 		this.scholarService = scholarService;
+		this.passwordService=passwordService;
 	}
 	@PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
 	@PostMapping("/generate")
@@ -246,5 +252,38 @@ public class ScholarController {
 //
 //	    return ResponseEntity.ok(result);
 //	}
+	
+	@PostMapping("/{scholarId}/create-account")
+	@PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
+	public ResponseEntity<?> createScholarAccount(
+	        @PathVariable Integer scholarId) {
+
+	    User user = scholarService.createScholarUserWithoutSendingEmail(scholarId);
+	    
+	    scholarService.updateScholarUserId(scholarId, user.getId());
+	    
+	    
+	  
+	    
+	    String[] emails = user.getEmail().split("[&,;\\s]+");
+	    String useremail="";
+
+	    for (String email : emails) {
+	    	useremail = email.trim();
+
+	        if (email.isEmpty()) {
+	            continue;
+	        }
+	    }
+	 // Send the password setup link
+	    passwordService.sendResetLink(useremail);
+
+
+	    Map<String, Object> response = new HashMap<String, Object>();
+	    response.put("message", "Scholar account created successfully,Password reset link sent successfully on");
+	    response.put("userId", user.getId());
+
+	    return ResponseEntity.ok(response);
+	}
 	
 }

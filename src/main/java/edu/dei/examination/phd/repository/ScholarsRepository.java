@@ -3,8 +3,10 @@ package edu.dei.examination.phd.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.dei.examination.phd.model.Scholars;
 
@@ -73,5 +75,13 @@ public interface ScholarsRepository extends JpaRepository<Scholars, Integer> {
     		    )
     		Optional<Scholars> findByIdWithSupervisors(
     		        @Param("scholarId") Integer scholarId);
+     
+     @Modifying
+     @Transactional
+     @Query("UPDATE Scholars s SET s.userId = :userId WHERE s.id = :scholarId")
+     int updateUserId(
+         @Param("scholarId") int scholarId,
+         @Param("userId") int userId
+     );
     
 }

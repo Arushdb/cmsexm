@@ -41,7 +41,7 @@ public class ScholarDTO {
 	private String nameinhindi;
 
 	public ScholarDTO(String appno, String fullName, String category, String email, String phone, int gender_id,
-			LocalDate dateOfBirth,  LocalDate admissionDate, String mode ,String subject
+			LocalDate dateOfBirth,  LocalDate admissionDate, String subject,String mode
 			) {
 
 		this.appno = appno;
@@ -69,7 +69,7 @@ public class ScholarDTO {
 	public ScholarDTO(Integer id, String fullName, String enrolmentno, String departmentName, String programName,
 			String email, String phone, String fathername, String address, LocalDate admissionDate, LocalDate dateOfBirth,
 			String researchtopiceng, String researchtopichnd, String nameinhindi, LocalDate dateJRF,
-			LocalDate dateJRFexp, LocalDate dateextension, LocalDate registrationdate) {
+			LocalDate dateJRFexp, LocalDate dateextension, LocalDate registrationdate,Integer userid) {
 		this.id = id;
 		this.fullName = fullName;
 		this.enrolmentno = enrolmentno;
@@ -89,6 +89,7 @@ public class ScholarDTO {
 		this.dateJRFexp = dateJRFexp;
 		this.dateextension = dateextension;
 		this.registrationdate = registrationdate;
+		this.userid=userid;
 
 	}
 

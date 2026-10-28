@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import edu.dei.examination.cmsexm.model.ERole;
 import edu.dei.examination.cmsexm.model.Role;
 import edu.dei.examination.cmsexm.model.User;
 import edu.dei.examination.cmsexm.model.UserIdentifier;
+import edu.dei.examination.cmsexm.model.UserIdentifier.IdentifierType;
 import edu.dei.examination.cmsexm.payload.request.UserDTO;
 import edu.dei.examination.cmsexm.repository.RoleRepository;
 import edu.dei.examination.cmsexm.repository.UserIdentifierRepository;
@@ -38,6 +40,7 @@ import edu.dei.examination.phd.model.ScholarSemester;
 import edu.dei.examination.phd.model.ScholarSupervisor;
 import edu.dei.examination.phd.model.Scholars;
 import edu.dei.examination.phd.model.Semesters;
+import edu.dei.examination.phd.model.SubjectProgramMapping;
 import edu.dei.examination.phd.repository.DepartmentRepository;
 import edu.dei.examination.phd.repository.ProgramRepository;
 import edu.dei.examination.phd.repository.ProgramRoleAssignmentRepository;
@@ -45,6 +48,7 @@ import edu.dei.examination.phd.repository.ScholarSemesterRepository;
 import edu.dei.examination.phd.repository.ScholarSupervisorRepository;
 import edu.dei.examination.phd.repository.ScholarsRepository;
 import edu.dei.examination.phd.repository.SemesterRepository;
+import edu.dei.examination.phd.repository.SubjectProgramMappingRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -56,10 +60,12 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -109,12 +115,16 @@ public class ScholarService {
 	private ScholarSupervisorRepository supervisorRepo;
 	@Autowired
 	private ProgramRoleAssignmentRepository programRoleRepo;
+	@Autowired
+	private SubjectProgramMappingRepository mappingRepository;
 
 	@PersistenceContext(unitName = "phd")
 	private EntityManager em;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	@Transactional("phdTransactionManager")
 	public int createScholarsForAcademicYearAndMonth(CreateScholarsRequest request) {
@@ -130,9 +140,9 @@ public class ScholarService {
 			throw new IllegalArgumentException("Admission month must be between 1 and 12");
 		}
 
-		String[] months = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
+		//String[] months = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
-		String monthName = months[month - 1];
+		//String monthName = months[month - 1];
 
 		List<ScholarDTO> list = em.createNamedQuery("Applicant.selectForScholar", ScholarDTO.class)
 				.setParameter("year", request.getAcademicYear()).setParameter("month", request.getAdmissionMonth())
@@ -143,70 +153,45 @@ public class ScholarService {
 		}
 
 		String insertSql = "INSERT INTO scholars (program_id,  full_name, gender_id, email, date_of_birth,phone, category, admission_date, status_id, \r\n"
-				+ " created_at,application_number,department_id,user_id,subject,mode) "
-				+ "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:user_id,:subject,:mode)";
+				+ " createdAt,application_number,department_id,subject,mode) "
+				+ "VALUES (:program_id, :first_name, :gender,:email,:dob,:phone,:category,:selection_date,1,now(),:appno,:department_id,:subject,:mode)";
 
-		LocalDateTime now = LocalDateTime.now();
+		//LocalDateTime now = LocalDateTime.now();
 
 		for (ScholarDTO row : list) {
 			
-			// Skip if email already exists
-//		    if (userRepo.existsByEmail(row.getEmail())) {
-//		        System.out.println(
-//		            "Skipping scholar: Email already exists - " + row.getEmail()
-//		        );
-//		        continue;
-//		    }
+			
 			if (scholarRepo.findByEmail(row.getEmail()).isPresent())
 				continue;
 			
 			String appno = row.getAppno();
-
-			//String username = row.getEmail();
 			
-			
-//			String password = row.getDateOfBirth().toString();
-//			Role scholarRole = roleRepository.findByName(ERole.ROLE_SCHOLAR)
-//					.orElseThrow(() -> new RuntimeException("Scholar Role not found"));
-//
-//			Integer roleId = scholarRole.getId();
-//			List<Integer> listroleid = new ArrayList<>();
-//			listroleid.add(roleId);
-//
-//			UserDTO userdto = new UserDTO();
-//			  // Temporary unique username
-//		    userdto.setUsername("TEMP_" + java.util.UUID.randomUUID());
-//			//userdto.setUsername(username);
-//			userdto.setPassword(password);
-//			userdto.setRoleIds(listroleid);
-//			userdto.setEmail(row.getEmail());
-//			userdto.setName(row.getFullName());
-//			userdto.setPhone(row.getPhone());
-//
-//			// User user=userservice.createUser(username, password,listroleid);
-//
-//			User user = userservice.createUser(userdto);
-//			
-//			 user.setUsername("SCH" + user.getId());
-//			    user = userRepo.saveAndFlush(user);
-//		
-//
-//			userRepo.save(user);
-//
-//			String idvalue = "APP" + year + row.getAppno();
-//
-//			userservice.addUserIdentifier(user.getId().intValue(),
-//					// user.getUsername(),
-//					UserIdentifier.IdentifierType.APPLICATION_NO, idvalue);
-//			appno = appno + monthName + year.substring(2);
+			String subjectKey = normalizeSubject(row.getSubject());
 
+			SubjectProgramMapping mapping =
+			    mappingRepository
+			        .findBySubjectKeyAndActiveTrue(subjectKey)
+			        .orElseThrow(() -> new IllegalStateException(
+			            "No department/program mapping found for subject: "
+			            + subjectKey
+			        ));
+
+			Long departmentId = mapping.getDepartmentId();
+			Long programId = mapping.getProgramId();
+
+			// Assign these IDs to the scholar entity
+			// using your existing entity fields and relationships.
+
+			
 			em.createNativeQuery(insertSql).setParameter("appno", appno)
 
 					.setParameter("first_name", row.getFullName()).setParameter("gender", row.getGender_id())
 					.setParameter("email", row.getEmail()).setParameter("dob", row.getDateOfBirth())
 					.setParameter("phone", row.getPhone()).setParameter("category", row.getCategory())
 					.setParameter("selection_date", row.getAdmissionDate())
-					.setParameter("department_id", row.getDepartment_id())
+					.setParameter("department_id", departmentId)
+					.setParameter("program_id", programId)
+					
 					
 					.setParameter("subject", row.getSubject()).setParameter("mode", row.getMode())
 
@@ -217,6 +202,18 @@ public class ScholarService {
 		return list.size();
 	}
 
+		private String normalizeSubject(String subject) {
+
+	    if (subject == null || subject.trim().isEmpty()) {
+	        throw new IllegalArgumentException(
+	            "Subject is missing from CMS"
+	        );
+	    }
+
+	    return subject.trim()
+	            .replaceAll("\\s+", " ")
+	            .toUpperCase(Locale.ROOT);
+	}
 	private String generateScholarNumber(Object[] row) {
 		// row[2] = academic_year , row[0] = id (index based on SELECT order)
 		return "SCH-" + row[2] + "-" + row[0];
@@ -551,7 +548,7 @@ public class ScholarService {
 				s.getDepartment().getDepartmentName(), s.getProgram().getProgramname(), s.getEmail(), s.getPhone(),
 				s.getFathername(), s.getAddressForCorrespondence(), s.getAdmissionDate(), s.getDateOfBirth(),
 				s.getResearchTopicEng(), s.getResearchTopicHnd(), s.getNameInHindi(), s.getDateJrf(), s.getDateJrfExp(),
-				s.getDateExtension(), s.getRegistrationDate());
+				s.getDateExtension(), s.getRegistrationDate(),s.getUserId());
 	}
 
 	@Transactional(rollbackFor = Exception.class)
@@ -1161,9 +1158,21 @@ public CreatedAccount createUserForScholar(Integer scholarId) {
     // Link the account to the scholar
     scholar.setUserId(user.getId());
     scholarRepo.save(scholar);
+    
+    
+    String[] emails = user.getEmail().split("[&,;\\s]+");
+    String useremail="";
+
+    for (String email : emails) {
+    	useremail = email.trim();
+
+        if (email.isEmpty()) {
+            continue;
+        }
+    }
 
     // Send the password setup link
-    passwordService.sendResetLink(user.getEmail());;
+    passwordService.sendResetLink(useremail);
 
     // Return account creation result
     CreatedAccount result = new CreatedAccount();
@@ -1179,5 +1188,213 @@ public CreatedAccount createUserForScholar(Integer scholarId) {
 
 	private String safe(String value) {
 		return value == null ? "" : value;
+	}
+	
+//	@Transactional
+//	public User createScholarAccount(int scholarId) {
+//
+//	    Scholars scholar = scholarRepo.findById(scholarId)
+//	        .orElseThrow(() ->
+//	            new RuntimeException("Scholar not found: " + scholarId));
+//
+//	    // Prevent duplicate account creation
+//	    if (scholar.getUserId() != null) {
+//	        throw new IllegalStateException(
+//	            "This scholar already has a user account");
+//	    }
+//
+//	    // Prefer enrolment number; otherwise use application number
+////	    String identifier;
+////	    IdentifierType identifierType;
+////
+////	    if (scholar.getEnrolmentno() != null
+////	            && !scholar.getEnrolmentno().trim().isEmpty()) {
+////
+////	        identifier = scholar.getEnrolmentno().trim();
+////	        identifierType = IdentifierType.ENROLLMENT_NO;
+////
+////	    } else if (scholar.getApplicationNumber() != null
+////	            && !scholar.getApplicationNumber().trim().isEmpty()) {
+////
+////	        identifier = scholar.getApplicationNumber().trim();
+////	        identifierType = IdentifierType.APPLICATION_NO;
+////
+////	    } else {
+////	        throw new IllegalStateException(
+////	            "Neither enrolment number nor application number is available");
+////	    }
+//
+//	    // Check that the login identifier is not already registered.
+////	    if (userIdentifierRepo
+////	            .existsByIdentifierTypeAndIdentifierValue(
+////	                identifierType, identifier)) {
+////	        throw new IllegalStateException(
+////	            "This login identifier is already registered");
+////	    }
+//
+//	    // Create the user using your existing user-creation logic.
+//	    // Assign the SCHOLAR role and copy the scholar's email/name.
+//	   // User user = createScholarUserWithoutSendingEmail(scholar);
+//
+//	    // Use your existing UserIdentifier entity and setters.
+////	    UserIdentifier userIdentifier = new UserIdentifier();
+////	    userIdentifier.setUser(user);
+////	    userIdentifier.setIdentifierType(identifierType);
+////	    userIdentifier.setIdentifierValue(identifier);
+////
+////	    userIdentifierRepo.save(userIdentifier);
+//
+//	    // Link the new account to the existing scholar.
+//	    
+//	    // Return the created user; send the reset email after commit.
+//	    return user;
+//	}
+	@Transactional
+	public User createScholarUserWithoutSendingEmail(int scholarId) {
+		
+		Scholars scholar = scholarRepo.findById(scholarId)
+		        .orElseThrow(() ->
+		            new RuntimeException("Scholar not found: " + scholarId));
+
+		    // Prevent duplicate account creation
+		    if (scholar.getUserId() != null) {
+		        throw new IllegalStateException(
+		            "This scholar already has a user account");
+		    }
+
+//	    if (scholar == null) {
+//	        throw new IllegalArgumentException(
+//	            "Scholar cannot be null");
+//	    }
+
+	    if (scholar.getEmail() == null
+	            || scholar.getEmail().trim().isEmpty()) {
+	        throw new IllegalArgumentException(
+	            "Scholar email is required");
+	    }
+	    
+	    // Select the login identifier
+	    String loginIdentifier;
+	    UserIdentifier.IdentifierType identifierType;
+
+	    if (scholar.getEnrolmentno() != null
+	            && !scholar.getEnrolmentno().trim().isEmpty()) {
+
+	        loginIdentifier = scholar.getEnrolmentno().trim();
+	        identifierType =
+	                UserIdentifier.IdentifierType.ENROLLMENT_NO ;
+
+	    } else {
+	        // Replace getApplicationNumber() with your actual getter
+	        loginIdentifier = scholar.getApplicationNumber();
+
+	        if (loginIdentifier == null
+	                || loginIdentifier.trim().isEmpty()) {
+	            throw new RuntimeException(
+	                    "Application number is missing");
+	        }
+
+	        loginIdentifier = loginIdentifier.trim();
+	        identifierType =
+	                UserIdentifier.IdentifierType.APPLICATION_NO;
+	    }
+
+	    // Prevent duplicate login identifiers
+	    if (userIdentifierRepo
+	            .existsByIdentifierTypeAndIdentifierValue(
+	                    identifierType, loginIdentifier)) {
+	        throw new RuntimeException(
+	                "Login identifier already exists: " + loginIdentifier);
+	    }
+
+	    // Find the scholar role
+	    Role scholarRole = roleRepository
+	            .findByName(ERole.ROLE_SCHOLAR)
+	            .orElseThrow(() ->
+	                new RuntimeException("Scholar role not found"));
+
+	    
+	   
+
+	    String email = scholar.getEmail().trim();
+
+	    // Prevent duplicate accounts by email.
+	    if (userRepo.existsByEmail(email)) {
+	        throw new IllegalStateException(
+	            "A user with this email already exists");
+	    }
+
+	    // Create user.
+	   	    
+	    //------------
+	 // Create the user account
+	    UserDTO dto = new UserDTO();
+	    dto.setUsername("TEMP_" + java.util.UUID.randomUUID());
+	    dto.setPassword(java.util.UUID.randomUUID().toString());
+	    dto.setEmail(scholar.getEmail().trim());
+	    dto.setName(scholar.getFullName());
+	    dto.setRoleIds(
+	            java.util.Collections.singletonList(scholarRole.getId()));
+
+	    User user = userservice.createUser(dto);
+
+	    // Set the internal username
+	    user.setUsername("SCH" + user.getId());
+	    //user = userRepo.saveAndFlush(user);
+	    userRepo.save(user);
+
+	    // Store application or enrolment number as login identifier
+	    userservice.addUserIdentifier(
+	            user.getId().intValue(),
+	            identifierType,
+	            loginIdentifier);
+	    
+
+	    // Link the account to the scholar
+//	    scholar.setUserId(user.getId());
+//	    scholarRepo.save(scholar);
+//	    int updated = scholarRepo.updateUserId(
+//	    		scholarId,
+//	    	    user.getId()
+//	    	);
+	    
+	  //  updateScholarUserId(scholarId,user.getId());
+
+//	    	if (updated != 1) {
+//	    	    throw new IllegalStateException(
+//	    	        "Failed to update scholar user ID");
+//	    	}
+	    
+	    return user;
+//
+//	    
+//	    
+//	    
+//
+//	    // Generate a random initial password.
+//	    // The scholar should set a new password through the reset link.
+//	    String temporaryPassword = UUID.randomUUID().toString();
+//
+//	    user.setPassword(passwordEncoder.encode(temporaryPassword));
+//
+//	    
+//
+//	    user.setRoles(Collections.singleton(scholarRole));
+//
+//	    // Save user only. Do not send email here.
+//	    return userRepo.save(user);
+	}
+	
+	
+
+	@Transactional
+	public void updateScholarUserId(int scholarId, int userId) {
+
+	    int updated = scholarRepo.updateUserId(scholarId, userId);
+
+	    if (updated != 1) {
+	        throw new IllegalStateException(
+	            "Failed to update user_id for scholar: " + scholarId);
+	    }
 	}
 }

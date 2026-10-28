@@ -95,18 +95,29 @@ public class UserService {
 		//System.out.println(password);
 		//user.setPassword(passwordEncoder.encode(password));
 		
-		user.setEmail(dto.getEmail());
+		 String[] emails = dto.getEmail().split("[&,;\\s]+");
+		    String useremail="";
+
+		    for (String email : emails) {
+		    	useremail = email.trim();
+
+		        if (email.isEmpty()) {
+		            continue;
+		        }
+		    }
+		
+		user.setEmail(useremail);
 		user.setName(dto.getName());
 		user.setPhone(dto.getPhone());
 		
 
-		Set<Role> roles = new HashSet<>(roleRepository.findAllById(dto.getRoleIds()));
+		// roles = new HashSet<>(roleRepository.findAllById(dto.getRoleIds()));
 		
 		user.setRoles(roles);
 		
 
 		 userRepository.save(user);
-		 passwordService.sendResetLink(user.getEmail());
+		// passwordService.sendResetLink(user.getEmail());
 		 
 		 return user;
 		 
@@ -132,7 +143,7 @@ public class UserService {
 //
 //		userIdentifierRepository.save(identifier);
 //	}
-
+    @Transactional
 	public void addUserIdentifier(Integer  userId, UserIdentifier.IdentifierType type, String value) {
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));

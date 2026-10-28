@@ -80,7 +80,7 @@ public class UserController {
     }
     
     @PostMapping("/password/admin/reset-link/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','EXAMADMIN')")
     public ResponseEntity<?> sendResetLink(
             @PathVariable Integer userId) {
 

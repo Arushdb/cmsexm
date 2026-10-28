@@ -25,7 +25,7 @@ import javax.persistence.ColumnResult;
     		+ "        ELSE 0  "
     		+ "    END AS gender_id, "
     		
-    	  + " home_phone as phone ,selection_date  as admissionDate ,a.mode,a.subject from phd_selected_candidates a " 
+    	  + " home_phone as phone ,selection_date  as admissionDate ,a.subject,a.mode from phd_selected_candidates a " 
     	  + " join admissionform_live.entity_student b on a.application_number=b.application_number "
     	  + " and  a.academic_year=b.registered_in_session" 
     	  + " join admissionform_live.admission_addresses_master aam  on aam.user_id=b.student_id"
