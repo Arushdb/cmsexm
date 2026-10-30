@@ -124,8 +124,10 @@ public class AuthController {
 		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).
 				body(new JwtResponse(jwt, 
 						 userDetails.getId(), 
-						 userDetails.getUsername(), 
-						 menuary.toString(),roles));
+						 userDetails.getUsername(),
+						 
+						 
+						 menuary.toString(),roles,userDetails.getName()));
 
 //		return ResponseEntity.ok(new JwtResponse(jwt, 
 //												 userDetails.getId(), 

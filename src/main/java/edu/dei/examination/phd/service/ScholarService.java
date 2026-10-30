@@ -1116,6 +1116,11 @@ public CreatedAccount createUserForScholar(Integer scholarId) {
         }
 
         loginIdentifier = loginIdentifier.trim();
+        String year = scholar.getAdmissionDate() != null
+                ? String.format("%02d",
+                    scholar.getAdmissionDate().getYear() % 100)
+                : null;
+        loginIdentifier+=year;
         identifierType =
                 UserIdentifier.IdentifierType.APPLICATION_NO;
     }
@@ -1287,6 +1292,13 @@ public CreatedAccount createUserForScholar(Integer scholarId) {
 	    } else {
 	        // Replace getApplicationNumber() with your actual getter
 	        loginIdentifier = scholar.getApplicationNumber();
+	        
+	        String year = scholar.getAdmissionDate() != null
+	                ? String.format("%02d",
+	                    scholar.getAdmissionDate().getYear() % 100)
+	                : null;
+	        loginIdentifier+=year;
+	        
 
 	        if (loginIdentifier == null
 	                || loginIdentifier.trim().isEmpty()) {

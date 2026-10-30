@@ -10,6 +10,7 @@ public class JwtResponse {
 	private String type = "Bearer";
 	private Integer id;
 	private String username;
+	private String name;
 	
 	private String menuary ;
 	private List<String> roles;
@@ -32,6 +33,16 @@ public class JwtResponse {
 		this.username = username;
 		this.menuary = menuary;
 		this.roles = roles;
+	}
+	
+	public JwtResponse(String token, Integer id, String username, String menuary, List<String> roles,String name) {
+		
+		this.token = token;
+		this.id = id;
+		this.username = username;
+		this.menuary = menuary;
+		this.roles = roles;
+		this.name=name;
 	}
 
 
@@ -91,5 +102,16 @@ public class JwtResponse {
 	public void setMenuary(String menuary) {
 		this.menuary = menuary;
 	}
+
+
+
+
+	public String getName() { return name; }
+
+
+
+
+	public void setName(String name) { this.name = name; }
+	
 
 }
