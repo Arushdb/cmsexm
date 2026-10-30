@@ -151,7 +151,7 @@ public class TranscriptRepository {
                      "    JOIN program_master pm ON pm.program_id = sp.program_id " +
                      "    JOIN student_master sm ON sm.enrollment_number = sp.enrollment_number " +
                      "     left join student_cgpa sg on sg.roll_number = srsh.roll_number "+
-                     "    WHERE if(pm.isNep = 'Y' and (sg.fourth_year_cgpa is not null and sg.fourth_year_cgpa > '0')  ,sp.program_status = 'PAS', " +
+                     "    WHERE if(pm.isNep = 'Y' and (sg.fourth_year_cgpa is not null and sg.fourth_year_cgpa > '0')  ,sp.program_status in ('PAS','SWT'), " +
                      "  IF(pm.isNep = 'Y' and (sg.third_year_cgpa is not null  and sg.third_year_cgpa > '0') and (sg.fourth_year_cgpa is null or sg.fourth_year_cgpa = '0')  , " +
                      "  sp.program_status = 'ACT',sp.program_status in ('PAS','SWT')))  AND srsh.roll_number = ? " +
                      "    ) AS t1 " +
