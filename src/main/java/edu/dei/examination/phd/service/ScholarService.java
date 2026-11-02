@@ -903,25 +903,25 @@ public class ScholarService {
 			userDto.setRoleIds(roleIds);
 			// userDto.setRoleIds(List.of(scholarRole.getId()));
 
-			User user = userservice.createUser(userDto);
+			//User user = userservice.createUser(userDto);
 
-			user.setUsername("SCH" + user.getId());
-			userRepo.save(user);
+			//user.setUsername("SCH" + user.getId());
+			//userRepo.save(user);
 
-			String identifier = "APP" + "2026" + applicationNumber;
+			//String identifier = "APP" + "2026" + applicationNumber;
 
-			userservice.addUserIdentifier(user.getId().intValue(), UserIdentifier.IdentifierType.APPLICATION_NO,
-					identifier);
+			//userservice.addUserIdentifier(user.getId().intValue(), UserIdentifier.IdentifierType.APPLICATION_NO,
+				//	identifier);
 
-			em.createNativeQuery(insertSql)
-
-					.setParameter("full_name", row.getFullName()).setParameter("gender_id", row.getGender_id())
-					.setParameter("email", row.getEmail()).setParameter("dob", row.getDateOfBirth())
-					.setParameter("phone", row.getPhone()).setParameter("category", row.getCategory())
-					.setParameter("admission_date", row.getAdmissionDate())
-					.setParameter("application_number", applicationNumber)
-					.setParameter("department_id", row.getDepartment_id()).setParameter("user_id", user.getId())
-					.executeUpdate();
+//			em.createNativeQuery(insertSql)
+//
+//					.setParameter("full_name", row.getFullName()).setParameter("gender_id", row.getGender_id())
+//					.setParameter("email", row.getEmail()).setParameter("dob", row.getDateOfBirth())
+//					.setParameter("phone", row.getPhone()).setParameter("category", row.getCategory())
+//					.setParameter("admission_date", row.getAdmissionDate())
+//					.setParameter("application_number", applicationNumber)
+//					.setParameter("department_id", row.getDepartment_id()).setParameter("user_id", user.getId())
+//					.executeUpdate();
 
 			importedCount++;
 		}
@@ -1120,7 +1120,8 @@ public CreatedAccount createUserForScholar(Integer scholarId) {
                 ? String.format("%02d",
                     scholar.getAdmissionDate().getYear() % 100)
                 : null;
-        loginIdentifier+=year;
+       
+        loginIdentifier="PH"+loginIdentifier+year;
         identifierType =
                 UserIdentifier.IdentifierType.APPLICATION_NO;
     }
@@ -1297,7 +1298,8 @@ public CreatedAccount createUserForScholar(Integer scholarId) {
 	                ? String.format("%02d",
 	                    scholar.getAdmissionDate().getYear() % 100)
 	                : null;
-	        loginIdentifier+=year;
+	        //loginIdentifier+=year;
+	        loginIdentifier="PH"+loginIdentifier+year;
 	        
 
 	        if (loginIdentifier == null
