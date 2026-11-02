@@ -616,14 +616,35 @@ public class ScholarService {
 					String deptname = getString(row.getCell(13));
 					parts = (deptname).split("\\r?\\n");
 					deptname = parts.length > 0 ? parts[0].trim() : null;
+					
+					String subject =getString(row.getCell(13));
 
-					Department dept = depRepo.findByDepartmentName(deptname)
-							.orElseThrow(() -> new Exception("Department not exists"));
-					List<Program> pgm = pgmRepo.findByDepartmentid(dept.getDepartmentId())
-							.orElseThrow(() -> new RuntimeException("Program not found"));
-					s.setProgram(pgm.get(0));
+//					cDepartment dept = depRepo.findByDepartmentName(deptname)
+//							.orElseThrow(() -> new Exception("Department not exists"));
+//					List<Program> pgm = pgmRepo.findByDepartmentid(dept.getDepartmentId())
+//							.orElseThrow(() -> new RuntimeException("Program not found"));
+					String subjectKey = normalizeSubject(subject);
+
+					SubjectProgramMapping mapping =
+					    mappingRepository
+					        .findBySubjectKeyAndActiveTrue(subjectKey)
+					        .orElseThrow(() -> new IllegalStateException(
+					            "No department/program mapping found for subject: "
+					            + subjectKey
+					        ));
+
+					int departmentId = mapping.getDepartmentId().intValue();
+					int programId = mapping.getProgramId().intValue();
+					Department dept = depRepo.findById(departmentId)
+							.orElseThrow(() -> new Exception("Department not exists"));;
+
+					
+					
+					//s.setProgram(pgm.get(0));
+					s.setProgramId(programId);
 					s.setSubject(getString(row.getCell(13)));
 					s.setDepartment(dept);
+					//s.setDepartment(departmentId);
 					parts = getString(row.getCell(14)).split("\\r?\\n");
 					String enrolmentNo = parts.length > 0 ? parts[0].trim() : null;
 					// String[] parts = cellValue.split("\\r?\\n");

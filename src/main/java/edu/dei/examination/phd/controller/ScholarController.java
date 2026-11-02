@@ -68,7 +68,7 @@ public class ScholarController {
 		}
 
 		else {
-			return ResponseEntity.ok(ApiResponse.success("No scholars created", count));
+			return ResponseEntity.ok(ApiResponse.success(" scholars created",count));
 		}
 	}
 	
