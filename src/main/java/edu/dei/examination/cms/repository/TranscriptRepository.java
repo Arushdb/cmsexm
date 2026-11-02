@@ -153,7 +153,7 @@ public class TranscriptRepository {
                      "     left join student_cgpa sg on sg.roll_number = srsh.roll_number "+
                      "    WHERE if(pm.isNep = 'Y' and (sg.fourth_year_cgpa is not null and sg.fourth_year_cgpa > '0')  ,sp.program_status in ('PAS','SWT'), " +
                      "  IF(pm.isNep = 'Y' and (sg.third_year_cgpa is not null  and sg.third_year_cgpa > '0') and (sg.fourth_year_cgpa is null or sg.fourth_year_cgpa = '0')  , " +
-                     "  sp.program_status = 'ACT',sp.program_status in ('PAS','SWT')))  AND srsh.roll_number = ? " +
+                     "  sp.program_status in ('ACT','SWT'),sp.program_status in ('PAS','SWT')))  AND srsh.roll_number = ? " +
                      "    ) AS t1 " +
                      "    JOIN ( " +
                      "    SELECT if(pm.isNep = 'Y' and (sg.third_year_cgpa is not null and sg.third_year_cgpa > '0') and (sg.fourth_year_cgpa is null or sg.fourth_year_cgpa = '0'), " + 
@@ -161,8 +161,9 @@ public class TranscriptRepository {
                      "   sm.student_first_name,if( pm.isNep = 'Y',nrp.program_name,CONCAT(if(srsh.session_start_date between pme.start_date and end_date,pme.program_name,pm.program_name), ' '," + 
                      "   if( pm.program_type = 'M','',(IF(stt1.component_description = 'NONE','',  " + 
                      "   CONCAT('(', stt1.component_description, ') ')))),IF(stt2.component_description = 'NONE','',CONCAT('WITH SPECIALIZATION IN ', stt2.component_description)))) as program_name, "
-                     + "sp.enrollment_number, sm.date_of_birth, if(pm.print_aggregate = 'TAP',concat('THEORY: ',sp.theory_cgpa,'   ','PRACTICAL: ',"
-                     + "                        sp.practical_cgpa,'             ','       Combined CGPA (Theory+Practical) :',sp.cgpa),sp.cgpa) as cgpa " +
+                     + "sp.enrollment_number, sm.date_of_birth, if(pm.isNep = 'Y' and  (sg.third_year_cgpa is not null and sg.third_year_cgpa > '0') and  \r\n"
+                     + "                       (sg.fourth_year_cgpa is null or sg.fourth_year_cgpa = '0'),sg.third_year_cgpa,if(pm.print_aggregate = 'TAP',concat('THEORY: ',sp.theory_cgpa,'   ','PRACTICAL: ',"
+                     + "                        sp.practical_cgpa,'             ','       Combined CGPA (Theory+Practical) :',sp.cgpa),sp.cgpa)) as cgpa " +
                      "    FROM student_registration_semester_header srsh " +
                      "    JOIN program_course_header pch ON srsh.program_course_key = pch.program_course_key " +
                      "    JOIN student_program sp ON srsh.roll_number = sp.roll_number " +
@@ -176,10 +177,9 @@ public class TranscriptRepository {
                      + "  left join program_master_extension pme on sp.program_id=pme.program_id left join nep_roll_wise_program_name nrp on nrp.roll_number = srsh.roll_number and pch.program_id =nrp.program_id "
                      + "                         and ptd.semester_group = nrp.semester_group WHERE if(pm.isNep = 'Y' and (sg.fourth_year_cgpa is not null and sg.fourth_year_cgpa > '0.000' ) ,sp.program_status = 'PAS', " +
                      "                                  IF(pm.isNep = 'Y' and (sg.third_year_cgpa is not null  and sg.third_year_cgpa > '0.000') and (sg.fourth_year_cgpa is null or sg.fourth_year_cgpa = '0' )   , " +
-                     "                                  sp.program_status = 'ACT',sp.program_status in ('PAS')))   AND srsh.roll_number = ? " +
+                     "                                  sp.program_status in ('ACT'),sp.program_status in ('PAS')))   AND srsh.roll_number = ? " +
                      "    ORDER BY pch.semester_code DESC LIMIT 1 " +
                      ") AS t2 ON t1.roll_number = t2.roll_number";
-
 
         return cmsJdbcTemplate.queryForObject(sql, new Object[]{rollNumber, rollNumber}, new RowMapper<Transcript>() {
             @Override
