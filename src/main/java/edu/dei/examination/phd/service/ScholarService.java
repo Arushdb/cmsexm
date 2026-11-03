@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -59,6 +60,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -79,8 +81,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Service
 public class ScholarService {
 
-	@Autowired
-	ScholarsRepository c;
+	
 
 	@Autowired
 	RoleRepository roleRepository;
@@ -558,19 +559,49 @@ public class ScholarService {
 			Sheet sheet = workbook.getSheetAt(0);
 
 			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+				
+				System.out.println("row number :"+i);
+				System.out.println("sheet.getLastRowNum() :"+sheet.getLastRowNum());
 
 				try {
 
 					Row row = sheet.getRow(i);
-					if (row == null)
+					if (row == null) {
+						System.out.println("row null");
 						continue;
+					}
+						
+						
 
 					// ❌ Skip garbage rows like "FACULTY OF EDUCATION"
 					Cell firstCell = row.getCell(0);
-					if (firstCell == null || firstCell.getCellType() == CellType.BLANK)
+					if (firstCell == null || firstCell.getCellType() == CellType.BLANK) {
+						//System.out.println("firstCell.getCellType()"+firstCell.getCellType());
+						System.out.println("Skipping blank row: " + (i + 1));
 						continue;
+					}
+						
 
-					String name = getString(row.getCell(1));
+					String input = getString(row.getCell(1)).trim();
+					System.out.println(input);
+					String status = "";
+					int index = input.indexOf("(");
+					 
+					String name=input;
+
+					if (index != -1) {
+						 int endIndex = input.indexOf(")", index);
+					    name = input.substring(0, index).trim();
+					    
+					    if (endIndex != -1) {
+					        status = input.substring(index + 1, endIndex).trim();
+					    }else {
+					        status = input.substring(index + 1).trim();
+					    }
+					    
+					}
+					
+					
 					if (name == null || name.trim().isEmpty())
 						continue;
 
@@ -584,6 +615,7 @@ public class ScholarService {
 
 					// ✔ Map only required columns (ignore rest)
 					s.setFullName(name);
+					s.setStatus(status);
 					s.setNameInHindi(getString(row.getCell(2)));
 
 					s.setFathername(getString(row.getCell(3)));
@@ -636,12 +668,14 @@ public class ScholarService {
 					int departmentId = mapping.getDepartmentId().intValue();
 					int programId = mapping.getProgramId().intValue();
 					Department dept = depRepo.findById(departmentId)
-							.orElseThrow(() -> new Exception("Department not exists"));;
+							.orElseThrow(() -> new Exception("Department not exists"));
+					Program pgm = pgmRepo.findById(programId)
+							.orElseThrow(() -> new Exception("Program does not exists"));
 
 					
 					
 					//s.setProgram(pgm.get(0));
-					s.setProgramId(programId);
+					s.setProgram(pgm);
 					s.setSubject(getString(row.getCell(13)));
 					s.setDepartment(dept);
 					//s.setDepartment(departmentId);
@@ -663,7 +697,21 @@ public class ScholarService {
 						s.setGenderId(2);
 
 					s.setCategory(getString(row.getCell(16)));
-					s.setStatus(getString(row.getCell(17)));
+					
+					String mode =getString(row.getCell(17));
+					if (mode.toLowerCase().contains("full")) {
+					    mode = "F";
+					} else if (mode.toLowerCase().contains("part")) {
+					    mode = "P";
+					} else {
+					    throw new IllegalArgumentException(
+					        "Invalid scholar mode at Excel row: " + (i + 1)
+					    );
+					}
+ 						
+					s.setMode(mode);
+					
+					
 					s.setState(getString(row.getCell(18)));
 
 					s.setMinority(getString(row.getCell(19)));
@@ -823,17 +871,59 @@ public class ScholarService {
 		cell.setCellType(CellType.STRING);
 		return cell.getStringCellValue().trim();
 	}
-
+	
 	private LocalDate getDate(Cell cell) {
-		if (cell == null)
-			return null;
 
-		if (cell.getCellType() == CellType.NUMERIC) {
-			return cell.getLocalDateTimeCellValue().toLocalDate();
-		}
+	    if (cell == null) {
+	        return null;
+	    }
 
-		return null;
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        if (DateUtil.isCellDateFormatted(cell)) {
+	            return cell.getLocalDateTimeCellValue().toLocalDate();
+	        }
+	    }
+
+	    if (cell.getCellType() == CellType.STRING) {
+
+	        String value = cell.getStringCellValue().trim();
+
+	        if (value.isEmpty()) {
+	            return null;
+	        }
+
+	        String[] formats = {
+	            "d.M.uuuu",       // 14.7.1991
+	            "dd.MM.uuuu",     // 14.07.1991
+	            "yyyy-MM-dd",     // 1991-07-14
+	            "dd/MM/uuuu"      // 14/07/1991
+	        };
+
+	        for (String format : formats) {
+	            try {
+	                return LocalDate.parse(
+	                    value,
+	                    DateTimeFormatter.ofPattern(format)
+	                );
+	            } catch (DateTimeParseException e) {
+	                // Try next format
+	            }
+	        }
+	    }
+
+	    return null;
 	}
+
+//	private LocalDate getDate(Cell cell) {
+//		if (cell == null)
+//			return null;
+//
+//		if (cell.getCellType() == CellType.NUMERIC) {
+//			return cell.getLocalDateTimeCellValue().toLocalDate();
+//		}
+//
+//		return null;
+//	}
 
 //            private void  createuser(Scholars sch) {
 //            	
