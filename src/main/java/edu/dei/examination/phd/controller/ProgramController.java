@@ -11,7 +11,7 @@ import edu.dei.examination.phd.service.ProgramService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/programs")
+@RequestMapping("/phd/api/programs")
 @CrossOrigin
 public class ProgramController {
 

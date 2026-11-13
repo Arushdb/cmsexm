@@ -19,7 +19,7 @@ import edu.dei.examination.phd.model.ProgressWork;
 import edu.dei.examination.phd.service.ProgressWorkService;
 
 @RestController
-@RequestMapping("/api/progress-work")
+@RequestMapping("/phd/api/progress-work")
 
 public class ProgressWorkController {
 

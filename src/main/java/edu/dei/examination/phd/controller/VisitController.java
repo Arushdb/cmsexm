@@ -14,7 +14,7 @@ import edu.dei.examination.phd.service.VisitService;
 
 
 @RestController
-@RequestMapping("/api/visits")
+@RequestMapping("/phd/api/visits")
 @CrossOrigin
 public class VisitController {
 

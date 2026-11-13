@@ -24,7 +24,7 @@ import edu.dei.examination.cmsexm.model.VerificationAgencyReferences;
 import edu.dei.examination.cmsexm.service.VerificationAgencyReferencesService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/exam/api")
 public class VerificationAgencyReferenceController {
 
 	private VerificationAgencyReferencesService referenceService;

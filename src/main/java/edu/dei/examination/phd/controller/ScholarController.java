@@ -42,7 +42,7 @@ import edu.dei.examination.phd.service.ScholarService.CreatedAccount;
 import io.jsonwebtoken.Claims;
 
 @RestController
-@RequestMapping("/api/scholars")
+@RequestMapping("/phd/api/scholars")
 public class ScholarController {
 
 	@Autowired
@@ -68,6 +68,8 @@ public class ScholarController {
 		}
 
 		else {
+
+
 			return ResponseEntity.ok(ApiResponse.success(" scholars created",count));
 		}
 	}

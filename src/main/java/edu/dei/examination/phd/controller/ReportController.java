@@ -17,7 +17,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/phd/api/reports")
 @CrossOrigin(origins = "*")
 public class ReportController {
 

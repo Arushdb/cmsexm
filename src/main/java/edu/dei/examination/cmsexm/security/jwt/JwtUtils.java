@@ -1,20 +1,22 @@
 package edu.dei.examination.cmsexm.security.jwt;
 
-import java.security.SignatureException;
+//import java.security.SignatureException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import edu.dei.examination.cmsexm.service.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
+//import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -34,35 +36,40 @@ public class JwtUtils {
 	@Value("${cmsexam.app.jwtExpirationMs}")
 	private int jwtExpirationMs;
 	
-	@Value("${cmsexam.app.jwtRefreshExpirationMs}")
-	private int jwtRefreshExpirationMs;
+	//@Value("${cmsexam.app.jwtRefreshExpirationMs}")
+	//private int jwtRefreshExpirationMs;
 	
-	@Value("${cmsexam.app.jwtRefreshSecret}")
-    private String jwtRefreshSecret;
-	
-	
-	public String generateJwtToken(Authentication authentication) {
-
-		UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-		
-		Map<String, Object> claims = new HashMap<>();
-	    claims.put("userId", userPrincipal.getId());
-	   // claims.put("scholarId", userPrincipal.getScholarId());
-	    claims.put("role", userPrincipal.getAuthorities()
-	                                    .iterator()
-	                                    .next()
-	                                    .getAuthority());
-
-		return Jwts.builder()
-				.setClaims(claims)
-				.setSubject((userPrincipal.getUsername()))
-				.setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-				.signWith(SignatureAlgorithm.HS512, jwtSecret)
-				.compact();
-	}
+	//@Value("${cmsexam.app.jwtRefreshSecret}")
+   // private String jwtRefreshSecret;
 	
 	
+//	public String generateJwtToken(Authentication authentication) {
+//
+//		UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+//		
+//		Map<String, Object> claims = new HashMap<>();
+//	    claims.put("userId", userPrincipal.getId());
+//	   // claims.put("scholarId", userPrincipal.getScholarId());
+////	    claims.put("role", userPrincipal.getAuthorities()
+////	                                    .iterator()
+////	                                    .next()
+////	                                    .getAuthority());
+//	    
+//	    claims.put("roles", userPrincipal.getAuthorities()
+//	            .stream()
+//	            .map(GrantedAuthority::getAuthority)
+//	            .collect(Collectors.toList()));
+//
+//		return Jwts.builder()
+//				.setClaims(claims)
+//				.setSubject((userPrincipal.getUsername()))
+//				.setIssuedAt(new Date())
+//				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+//				.signWith(SignatureAlgorithm.HS512, jwtSecret)
+//				.compact();
+//	}
+//	
+//	
 	public String getUserNameFromJwtToken(String token) {
 		return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
 	}
@@ -101,39 +108,71 @@ public class JwtUtils {
 		return false;
 	}
 	
-	public boolean validateRefreshToken(String refreshToken) {
-        try {
-            Jwts.parser().setSigningKey(jwtRefreshSecret).parseClaimsJws(refreshToken);
-            return true;
-
-        } catch (JwtException e) {
-            return false;
-        }
-    }
+//	public boolean validateRefreshToken(String refreshToken) {
+//        try {
+//            Jwts.parser().setSigningKey(jwtRefreshSecret).parseClaimsJws(refreshToken);
+//            return true;
+//
+//        } catch (JwtException e) {
+//            return false;
+//        }
+//    }
 	
-	public String generateAccessTokenFromUsername(String username) {
+//	public String generateAccessTokenFromUsername(String username) {
+//
+//	    return Jwts.builder()
+//	            .setSubject(username)
+//	            .setIssuedAt(new Date())
+//	            .setExpiration(new Date(
+//	                    System.currentTimeMillis() + jwtExpirationMs
+//	            ))
+//	            .signWith(SignatureAlgorithm.HS512, jwtSecret)
+//	            .compact();
+//	}
+
+
+//	public String generateRefreshToken(Authentication authentication) {
+//
+//        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+//
+//        return Jwts.builder()
+//                .setSubject(userPrincipal.getUsername())
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date((new Date()).getTime() + jwtRefreshExpirationMs))
+//                .signWith(SignatureAlgorithm.HS512, jwtRefreshSecret)
+//                .compact();
+//    }
+//	
+	public String generateAccessToken(
+	        UserDetailsImpl userPrincipal,
+	        String applicationId) {
+
+	    Map<String, Object> claims = new HashMap<>();
+
+	    claims.put("userId", userPrincipal.getId());
+
+//	    claims.put("role", userPrincipal.getAuthorities()
+//	            .iterator()
+//	            .next()
+//	            .getAuthority());
+	    
+	    claims.put("roles", userPrincipal.getAuthorities()
+	            .stream()
+	            .map(GrantedAuthority::getAuthority)
+	            .collect(Collectors.toList()));
+	    
+	    
+
+	    claims.put("app", applicationId);
 
 	    return Jwts.builder()
-	            .setSubject(username)
+	            .setClaims(claims)
+	            .setSubject(userPrincipal.getUsername())
 	            .setIssuedAt(new Date())
 	            .setExpiration(new Date(
-	                    System.currentTimeMillis() + jwtExpirationMs
-	            ))
+	                    System.currentTimeMillis() + jwtExpirationMs))
 	            .signWith(SignatureAlgorithm.HS512, jwtSecret)
 	            .compact();
 	}
-
-
-	public String generateRefreshToken(Authentication authentication) {
-
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
-        return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtRefreshExpirationMs))
-                .signWith(SignatureAlgorithm.HS512, jwtRefreshSecret)
-                .compact();
-    }
 
 }

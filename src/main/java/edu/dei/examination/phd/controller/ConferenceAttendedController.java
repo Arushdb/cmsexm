@@ -11,7 +11,7 @@ import edu.dei.examination.phd.model.ConferenceAttended;
 import edu.dei.examination.phd.service.ConferenceAttendedService;
 
 @RestController
-@RequestMapping("/api/conferences")
+@RequestMapping("/phd/api/conferences")
 @CrossOrigin
 public class ConferenceAttendedController {
 

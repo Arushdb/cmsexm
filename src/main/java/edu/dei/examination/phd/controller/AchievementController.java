@@ -11,7 +11,7 @@ import edu.dei.examination.phd.model.Achievement;
 import edu.dei.examination.phd.service.AchievementService;
 
 @RestController
-@RequestMapping("/api/achievements")
+@RequestMapping("/phd/api/achievements")
 @CrossOrigin(origins = "http://localhost:4200")
 public class AchievementController {
 

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/remarks")
+@RequestMapping("/phd/api/remarks")
 @CrossOrigin(origins = "*")
 public class RemarkController {
 

@@ -32,6 +32,9 @@ public class RefreshToken {
 
     @Column(nullable = false)
     private boolean revoked = false;
+    
+    @Column(name = "application_code", nullable = false, length = 20)
+    private String applicationCode;
 
 	public Long getId() { return id; }
 
@@ -52,6 +55,12 @@ public class RefreshToken {
 	public boolean isRevoked() { return revoked; }
 
 	public void setRevoked(boolean revoked) { this.revoked = revoked; }
+
+	public String getApplicationCode() { return applicationCode; }
+
+	public void setApplicationCode(String applicationCode) { this.applicationCode = applicationCode; }
+	
+	
 
     // getters/setters
     

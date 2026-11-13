@@ -10,7 +10,7 @@ import edu.dei.examination.phd.service.DocumentTypeService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/document-types")
+@RequestMapping("/phd/api/document-types")
 public class DocumentTypeController {
 
     private final DocumentTypeService service;

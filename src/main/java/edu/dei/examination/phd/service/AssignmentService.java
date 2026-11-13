@@ -465,4 +465,9 @@ public class AssignmentService {
 		// TODO Auto-generated method stub
 		return departmentRoleRepo.searchFacultyRoles(keyword);
 	}
+
+	public void assignpgDean(Integer integer) {
+		// TODO Auto-generated method stub
+		
+	}
 }

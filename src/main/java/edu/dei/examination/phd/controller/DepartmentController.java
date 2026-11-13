@@ -13,7 +13,7 @@ import edu.dei.examination.phd.service.DepartmentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/departments")
+@RequestMapping("/phd/api/departments")
 @CrossOrigin
 public class DepartmentController {
 
