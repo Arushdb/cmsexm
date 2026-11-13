@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/publications")
+@RequestMapping("/phd/api/publications")
 
 @CrossOrigin
 public class PublicationController {

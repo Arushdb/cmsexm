@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/assign")
+@RequestMapping("/phd/api/assign")
 @CrossOrigin(origins = "http://localhost:4200")
 public class AssignmentController {
 
@@ -276,9 +276,11 @@ public class AssignmentController {
     @PostMapping("/hod")
     public ResponseEntity<?> assignHod(@RequestBody Map<String, Integer> req) {
     	
-    	
+    	int  depid =req.get("departmentId");
+    	int  userid =req.get("userId");
+    
 
-    	assignmentService.assignHod(req.get("departmentId"), req.get("userId"));
+    	assignmentService.assignHod(depid,userid);
 
        
         return ResponseEntity.ok(ApiResponse.success("HOD assigned successfully",null));
@@ -295,5 +297,15 @@ public class AssignmentController {
         return ResponseEntity.ok( ApiResponse.success("Dean assigned successfully",null));
     }
     
+ // =========================
+    // ASSIGN DEAN
+    // =========================
+    @PostMapping("/pg-dean")
+    public ResponseEntity<?> assignPgDean(@RequestBody Map<String, Integer> req) {
+
+    	assignmentService.assignPgDean(req.get("userId"));
+
+        return ResponseEntity.ok( ApiResponse.success("Dean assigned successfully",null));
+    }
     
 }

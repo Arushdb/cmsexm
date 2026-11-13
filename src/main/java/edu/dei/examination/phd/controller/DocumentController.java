@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/phd/api/documents")
 public class DocumentController {
 
     private final DocumentService docservice;

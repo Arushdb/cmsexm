@@ -21,7 +21,7 @@ import edu.dei.examination.cmsexm.service.UserDetailsImpl;
 import edu.dei.examination.cmsexm.service.VerificationAgencyService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/exam/api")
 public class VerificationAgencyController {
 	
 	

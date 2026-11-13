@@ -10,7 +10,7 @@ import edu.dei.examination.phd.dto.FacultyDTO;
 import edu.dei.examination.phd.service.FacultyService;
 
 @RestController
-@RequestMapping("/api/faculty")
+@RequestMapping("/phd/api/faculty")
 @CrossOrigin
 public class FacultyController {
 

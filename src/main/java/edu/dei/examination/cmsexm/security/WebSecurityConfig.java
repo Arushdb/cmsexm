@@ -130,26 +130,43 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 			
 			.antMatchers("/api/auth/**").permitAll()
-			 .antMatchers("/cmsexam/api/remarks/**").permitAll()
-	         .antMatchers("/cmsexam/api/reviewer/**").permitAll()
-	         .antMatchers("/cmsexam/api/users/**").hasAuthority("ADMIN")
-	         .antMatchers("/cmsexam/api/assign/**").hasAuthority("ADMIN")
+			.antMatchers("/cmsexam/api/auth/**").permitAll()
+			 .antMatchers("/cmsexam/api/users/**").hasAuthority("ROLE_ADMIN")
+			 .antMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
+					
+			 .antMatchers("/cmsexam/phd/api/remarks/**").permitAll()
+	         .antMatchers("/cmsexam/phd/api/reviewer/**").permitAll()
+	        
+	         .antMatchers("/cmsexam/phd/api/assign/**").hasAuthority("ROLE_ADMIN")
 	          
 				
-				.antMatchers("/cmsexam/api/scholars/generate/**").hasAuthority("ADMIN")
-				.antMatchers("/cmsexam/api/scholars/create-from-cms/**").hasAuthority("ADMIN")
-				.antMatchers("/cmsexam/api/scholars/**").hasAuthority("SCHOLAR")
+				.antMatchers("/cmsexam/phd/api/scholars/generate/**").hasAuthority("ROLE_ADMIN")
+				.antMatchers("/cmsexam/phd/api/scholars/create-from-cms/**").hasAuthority("ROLE_ADMIN")
+				.antMatchers("/cmsexam/phd/api/scholars/**").hasAuthority("ROLE_SCHOLAR")
 			  // ✅ IMPORTANT: MUST COME BEFORE /scholars/**
             
             
             // 🔒 ROLE-BASED ENDPOINTS
-            .antMatchers("/cmsexam/api/progress/**").hasAuthority("SCHOLAR")
-            .antMatchers("/cmsexam/api/progress-work/**").hasAuthority("SCHOLAR")
-            .antMatchers("/cmsexam/api/documents/**").hasAuthority("SCHOLAR")
-            .antMatchers("/cmsexam/api/register/**").hasAuthority("SCHOLAR")
-            .antMatchers("/cmsexam/api/visits/**").hasAuthority("SCHOLAR")
-            .antMatchers("/cmsexam/api/conferences/**").hasAuthority("SCHOLAR")
-            .antMatchers("/cmsexam/api/reports/**").hasAnyAuthority("ADMIN", "SCHOLAR")
+            .antMatchers("/cmsexam/phd/api/progress/**").hasAuthority("ROLE_SCHOLAR")
+            .antMatchers("/cmsexam/phd/api/progress-work/**").hasAuthority("ROLE_SCHOLAR")
+            .antMatchers("/cmsexam/phd/api/documents/**").hasAuthority("ROLE_SCHOLAR")
+            .antMatchers("/cmsexam/phd/api/register/**").hasAuthority("ROLE_SCHOLAR")
+            .antMatchers("/cmsexam/phd/api/visits/**").hasAuthority("ROLE_SCHOLAR")
+            .antMatchers("/cmsexam/phd/api/conferences/**").hasAuthority("ROLE_SCHOLAR")
+            .antMatchers("/cmsexam//phd/api/reports/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SCHOLAR")
+            
+      	  //  // =====================================
+            // APPLICATION ACCESS FALLBACK
+            // =====================================
+	        .antMatchers("/cmsexam/phd/api/**")
+	            .hasAuthority("PHD_ACCESS")
+
+	        // Examination application APIs
+	        .antMatchers("/cmsexam/exam/api/**")
+	            .hasAuthority("CMSEXAM_ACCESS")
+	            // Deny old application API paths
+	            .antMatchers("/cmsexam/api/**").denyAll()   
+
             
            
 			.anyRequest().authenticated();
